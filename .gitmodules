@@ -1,0 +1,3 @@
+[submodule "digitama/big_bang"]
+	path = digitama/big_bang
+	url = https://github.com/Gyoudmon/big-bang.cpp.git
