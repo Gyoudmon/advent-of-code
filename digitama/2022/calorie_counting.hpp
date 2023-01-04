@@ -6,26 +6,32 @@
 
 namespace WarGrey::AoC {
     /******************************************* 声明游戏世界 ******************************************/
-    enum class WorldStatus { CountOff, FindMaximumCalorie, Wait };
+    enum class WorldStatus {
+        CountOff,
+        FindMaximumCalorie,
+        FindMaximumCalories,
+        FindMaximumCaloriesViaSorting,
+        TaskDone
+    };
     
     /******************************************* 声明游戏世界 ******************************************/
     class Elfmon : public WarGrey::STEM::Sprite {
         public:
-            Elfmon(const char* dirname, int idx);
+            Elfmon(const char* dirname, int id);
 
         public:
             int calorie_total();
-
+            
         public:
-            std::vector<int> calories;
-            int idx;
+            std::vector<int> food_calories;
+            int id;
     };
 
     /******************************************* 声明游戏世界 ******************************************/
     class AoCWorld : public WarGrey::STEM::World {
         public:
-            AoCWorld() : World("清点卡路里", 8) {}
-            virtual ~AoCWorld() { WarGrey::STEM::game_font_destroy(this->big_font); }
+            AoCWorld() : World("Calorie Counting", 16) {}
+            virtual ~AoCWorld();
 
         public:    // 覆盖游戏基本方法
             void construct(int argc, char* argv[]) override;
@@ -42,17 +48,26 @@ namespace WarGrey::AoC {
             int find_maximum_calories(int n);
 
         private:
+            void on_task_start(WarGrey::AoC::WorldStatus status);
+            void on_task_done();
+
+        private:
             void move_elf_to_grid(WarGrey::AoC::Elfmon* elf);
-            void excite_elf(WarGrey::AoC::Elfmon* elf);
-            void calm_elf_down(WarGrey::AoC::Elfmon* elf);
+            void excite_elf(WarGrey::AoC::Elfmon* elf, float scale);
+            void reflow_top_elves();
+            void calm_elf_down(WarGrey::AoC::Elfmon* elf, float scale);
+            void calm_top_elves_down();
+            void random_walk(int start_idx);
 
         private:   // 本游戏世界中的物体和数据
+            WarGrey::STEM::Labellet* title;
             WarGrey::STEM::Labellet* population;
-            WarGrey::STEM::Labellet* p1_answer;
-            WarGrey::STEM::Labellet* p2_answer;
-            WarGrey::STEM::Labellet* leader;
+            WarGrey::STEM::Labellet* top1_total;
+            WarGrey::STEM::Labellet* topn_total;
+            WarGrey::STEM::Labellet* sorted_total;
             std::vector<WarGrey::AoC::Elfmon*> elves;
-
+            std::vector<WarGrey::STEM::Labellet*> dims;
+            
         private:
             float grid_xoff;
             float grid_yoff;
@@ -62,10 +77,21 @@ namespace WarGrey::AoC {
             int col;
 
         private:
-            TTF_Font* big_font;
+            TTF_Font* title_font;
+            TTF_Font* text_font;
+            TTF_Font* dim_font;
             WarGrey::AoC::WorldStatus status;
+
+        private: // shared variable
             int current_elf_idx;
-            int last_elf_idx;
-            int max_cal;
+            int top_calorie;
+
+        private: // for FindMaximumCalorie
+            int prev_top_elf_id;
+
+        private: // for FindMaximumCalories and FindMaximumCaloriesViaSorting
+            std::vector<int> top_calories;
+            std::vector<int> top_elf_indices;
+            int top_count;
     };
 }

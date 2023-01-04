@@ -77,7 +77,7 @@
 接下来就可以通过传入清单文件来执行了：
 
 @tamer-action[#:requires ["../literacy.rkt"]
-              (with-aoc-data-from "2022/calorie.counting.dat"
+              (with-aocin "2022/calorie.counting.dat"
                   find-maximum-calorie)]
 
 这里多说一句，上面的算法是@bold{纯函数式}风格，虽然定义了两个@bold{变量}，
@@ -138,7 +138,7 @@
 以及，针对列表设计的确定最大值逻辑：列表中如果存在比当前卡路里含量低的就替换之。
 
 @handbook-chunk[<确定最大值列表>
-                (let* ([smaller? (λ [max:cal] (< max:cal self:cal))]
+                (let* ([smaller? (λ [cal] (< cal self:cal))]
                        [idx (index-where calories smaller?)])
                   (if (not idx)
                       calories
@@ -146,14 +146,14 @@
 
 至此，问题解决：
 
-@tamer-action[(with-aoc-data-from "2022/calorie.counting.dat"
+@tamer-action[(with-aocin "2022/calorie.counting.dat"
                 find-maximum-calories 3)]
 
 我们还可以对比一下这两个谜题在逻辑上的一致：
 
-@tamer-action[(with-aoc-data-from "2022/calorie.counting.dat"
+@tamer-action[(with-aocin "2022/calorie.counting.dat"
                 find-maximum-calorie)
-              (with-aoc-data-from "2022/calorie.counting.dat"
+              (with-aocin "2022/calorie.counting.dat"
                 find-maximum-calories 1)]
 
 不过，还是要谨记，比较两种算法的执行结果并不是严密的证明。

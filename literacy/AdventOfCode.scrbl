@@ -1,4 +1,4 @@
-#lang scribble/acmart @sigplan @nonacm @screen @timestamp
+#lang scribble/sigplan @nocopyright
 
 @require{literacy.rkt}
 @require{graphviz.rkt}
