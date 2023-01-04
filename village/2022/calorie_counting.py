@@ -16,6 +16,7 @@ def find_maximum_calorie(src):
                 max_cal = self_cal
             self_cal = 0
 
+    # There is no blank line after the records of last elf
     print(max(max_cal, self_cal))
 
 def find_maximum_calories(src, n):
@@ -31,6 +32,7 @@ def find_maximum_calories(src, n):
             calories.append(cal)
             cal = 0
 
+    # There is no blank line after the records of last elf
     if (cal > 0):
         calories.append(cal)
 

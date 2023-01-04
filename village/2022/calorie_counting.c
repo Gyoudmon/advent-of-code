@@ -24,6 +24,7 @@ void find_maximum_calorie(FILE* in) {
         }
     }
 
+    /* There is no blank line after the records of last elf */
     if (max_cal < self_cal) {
         max_cal = self_cal;
     }
@@ -62,6 +63,7 @@ void find_maximum_calories(FILE* in, int n) {
         }
     }
 
+    /* There is no blank line after the records of last elf */
     for (int idx = 0; idx < n; idx++) {
         if (self_cal > calories[idx]) {
             calories[idx] = self_cal;

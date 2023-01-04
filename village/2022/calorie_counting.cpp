@@ -21,6 +21,7 @@ void find_maximum_calorie(std::istream& in) {
         }
     }
 
+    // There is no blank line after the records of last elf
     if (self_cal > max_cal) {
         max_cal = self_cal;
     }
@@ -42,6 +43,7 @@ void find_maximum_calories(std::istream& in, int n) {
         }
     }
 
+    // There is no blank line after the records of last elf
     if (cal > 0) {
         calories.push_back(cal);
     }
