@@ -31,8 +31,8 @@
          #:date   2022
          #:url    (format "https://adventofcode.com/2022/day/~a" day)))]))
 
-(define with-aocin
-  (lambda [path f . argv]
+(define with-aoc-data-from
+  (lambda [path #:do f . argv]
     (call-with-input-file* (digimon-path 'stone path)
       (lambda [/dev/stdin]
         (apply f /dev/stdin argv)))))

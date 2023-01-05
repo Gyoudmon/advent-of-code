@@ -73,7 +73,7 @@ void WarGrey::AoC::AoCWorld::construct(int argc, char* argv[]) {
     if (datin.size() > 0) {
         this->load_calories(datin);
     } else {
-        this->load_calories(digimon_path("2022/calorie.counting.dat"));
+        this->load_calories(digimon_path("2022/01.cc.dat"));
     }
 
     if (this->top_count <= 0) {
