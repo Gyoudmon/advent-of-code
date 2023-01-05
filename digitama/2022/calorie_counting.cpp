@@ -15,14 +15,14 @@ using namespace WarGrey::AoC;
 
 /*************************************************************************************************/
 static const char* title_desc = "C++ 降临节: [任务1] 计点卡路里";
-static const char* population_desc = "精灵数量";
-static const char* top1_desc = "最多卡路里";
+static const char* population_desc = "精灵伙伴数量";
+static const char* top1_desc = "个体食物最富";
 static const char* cmp_alg_desc = "比较法";
 static const char* srt_alg_desc = "排序法";
 
 static const char* unknown_fmt = "%s: (未知)";
-static const char* topn_unknown_fmt = "前%d大卡[%s]: (未知)";
-static const char* topn_fmt = "前%d大卡[%s]: %d";
+static const char* topn_unknown_fmt = "前%d热量[%s]: (未知)";
+static const char* topn_fmt = "前%d热量[%s]: %d";
 static const char* puzzle_fmt = "%s: %d";
 
 static const int title_fontsize = 50;
@@ -33,8 +33,10 @@ static const int micro_pace = 3;
 static const float normal_scale_up = 1.6F;
 static const float top_scale_up = 2.0F;
 
+static const int elf_type_count = 2;
+
 static inline const char* elf_name(int hint) {
-    switch ((hint < 3) ? hint : random_uniform(0, 2)) {
+    switch ((hint <= elf_type_count) ? hint : random_uniform(0, elf_type_count)) {
     case 1: return "fairy"; break;
     case 2: return "goblin"; break;
     case 3: return "mermaid"; break;
@@ -76,6 +78,8 @@ void WarGrey::AoC::AoCWorld::construct(int argc, char* argv[]) {
 
     if (this->top_count <= 0) {
         this->top_count = 3;
+    } else if (this->top_count > this->elves.size()) {
+        this->top_count = this->elves.size();
     }
 
     this->title_font = game_create_font(font_basename(game_font::unicode), title_fontsize);
@@ -91,6 +95,7 @@ WarGrey::AoC::AoCWorld::~AoCWorld() {
 
 void WarGrey::AoC::AoCWorld::load(float width, float height) {
     this->title = this->insert(new Labellet(this->title_font, BLACK, title_desc));
+    this->info_board = this->insert(new Labellet(this->title_font, GRAY, " "));
     this->population = this->insert(new Labellet(this->text_font, GOLDENROD, unknown_fmt, population_desc));
     this->top1_total = this->insert(new Labellet(this->text_font, ROYALBLUE, unknown_fmt, top1_desc));
     this->topn_total = this->insert(new Labellet(this->text_font, FORESTGREEN, topn_unknown_fmt, this->top_count, cmp_alg_desc));
@@ -123,6 +128,7 @@ void WarGrey::AoC::AoCWorld::load(float width, float height) {
 }
 
 void WarGrey::AoC::AoCWorld::reflow(float width, float height) {
+    this->move_to(this->info_board, width, 0.0F, MatterAnchor::RT);
     this->move_to(this->population, this->title, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->top1_total, this->population, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->topn_total, this->top1_total, MatterAnchor::LB, MatterAnchor::LT);
@@ -164,7 +170,7 @@ void WarGrey::AoC::AoCWorld::reflow(float width, float height) {
 
 void WarGrey::AoC::AoCWorld::update(uint32_t interval, uint32_t count, uint32_t uptime) {
     switch (this->status) {
-        case WorldStatus::CountOff: {
+        case AoCStatus::CountOff: {
             if (this->current_elf_idx > 0) {
                 this->calm_elf_down(this->elves[this->current_elf_idx - 1], normal_scale_up);
             }
@@ -172,29 +178,31 @@ void WarGrey::AoC::AoCWorld::update(uint32_t interval, uint32_t count, uint32_t 
             if (this->current_elf_idx < this->elves.size()) {
                 this->excite_elf(this->elves[this->current_elf_idx], normal_scale_up);
                 this->move_elf_to_grid(this->elves[this->current_elf_idx]);
+                this->info_board->set_text(std::to_string(this->elves[this->current_elf_idx]->calorie_total()), MatterAnchor::RT);
                 this->population->set_text(puzzle_fmt, population_desc, ++ this->current_elf_idx);
-
+                
                 this->random_walk(this->current_elf_idx);
             } else {
                 this->population->set_text(puzzle_fmt, population_desc, this->elves.size());
                 this->on_task_done();
             }
         }; break;
-        case WorldStatus::FindMaximumCalorie: {
+        case AoCStatus::FindMaximumCalorie: {
             if (this->current_elf_idx < this->elves.size()) {
                 int self_cal = this->elves[this->current_elf_idx]->calorie_total();
 
+                this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RT);
+                    
                 if (self_cal > this->top_calorie) {
                     this->top_calorie = self_cal;
                     this->top1_total->set_text(puzzle_fmt, top1_desc, self_cal);
                     this->excite_elf(this->elves[this->current_elf_idx], top_scale_up);
                     this->move_to(this->elves[this->current_elf_idx],
                         this->top1_total, MatterAnchor::RB,
-                        MatterAnchor::LB, float(text_fontsize) * 0.618F);
+                        MatterAnchor::LB, float(dim_fontsize) * 0.618F);
                     
                     if (this->prev_top_elf_id >= 0) {
                         this->calm_elf_down(this->elves[this->prev_top_elf_id], top_scale_up);
-                        this->move_elf_to_grid(this->elves[this->prev_top_elf_id]);
                     }
 
                     this->prev_top_elf_id = this->current_elf_idx;
@@ -211,23 +219,23 @@ void WarGrey::AoC::AoCWorld::update(uint32_t interval, uint32_t count, uint32_t 
             } else {
                 if (this->prev_top_elf_id >= 0) {
                     this->calm_elf_down(this->elves[this->prev_top_elf_id], top_scale_up);
-                    this->move_elf_to_grid(this->elves[this->prev_top_elf_id]);
                 }
 
                 this->on_task_done();
             }
         }; break;
-        case WorldStatus::FindMaximumCalories: {
+        case AoCStatus::FindMaximumCalories: {
             if (this->current_elf_idx < this->elves.size()) {
                 int self_cal = this->elves[this->current_elf_idx]->calorie_total();
                 int replaced_idx = vector_replace_sorted_maximum(this->top_calories, self_cal);
                 
+                this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RT);
+
                 if (replaced_idx >= 0) {
                     int replaced_elf_idx = this->top_elf_indices[replaced_idx];
 
                     if (replaced_elf_idx >= 0) {
                         this->calm_elf_down(this->elves[replaced_elf_idx], top_scale_up);
-                        this->move_elf_to_grid(this->elves[replaced_elf_idx]);
                     }
 
                     this->top_elf_indices[replaced_idx] = this->current_elf_idx;
@@ -246,6 +254,42 @@ void WarGrey::AoC::AoCWorld::update(uint32_t interval, uint32_t count, uint32_t 
                 this->on_task_done();
             }
         }; break;
+        case AoCStatus::FindMaximumCaloriesViaSorting: {
+            if ((this->top_calories.size() < this->top_count) || (this->current_elf_idx > 0)) {
+                if (this->current_elf_idx == 0) {
+                    this->current_elf_idx = this->top_calories.size() + 1;
+                    this->top_elf_indices.push_back(this->current_elf_idx - 1);
+                    this->top_calories.push_back(this->elves[this->current_elf_idx - 1]->calorie_total());
+                } else if (this->current_elf_idx < this->elves.size()) {
+                    int top_cal_in_this_round = this->top_calories.back();
+                    int self_cal = this->elves[this->current_elf_idx]->calorie_total();
+
+                    this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RT);
+
+                    if (top_cal_in_this_round < self_cal) {
+                        int target_elf_idx = this->top_elf_indices.back();
+
+                        this->swap_elves(this->current_elf_idx, target_elf_idx);
+                        this->excite_elf(this->elves[target_elf_idx], top_scale_up);
+                        this->calm_elf_down(this->elves[this->current_elf_idx], top_scale_up);
+                        this->sorted_total->set_text(topn_fmt, this->top_count, srt_alg_desc, vector_sum(this->top_calories));
+                        this->top_calories[this->top_calories.size() - 1] = self_cal;
+                    } else {
+                        this->move_elf_to_grid(this->elves[this->current_elf_idx]);
+                    }
+
+                    this->reflow_top_elves();
+                    this->current_elf_idx ++;
+                    this->random_walk(this->current_elf_idx);
+                } else {
+                    this->current_elf_idx = 0;
+                }
+            } else {
+                this->sorted_total->set_text(topn_fmt, this->top_count, srt_alg_desc, vector_sum(this->top_calories));
+                this->calm_top_elves_down();
+                this->on_task_done();
+            }
+        }; break;
         default: /* do nothing */;
     }
 }
@@ -254,23 +298,34 @@ void WarGrey::AoC::AoCWorld::after_select(IMatter* m, bool yes_or_no) {
     if (yes_or_no) {
         if (m == this->population) {
             this->current_elf_idx = 0;
-            this->on_task_start(WorldStatus::CountOff);
+            this->on_task_start(AoCStatus::CountOff);
         } else if (m == this->top1_total) {
             this->current_elf_idx = 0;
             this->prev_top_elf_id = -1;
             this->top_calorie = 0;
-            this->on_task_start(WorldStatus::FindMaximumCalorie);
+            this->on_task_start(AoCStatus::FindMaximumCalorie);
         } else if (m == this->topn_total) {
             this->current_elf_idx = 0;
             vector_reset(this->top_calories, this->top_count, 0);
             vector_reset(this->top_elf_indices, this->top_count, -1);
-            this->on_task_start(WorldStatus::FindMaximumCalories);
+            this->on_task_start(AoCStatus::FindMaximumCalories);
+        } else if (m == this->sorted_total) {
+            this->current_elf_idx = 0;
+            this->top_calories.clear();
+            this->top_elf_indices.clear();
+            this->on_task_start(AoCStatus::FindMaximumCaloriesViaSorting);
+        } else {
+            Elfmon* maybe_elf = dynamic_cast<Elfmon*>(m);
+
+            if (maybe_elf != nullptr) {
+                this->info_board->set_text(std::to_string(maybe_elf->calorie_total()), MatterAnchor::RT);
+            }
         }
     }
 }
 
 bool WarGrey::AoC::AoCWorld::can_select(IMatter* m) {
-    return (this->status == WorldStatus::TaskDone);
+    return (this->status == AoCStatus::TaskDone);
 }
 
 void WarGrey::AoC::AoCWorld::move_elf_to_grid(Elfmon* elf) {
@@ -306,7 +361,6 @@ void WarGrey::AoC::AoCWorld::calm_top_elves_down() {
 
         if (top_elf_idx >= 0) {
             this->calm_elf_down(this->elves[top_elf_idx], top_scale_up);
-            this->move_elf_to_grid(this->elves[top_elf_idx]);
             this->dims[idx]->set_text(" ");
         } else {
             break;
@@ -322,6 +376,7 @@ void WarGrey::AoC::AoCWorld::excite_elf(Elfmon* elf, float scale) {
 void WarGrey::AoC::AoCWorld::calm_elf_down(Elfmon* elf, float scale) {
     elf->switch_to_custome("normal");
     elf->resize(1.0F / scale);
+    this->move_elf_to_grid(elf);
 }
 
 void WarGrey::AoC::AoCWorld::random_walk(int start_idx) {
@@ -330,12 +385,25 @@ void WarGrey::AoC::AoCWorld::random_walk(int start_idx) {
     }
 }
 
-void WarGrey::AoC::AoCWorld::on_task_start(WorldStatus status) {
+void WarGrey::AoC::AoCWorld::on_task_start(AoCStatus status) {
     this->status = status;
 }
 
 void WarGrey::AoC::AoCWorld::on_task_done() {
-    this->status = WorldStatus::TaskDone;
+    this->status = AoCStatus::TaskDone;
+    this->info_board->set_text(MatterAnchor::RT, " ");
+}
+
+void WarGrey::AoC::AoCWorld::swap_elves(int self_idx, int target_idx) {
+    Elfmon* self = this->elves[self_idx];
+    Elfmon* target = this->elves[target_idx];
+    int temp_id = self->id;
+
+    self->id = target->id;
+    target->id = temp_id;
+
+    this->elves[self_idx] = target;
+    this->elves[target_idx] = self;
 }
 
 /*************************************************************************************************/
@@ -370,28 +438,6 @@ void WarGrey::AoC::AoCWorld::load_calories(const std::string& pathname) {
 
         datin.close();
     }
-}
-
-int WarGrey::AoC::AoCWorld::find_maximum_calories(int n) {
-    std::vector<int> calories(n);
-    int total = 0;
-
-    for (int eidx = 0; eidx < this->elves.size(); eidx ++) {
-        int cal = this->elves[eidx]->calorie_total();
-
-        for (int cidx = 0; cidx < n; cidx ++) {
-            if (cal > calories[cidx]) {
-                calories[cidx] = cal;
-                break;
-            }
-        }
-    }
-
-    for (int idx = 0; idx < n; idx ++) {
-        total += calories[idx];
-    }
-
-    return total;
 }
 
 /*************************************************************************************************/
