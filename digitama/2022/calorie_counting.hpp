@@ -19,7 +19,7 @@ namespace WarGrey::AoC {
     };
 
     /******************************************* 声明游戏状态 ******************************************/
-    enum class AoCStatus {
+    enum class CCStatus {
         CountOff,
         FindMaximumCalorie,
         FindMaximumCalories,
@@ -28,10 +28,10 @@ namespace WarGrey::AoC {
     };
     
     /******************************************* 声明游戏世界 ******************************************/
-    class AoCWorld : public WarGrey::STEM::World {
+    class CalorieCountingWorld : public WarGrey::STEM::World {
         public:
-            AoCWorld() : World("Calorie Counting", 8) {}
-            virtual ~AoCWorld();
+            CalorieCountingWorld() : World("Calorie Counting", 8) {}
+            virtual ~CalorieCountingWorld();
 
         public:  // 覆盖游戏基本方法
             void construct(int argc, char* argv[]) override;
@@ -44,7 +44,7 @@ namespace WarGrey::AoC {
             void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
 
         private:
-            void on_task_start(WarGrey::AoC::AoCStatus status);
+            void on_task_start(WarGrey::AoC::CCStatus status);
             void on_task_done();
 
         private:
@@ -78,10 +78,7 @@ namespace WarGrey::AoC {
             int col;
 
         private:
-            TTF_Font* title_font;
-            TTF_Font* text_font;
-            TTF_Font* dim_font;
-            WarGrey::AoC::AoCStatus status;
+            WarGrey::AoC::CCStatus status;
 
         private: // shared variable
             int current_elf_idx;
