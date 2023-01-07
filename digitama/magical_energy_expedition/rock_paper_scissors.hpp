@@ -7,17 +7,17 @@
 namespace WarGrey::AoC {
     /******************************************* 声明游戏状态 ******************************************/
     enum class RPSStatus {
-        PlayFollowStrategy,
+        SimulateWithGuessedStrategy,
         TaskDone
     };
 
-    enum class RPSSelection {
+    enum class RPSShape {
         Rock,
         Paper,
         Scissor,
         _
     };
-    
+
     /******************************************* 声明游戏世界 ******************************************/
     class RockPaperScissorsWorld : public WarGrey::STEM::World {
         public:
@@ -50,13 +50,13 @@ namespace WarGrey::AoC {
             WarGrey::STEM::Labellet* selection_rules_let;
             WarGrey::STEM::Labellet* outcome_rules_let;
             WarGrey::STEM::Labellet* guessed_score_let;
-            WarGrey::STEM::Labellet* elf_score_let;
+            //WarGrey::STEM::Labellet* elf_score_let;
             WarGrey::STEM::Labellet* outcome_let;
             std::vector<WarGrey::STEM::Sprite*> elves;
             
         private:
             WarGrey::AoC::RPSStatus status;
-            std::vector<std::pair<RPSSelection, char>> strategy;
+            std::vector<std::pair<char, char>> strategy;
 
         private: // Shared Variables
             int current_round = 0;

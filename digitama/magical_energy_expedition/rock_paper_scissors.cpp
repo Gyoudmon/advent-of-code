@@ -16,7 +16,7 @@ using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
 
 /*************************************************************************************************/
-static const char* title_desc = "石头 剪刀 布大赛";
+static const char* title_desc = "猜拳大赛";
 static const char* tournament_desc = "大赛总局数";
 static const char* guessed_strategy_desc = "精灵策略得分";
 
@@ -33,39 +33,39 @@ static const int lose_point = 0;
 static const int draw_point = 3;
 
 /*************************************************************************************************/
-static inline RPSSelection char_to_selection(char ch) {
+static inline RPSShape char_to_shape(char ch) {
     switch (ch) {
-        case 'A': case 'X': return RPSSelection::Rock; break;
-        case 'B': case 'Y': return RPSSelection::Paper; break;
-        case 'C': case 'Z': return RPSSelection::Scissor; break;
-        default: return RPSSelection::_; break;
+        case 'A': case 'X': return RPSShape::Rock; break;
+        case 'B': case 'Y': return RPSShape::Paper; break;
+        case 'C': case 'Z': return RPSShape::Scissor; break;
+        default: return RPSShape::_; break;
     }
 }
 
-static inline int selection_score(RPSSelection selection) {
+static inline int shape_score(RPSShape selection) {
     int score = 0;
 
     switch (selection) {
-        case RPSSelection::Rock: score = rock_point; break;
-        case RPSSelection::Paper: score = paper_point; break;
-        case RPSSelection::Scissor: score = scissor_point; break;
+        case RPSShape::Rock: score = rock_point; break;
+        case RPSShape::Paper: score = paper_point; break;
+        case RPSShape::Scissor: score = scissor_point; break;
         default: /**/;
     }
 
     return score;
 }
 
-static inline int round_score(RPSSelection opponent, RPSSelection self) {
+static inline int round_score(RPSShape opponent, RPSShape self) {
     int score = 0;
 
     if (opponent == self) {
         score = draw_point;
-    } else if (self == RPSSelection::Rock) {
-        score = (opponent == RPSSelection::Paper) ? lose_point : win_point;
-    } else if (self == RPSSelection::Paper) {
-        score = (opponent == RPSSelection::Scissor) ? lose_point : win_point;
-    } else if (self == RPSSelection::Scissor) {
-        score = (opponent == RPSSelection::Rock) ? lose_point : win_point;
+    } else if (self == RPSShape::Rock) {
+        score = (opponent == RPSShape::Paper) ? lose_point : win_point;
+    } else if (self == RPSShape::Paper) {
+        score = (opponent == RPSShape::Scissor) ? lose_point : win_point;
+    } else if (self == RPSShape::Scissor) {
+        score = (opponent == RPSShape::Rock) ? lose_point : win_point;
     }
 
     return score;
@@ -113,16 +113,17 @@ void WarGrey::AoC::RockPaperScissorsWorld::reflow(float width, float height) {
 
 void WarGrey::AoC::RockPaperScissorsWorld::update(uint32_t interval, uint32_t count, uint32_t uptime) {
     switch (this->status) {
-        case RPSStatus::PlayFollowStrategy: {
+        case RPSStatus::SimulateWithGuessedStrategy: {
             if (this->current_round < this->strategy.size()) {
-                std::pair<RPSSelection, char> play = this->strategy[this->current_round];
-                RPSSelection self = char_to_selection(play.second);
-                int selscore = selection_score(self);
-                int outscore = round_score(play.first, self);
+                std::pair<char, char> play = this->strategy[this->current_round];
+                RPSShape opponent = char_to_shape(play.first);
+                RPSShape self = char_to_shape(play.second);
+                int shpscore = shape_score(self);
+                int outscore = round_score(opponent, self);
 
-                this->total_score += (selscore + outscore);
+                this->total_score += (shpscore + outscore);
                 this->guessed_score_let->set_text(puzzle_fmt, guessed_strategy_desc, this->total_score);
-                this->display_outcome(selscore, outscore);
+                this->display_outcome(shpscore, outscore);
                 
                 this->current_round ++;
             } else {
@@ -139,7 +140,7 @@ void WarGrey::AoC::RockPaperScissorsWorld::after_select(IMatter* m, bool yes_or_
         if (m == this->guessed_score_let) {
             this->current_round = 0;
             this->total_score = 0;
-            this->on_task_start(RPSStatus::PlayFollowStrategy);
+            this->on_task_start(RPSStatus::SimulateWithGuessedStrategy);
         }
     }
 }
@@ -156,21 +157,21 @@ void WarGrey::AoC::RockPaperScissorsWorld::on_task_done() {
     this->status = RPSStatus::TaskDone;
 }
 
-void WarGrey::AoC::RockPaperScissorsWorld::display_outcome(int selection_score, int outcome_score) {
-    int round_score = selection_score + outcome_score;
+void WarGrey::AoC::RockPaperScissorsWorld::display_outcome(int shape_score, int outcome_score) {
+    int round_score = shape_score + outcome_score;
     
     switch (outcome_score) {
         case lose_point: {
             this->outcome_let->set_text_color(CRIMSON);
-            this->outcome_let->set_text(MatterAnchor::CC, outcome_fmt, "输了", round_score, selection_score, outcome_score);
+            this->outcome_let->set_text(MatterAnchor::CC, outcome_fmt, "输了", round_score, shape_score, outcome_score);
         }; break;
         case win_point: {
             this->outcome_let->set_text_color(FORESTGREEN);
-            this->outcome_let->set_text(MatterAnchor::CC, outcome_fmt, "赢了", round_score, selection_score, outcome_score);
+            this->outcome_let->set_text(MatterAnchor::CC, outcome_fmt, "赢了", round_score, shape_score, outcome_score);
         }; break;
         case draw_point: {
             this->outcome_let->set_text_color(DARKORANGE);
-            this->outcome_let->set_text(MatterAnchor::CC, outcome_fmt, "平局", round_score, selection_score, outcome_score);
+            this->outcome_let->set_text(MatterAnchor::CC, outcome_fmt, "平局", round_score, shape_score, outcome_score);
         }; break;
     }
 }
@@ -186,12 +187,13 @@ void WarGrey::AoC::RockPaperScissorsWorld::load_strategy(const std::string& path
 
         while (std::getline(datin, line)) {
             if (line.size() >= 3) {
-                RPSSelection opponent = char_to_selection(line[0]);
+                char opponent_char = line[0];
                 char self_char = line[2];
-                RPSSelection self = char_to_selection(self_char);
-
-                if ((opponent != RPSSelection::_) && (self != RPSSelection::_)) {
-                    this->strategy.push_back(std::pair<RPSSelection, char>(opponent, self_char));
+                RPSShape opponent = char_to_shape(opponent_char);
+                RPSShape self = char_to_shape(self_char);
+            
+                if ((opponent != RPSShape::_) && (self != RPSShape::_)) {
+                    this->strategy.push_back(std::pair<char, char>(opponent_char, self_char));
                 }
             }
         }

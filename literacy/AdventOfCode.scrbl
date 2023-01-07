@@ -37,7 +37,7 @@
 
 @handbook-smart-table[]
 
-@include-section{2022.scrbl}
+@include-section{magical.energy.expedition.scrbl}
 
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-appendix[#:index-section? #true #:numbered? #false]
