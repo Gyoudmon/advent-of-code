@@ -7,9 +7,9 @@
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-root-story{第一天：计点卡路里}
 
-故事原文见 @~cite[D1CC]。故事中的任务将以如下的程序结构组织：
+故事原文见 @~cite[D1CC]。故事中的任务将按如下程序结构展开：
 
-@handbook-chunk[<*:cc>
+@handbook-chunk[<calorie:*>
                 (module tamer racket 
                   <定义函数find-maximum-calorie>
                   <定义函数find-maximum-calories>)]
