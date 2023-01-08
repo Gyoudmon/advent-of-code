@@ -52,23 +52,23 @@
 
 @handbook-chunk[<定义函数find-maximum-calorie>
                 (code:comment #,($argv [/dev/datin "与卡路里清单关联的输入源"]))
-                (define (find-maximum-calorie /dev/datin)
-                  <读取-记录-替换-循环>)]
+                (define find-maximum-calorie
+                  (λ [/dev/datin]
+                    <读取-记录-替换-循环>))]
 
 检阅清单的过程就是个简单的@racketcommentfont{读取-记录-替换}循环（@racketidfont{rrsl}, read-record-substitute-loop），
 即逐行读取清单，每读到一行，就尝试将该行内容转化成@bold{正整数}，如果能转化成功，说明读到的是卡路里含量，
 应当记在当前精灵的账上；否则，准备换个精灵记账。直到没有更多内容为止，函数返回最大值。
 
 @handbook-chunk[<读取-记录-替换-循环>
-                (code:comment #,($argv [max:cal "当前已知最高卡路里数"]
-                                       [self:cal "当前精灵携带的卡路里总数"]))
+                (code:comment #,($argv [max:cal "当前已知最高卡路里数"] [self:cal "当前精灵携带的卡路里总数"]))
                 (let rrsl ([max:cal 0]
                            [self:cal 0])
                   (define line (read-line /dev/datin))
                   (if (string? line)
-                      (let ([?cal (string->number line 10)])
-                        (if (exact-positive-integer? ?cal)
-                            (rrsl max:cal (+ self:cal ?cal))
+                      (let ([c (string->number line 10)])
+                        (if (exact-positive-integer? c)
+                            (rrsl max:cal (+ self:cal c))
                             (rrsl <确定最大值> 0)))
                       <确定最大值>))]
 
@@ -85,11 +85,11 @@
               (with-aoc-data-from "mee/01.cc.dat" #:do
                   find-maximum-calorie)]
 
-这里多说一句，上面的算法是@bold{纯函数式}风格，虽然定义了两个@bold{变量}，
-但实际上它们的值从头到尾都没有变过；每一轮循环都相当于是一次（递归）函数调用，
-并且比对着那俩变量创建了新的@bold{位置}，本该用来修改它们的值也被放到新的位置去了，
-而它们原来的位置在哪，里面有什么都已经不重要了。这种思路需要专业引导，
-初学者一时半会不能适应是正常现象。
+顺便说一遍，上面的函数定义采用了@bold{纯函数式}风格，虽然有两个@bold{变量}
+（@racketvarfont{max:cal} 和 @racketvarfont{self:cal}），但实际上它们的值从头到尾都没有变过；
+每一轮循环都相当于是一次（递归）函数调用，并且比对着那俩变量创建了新的@bold{位置}，
+本该用来修改它们的值也被放到新的位置去了，而它们原来的位置在哪，里面有什么都已经不重要了。
+这种思路需要专业引导，初学者一时半会不能适应是正常现象。
 
 当你在冥思苦想上面那都是些啥玩意的时候，精灵们又开始搞事了：天，这么点卡路里迟早会被消耗完的！
 这可不行，你必须再找到另外两个所带食物提供了最大卡路里的精灵。这样，一个精灵携带的食物吃完了，
@@ -119,18 +119,18 @@
 多了一个参数 @racketvalfont{n}：
 
 @handbook-chunk[<定义函数find-maximum-calories>
-                (code:comment #,($argv [/dev/datin "与卡路里清单关联的输入源"]
-                                       [n "需要关注的前几名精灵数量"]))
-                (define (find-maximum-calories /dev/datin n)
-                  (let rrsl (<初始化卡路里列表>
-                             [self:cal 0])
-                    (define line (read-line /dev/datin))
-                    (if (string? line)
-                        (let ([?cal (string->number line 10)])
-                          (if (exact-positive-integer? ?cal)
-                              (rrsl calories (+ self:cal ?cal))
-                              (rrsl <确定最大值列表> 0)))
-                        <高卡路里合计>)))]
+                (code:comment #,($argv [/dev/datin "与卡路里清单关联的输入源"] [n "需要关注的前几名精灵数量"]))
+                (define find-maximum-calories
+                  (λ [/dev/datin n]
+                    (let rrsl (<初始化卡路里列表>
+                               [self:cal 0])
+                      (define line (read-line /dev/datin))
+                      (if (string? line)
+                          (let ([c (string->number line 10)])
+                            (if (exact-positive-integer? c)
+                                (rrsl calories (+ self:cal c))
+                                (rrsl <确定最大值列表> 0)))
+                          <高卡路里合计>))))]
 
 算法逻辑也还是大同小异，区别在于主循环里
 代表最大值的整型参数变为了列表型参数：
@@ -153,7 +153,7 @@
                       calories
                       (list-set calories idx self:cal)))]
 
-至此，问题解决：
+至此，任务完成：
 
 @tamer-action[(with-aoc-data-from "mee/01.cc.dat" #:do
                 find-maximum-calories 3)]
