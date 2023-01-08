@@ -18,7 +18,7 @@
 当小船快靠岸时，精灵们开始清点存货，食物是重点清点对象之一。具体来说，
 也就是每个精灵携带食物的卡路里含量。
 
-于是，精灵们把各自携带的各种肉类、点心、口粮等食物的卡路里数写在纸上，
+于是，精灵们把轮流把自己携带的各种肉类、点心、口粮等食物的卡路里数写在纸上，
 一行一项，不同精灵之间用空行隔开。比如，假如精灵们出了如下一份清单：
 
 @tabular[#:style 'boxed
@@ -48,21 +48,20 @@
 上面的例子中，是第四只精灵携带的食物卡路里含量最高，达到了 @racket[24000] 大卡。
 
 于是，为伺候好这些精灵，我们需要定义一个函数 @racketid[find-maximum-calorie]
-来计算@question{携带食物所提供的卡路里最多的那只精灵到底提供了多少卡}，该函数接受一个参数
-@racketvarfont{/dev/datin}，可以从里面读取精灵们写好的清单：
+来计算@question{携带食物所提供的卡路里最多的那只精灵到底提供了多少卡}：
 
 @handbook-chunk[<定义函数find-maximum-calorie>
-                (code:comment #,(elem "(:: " (racket Input-Port) (racket ->) (racket Nature) ")"))
+                (code:comment #,($argv [/dev/datin "与卡路里清单关联的输入源"]))
                 (define (find-maximum-calorie /dev/datin)
                   <读取-记录-替换-循环>)]
 
-总的来说，这个任务比较简单。需要两个变量 @racketvalfont{max:cal} 和 @racketvalfont{self:cal}，
-分别代表@racketcommentfont{已知最大卡路里数}和@racketcommentfont{当前精灵账目上的卡路里总数}。
 检阅清单的过程就是个简单的@racketcommentfont{读取-记录-替换}循环（@racketidfont{rrsl}, read-record-substitute-loop），
 即逐行读取清单，每读到一行，就尝试将该行内容转化成@bold{正整数}，如果能转化成功，说明读到的是卡路里含量，
 应当记在当前精灵的账上；否则，准备换个精灵记账。直到没有更多内容为止，函数返回最大值。
 
 @handbook-chunk[<读取-记录-替换-循环>
+                (code:comment #,($argv [max:cal "当前已知最高卡路里数"]
+                                       [self:cal "当前精灵携带的卡路里总数"]))
                 (let rrsl ([max:cal 0]
                            [self:cal 0])
                   (define line (read-line /dev/datin))
@@ -88,7 +87,7 @@
 
 这里多说一句，上面的算法是@bold{纯函数式}风格，虽然定义了两个@bold{变量}，
 但实际上它们的值从头到尾都没有变过；每一轮循环都相当于是一次（递归）函数调用，
-并且比对着那俩变量创建了新的位置，本该用来修改它们的值也被放到新的位置去了，
+并且比对着那俩变量创建了新的@bold{位置}，本该用来修改它们的值也被放到新的位置去了，
 而它们原来的位置在哪，里面有什么都已经不重要了。这种思路需要专业引导，
 初学者一时半会不能适应是正常现象。
 
@@ -116,7 +115,12 @@
 比如 Python，不可变的元组才更符合函数式风格；在 C 里，开箱即用的选项就只有数组了，
 也几乎没法难体现函数式风格。
 
+相比于上面的 @racketid[find-maximum-calorie] 函数，这个复数形式的 @racketid[find-maximum-calories]
+多了一个参数 @racketvalfont{n}：
+
 @handbook-chunk[<定义函数find-maximum-calories>
+                (code:comment #,($argv [/dev/datin "与卡路里清单关联的输入源"]
+                                       [n "需要关注的前几名精灵数量"]))
                 (define (find-maximum-calories /dev/datin n)
                   (let rrsl (<初始化卡路里列表>
                              [self:cal 0])
@@ -128,8 +132,7 @@
                               (rrsl <确定最大值列表> 0)))
                         <高卡路里合计>)))]
 
-相比于上面的 @racketid[find-maximum-calorie] 函数，这个复数形式的 @racketid[find-maximum-calories]
-多了一个参数 @racketvalfont{n} 用以表示@racketcommentfont{前n名}。算法逻辑也还是大同小异，区别在于主循环里
+算法逻辑也还是大同小异，区别在于主循环里
 代表最大值的整型参数变为了列表型参数：
 
 @handbook-chunk[<初始化卡路里列表>
@@ -162,7 +165,7 @@
               (with-aoc-data-from "mee/01.cc.dat" #:do
                 find-maximum-calories 1)]
 
-不过，还是要谨记，比较两种算法的执行结果并不是严密的证明。
+不过，还是要谨记，比较两种算法的执行结果并不是严密地证明。
 两个结果相等也可能说明两个算法都不对，只不过用题目给的数据测试不出来。
 比如，本次解谜就有可能掉进前文所说的陷阱里，导致漏算了最后一只精灵，
 而那只精灵又恰好不影响最终结果。可见，这个挑战活动本身也有问题，
