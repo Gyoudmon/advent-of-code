@@ -2,40 +2,6 @@
 #include <stdlib.h>
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-void find_maximum_calorie(FILE* in) {
-    char* line = NULL;
-    size_t capacity = 0;
-    ssize_t read;
-
-    long max_cal = 0L;
-    long self_cal = 0L;
-
-    while ((read = getline(&line, &capacity, in)) != -1) {
-        long cal = strtol(line, NULL, 10);
-        
-        if (cal > 0L) {
-            self_cal += cal;
-        } else {
-            if (self_cal > max_cal) {
-                max_cal = self_cal;
-            }
-
-            self_cal = 0L;
-        }
-    }
-
-    /* There is no blank line after the records of last elf */
-    if (max_cal < self_cal) {
-        max_cal = self_cal;
-    }
-
-    printf("%ld\n", max_cal);
-
-    if (line != NULL) {
-        free(line);
-    }
-}
-
 void find_maximum_calories(FILE* in, int n) {
     char* line = NULL;
     size_t capacity = 0;
@@ -73,6 +39,10 @@ void find_maximum_calories(FILE* in, int n) {
         total += calories[idx];
     }
 
+    if (n > 0) {
+        printf("%ld\n", calories[0]);
+    }
+    
     printf("%ld\n", total);
 
     /* Don't forget to release the momery */
@@ -93,7 +63,7 @@ int main(int argc, char* argv[]) {
             fclose(src);
         }
     } else {
-        find_maximum_calorie(stdin);
+        find_maximum_calories(stdin, 3);
     }
 
     return 0;

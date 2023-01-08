@@ -20,15 +20,8 @@
 精灵们开始在沙滩上搭帐篷。为了让自己的帐篷能够尽可能的离食物仓库近一些，
 一场超大型的猜拳大赛正在如火如荼的进行着。
 
-猜拳是一种双人对决类游戏，一场比赛下来双方要来上很多轮。
-每一轮，两位选手同时决定在石头(@racket['rock])、布(@racket['paper])、
-剪刀(@racket['scissor])三种手型里任选其一@handbook-footnote{像 @racket['rock]
- 这样的加了一个@litchar{'}前缀的字符串是一种特殊类型的数据，称作 @racketid[Symbol]。
- 其常见用法包括：充当枚举类型的不同选项。在真实应用中，猜拳手型可以更为精确的定义为:
- @racket[(define-type RPSShape (U 'rock 'paper 'scissor '_))]，类似 C++ 的
- @litchar{enum class RPSShape { rock, paper, scissor, _ };}。当函数参数被声明为
- 只接受 @racket[RPSShape] 类型的数据时，传入上述三个以外的 @racket[Symbol]
- 型数值时会产生编译错误。}，
+猜拳是一种双人对决类游戏，一场比赛下来双方要来上很多轮。每一轮，
+两位选手同时决定在石头、布、剪刀三种手型里任选其一，
 然后依据如下简单规则决出胜负：石头砸烂剪刀、剪刀碎掉布、布以柔克刚包裹石头；
 而如果双方手型一致，则算平局。
 
@@ -53,8 +46,15 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
 @tamer-datum['shape-score 'scissor] 分）和结局分（输了不得分，
 平局得 @racket[3] 分，赢了就能得到 @racket[6] 分）。
 
-提炼上述比赛规则，我们可以得到以下四个函数分别计算手型分、结局分、本轮得分，
-以及可能的结局：
+提炼上述比赛规则，无论是选手可出的手型，还是每轮比赛的结局，都只有有限的几个取值，
+这样的数据类型通常会被定义为@bold{枚举类型}。在 Racket 中，枚举类型一般会直接使用
+@racket[Symbol]类型的数据来表示，比如 石头(@racket['rock])、布(@racket['paper])、
+剪刀(@racket['scissor])；赢(@racket['win])、平局(@racket['draw])、
+输(@racket['lose])@handbook-footnote{在真实应用中，猜拳手型可以更为精确的定义为:
+ @racket[(define-type RPSShape (U 'rock 'paper 'scissor))]，当函数参数被声明为
+ 只接受 @racket[RPSShape] 类型的值时，就只能传入上述三个符号，否则编译失败。}。
+于是，围绕这两个枚举类型，我们可以定义如下四个函数分别计算手型分、结局分、本轮得分，
+以及每一轮的结局：
 
 @handbook-chunk[<定义比赛规则函数>
                 (code:comment #,($argv [shape "当前手型"]))
@@ -228,8 +228,8 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
                           total))))]
 
 这两个主函数大同小异，唯一的不同则关乎于每轮得分的构成。
-对于你自己猜测的策略，其本质是“已知手型求结局”；
-而精灵策略的本意则是“已知结局求手型”。
+对于你自己猜测的策略，其本质是@question{已知手型求结局}；
+而精灵策略的本意则是@question{已知结局求手型}。
 
 @handbook-chunk[<模拟策略>
                 (let* ([op:play (char->shape op:ch)]
