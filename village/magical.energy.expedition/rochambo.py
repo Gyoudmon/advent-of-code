@@ -4,15 +4,17 @@ import sys
 import enum
 
 ###################################################################################################
+# Enum with 0 as value will not be treat as False implicitly
+
 class RPSShape(enum.Enum):
-    Rock = 0x4a0e450304e235fb
-    Paper = 0x418003bd4715fe6b
-    Scissor = 0x45e373bc895eea78
+    Rock = 1
+    Paper = 2
+    Scissor = 3
 
 class RPSOutcome(enum.Enum):
-    Win = 0x4e5dbdde88abb120
-    Draw = 0x430dba1e1c60f3d9
-    Lose = 0x45ccdd2007a9e1d1
+    Win = 6
+    Draw = 3
+    Lose = 0
 
 def char_to_shape(ch):
     if ch in ['A', 'X']:
@@ -35,24 +37,10 @@ def char_to_outcome(ch):
         return None
 
 def shape_score(shape):
-    if shape is RPSShape.Rock:
-        return 1
-    elif shape is RPSShape.Paper:
-        return 2
-    elif shape is RPSShape.Scissor:
-        return 3
-    else:
-        return 0
+    return shape.value
 
 def outcome_score(outcome):
-    if outcome is RPSOutcome.Win:
-        return 6
-    elif outcome is RPSOutcome.Draw:
-        return 3
-    elif outcome is RPSOutcome.Lose:
-        return 0
-    else:
-        return 0
+    return outcome.value
 
 def round_score(self_shape, outcome):
     return shape_score(self_shape) + outcome_score(outcome)
@@ -100,42 +88,50 @@ def smart_shape(op_play, outcome):
         return None
 
 ###################################################################################################
-def stimulate_with_guessed_strategy(src):
-    total = 0
+def round_score_by_guessing(op_ch, sf_ch):
+    op_play = char_to_shape(op_ch)
+    sf_play = char_to_shape(sf_ch)
+    score = 0
+
+    if op_play and sf_play:
+        score = round_score(sf_play, round_end(op_play, sf_play))
+
+    return score
+
+def round_score_by_design(op_ch, sf_ch):
+    op_play = char_to_shape(op_ch)
+    outcome = char_to_outcome(sf_ch)
+    score = 0
+
+    if op_play and outcome:
+        score = round_score(smart_shape(op_play, outcome), outcome)
+
+    return score
+
+###################################################################################################
+def simulate_with_strategy(src):
+    guessed_total = 0
+    designed_total = 0
 
     for line in src:
         if len(line) >= 3:
-            op_shape = char_to_shape(line[0])
-            sf_shape = char_to_shape(line[2])
+            op_ch, _, sf_ch = line[0:3]
+            
+            guessed_total += round_score_by_guessing(op_ch, sf_ch)
+            designed_total += round_score_by_design(op_ch, sf_ch)
 
-            if op_shape and sf_shape:
-                total += round_score(sf_shape, round_end(op_shape, sf_shape))
-
-    print(total)
-
-def simulate_with_top_secret_strategy(src):
-    total = 0
-
-    for line in src:
-        if len(line) >= 3:
-            op_shape = char_to_shape(line[0])
-            outcome = char_to_outcome(line[2])
-
-            if op_shape and outcome:
-                total += round_score(smart_shape(op_shape, outcome), outcome)
-
-    print(total)
+    print([guessed_total, designed_total])
 
 ###################################################################################################
 def main(argc, argv):
     if argc > 1:
         try:
             with open(argv[1], 'r') as src:
-                simulate_with_top_secret_strategy(src)
+                simulate_with_strategy(src)
         except FileNotFoundError:
             pass
     else:
-        stimulate_with_guessed_strategy(sys.stdin)
+        simulate_with_strategy(sys.stdin)
 
     return 0
 

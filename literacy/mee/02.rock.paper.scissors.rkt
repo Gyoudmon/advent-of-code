@@ -15,7 +15,7 @@
                   <定义策略解密函数>
                   <定义策略规则函数>
                   <定义函数simulate-with-guessed-strategy>
-                  <定义函数simulate-with-top-secret-strategy>)]
+                  <定义函数simulate-with-designed-strategy>)]
 
 精灵们开始在沙滩上搭帐篷。为了让自己的帐篷能够尽可能的离食物仓库近一些，
 一场超大型的猜拳大赛正在如火如荼的进行着。
@@ -212,12 +212,12 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
                          (if (eq? outcome 'win) 'rock 'paper)]
                         [else #false]))]
 
-然后是真策略函数 @racketid[simulate-with-top-secret-strategy]，
+然后是真策略函数 @racketid[simulate-with-designed-strategy]，
 以计算@question{严格跟着那份精灵的加密策略走能得到多高的分}：
 
-@handbook-chunk[<定义函数simulate-with-top-secret-strategy>
+@handbook-chunk[<定义函数simulate-with-designed-strategy>
                 (code:comment #,($argv [/dev/datin "与加密策略关联的输入源"]))
-                (define simulate-with-top-secret-strategy
+                (define simulate-with-designed-strategy
                   (λ [/dev/datin]
                     (let rsal ([total 0])
                       (define line (read-line /dev/datin))
@@ -243,7 +243,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
 至此，任务完成：
 
 @tamer-action[(with-aoc-data-from "mee/02.rps.dat" #:do
-                simulate-with-top-secret-strategy)]
+                simulate-with-designed-strategy)]
 
 不过，貌似就本任务中的输入数据来说，这个机密策略还不如自己瞎猜的那个。
 
