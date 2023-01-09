@@ -8,21 +8,32 @@ namespace WarGrey::AoC {
     /******************************************* 声明游戏状态 ******************************************/
     enum class RPSStatus {
         SimulateWithGuessedStrategy,
+        SimulateWithDesignedStrategy,
         TaskDone
     };
 
     enum class RPSShape {
-        Rock,
-        Paper,
-        Scissor,
-        _
+        Rock = 1,
+        Paper = 2,
+        Scissor = 3,
+        _ = 0
+    };
+
+    enum class RPSOutcome {
+        Win = 6,
+        Draw = 3,
+        Lose = 0,
+
+        // this is dangerous unless you really want to
+        //   treat all invalid inputs as loses.  
+        _ = 0
     };
 
     /******************************************* 声明游戏世界 ******************************************/
-    class RockPaperScissorsWorld : public WarGrey::STEM::World {
+    class RochamboWorld : public WarGrey::STEM::World {
         public:
-            RockPaperScissorsWorld() : World("Rock Paper Scissors", 60) {}
-            virtual ~RockPaperScissorsWorld();
+            RochamboWorld() : World("Rock Paper Scissors", 60) {}
+            virtual ~RochamboWorld();
 
         public:  // 覆盖游戏基本方法
             void construct(int argc, char* argv[]) override;
@@ -39,7 +50,7 @@ namespace WarGrey::AoC {
             void on_task_done();
 
         private:
-            void display_outcome(int selection_score, int outcome_score);
+            int round_score(WarGrey::AoC::RPSShape self_shape, WarGrey::AoC::RPSOutcome outcome);
 
         private:
             void load_strategy(const std::string& pathname);
@@ -47,10 +58,10 @@ namespace WarGrey::AoC {
         private: // 本游戏世界中的物体
             WarGrey::STEM::Labellet* title_let;
             WarGrey::STEM::Labellet* info_board_let;
-            WarGrey::STEM::Labellet* selection_rules_let;
+            WarGrey::STEM::Labellet* play_rules_let;
             WarGrey::STEM::Labellet* outcome_rules_let;
             WarGrey::STEM::Labellet* guessed_score_let;
-            //WarGrey::STEM::Labellet* elf_score_let;
+            WarGrey::STEM::Labellet* designed_score_let;
             WarGrey::STEM::Labellet* outcome_let;
             std::vector<WarGrey::STEM::Sprite*> elves;
             

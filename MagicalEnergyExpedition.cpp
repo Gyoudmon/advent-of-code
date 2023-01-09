@@ -3,7 +3,7 @@
 using namespace WarGrey::AoC;
 
 int main(int argc, char* args[]) {
-    RockPaperScissorsWorld universe;
+    RochamboWorld universe;
 
     universe.construct(argc, args);
     universe.set_window_size(1200, 1200);
