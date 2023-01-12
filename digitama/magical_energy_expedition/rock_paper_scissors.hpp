@@ -63,7 +63,7 @@ namespace WarGrey::AoC {
             WarGrey::STEM::Labellet* guessed_score_let;
             WarGrey::STEM::Labellet* designed_score_let;
             WarGrey::STEM::Labellet* outcome_let;
-            std::vector<WarGrey::STEM::Sprite*> elves;
+            WarGrey::STEM::Sprite* tux;
             
         private:
             WarGrey::AoC::RPSStatus status;

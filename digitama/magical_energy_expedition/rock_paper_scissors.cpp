@@ -111,6 +111,7 @@ void WarGrey::AoC::RochamboWorld::load(float width, float height) {
     this->guessed_score_let = this->insert(new Labellet(aoc_font::text, GOLDENROD, unknown_fmt, guessed_strategy_desc));
     this->designed_score_let = this->insert(new Labellet(aoc_font::text, SPRINGGREEN, unknown_fmt, designed_strategy_desc));
     this->outcome_let = this->insert(new Labellet(aoc_font::text, FORESTGREEN, " "));
+    this->tux = this->insert(new Sprite(digimon_path("tux", "", "stone/sprite")));
 
     this->play_rules_let = this->insert(new Labellet(aoc_font::text, PURPLE, play_rule_fmt,
             shape_score(RPSShape::Rock), shape_score(RPSShape::Paper), shape_score(RPSShape::Scissor)));
@@ -127,6 +128,8 @@ void WarGrey::AoC::RochamboWorld::reflow(float width, float height) {
     this->move_to(this->play_rules_let, this->info_board_let, MatterAnchor::RB, MatterAnchor::RT);
     this->move_to(this->outcome_rules_let, this->play_rules_let, MatterAnchor::RB, MatterAnchor::RT);
     this->move_to(this->outcome_let, width * 0.5F, height * 0.25F, MatterAnchor::CC);
+    this->move_to(this->tux, width * 0.5F, height * 0.5F, MatterAnchor::CC);
+    this->tux->play("walk");
 }
 
 void WarGrey::AoC::RochamboWorld::update(uint32_t interval, uint32_t count, uint32_t uptime) {
