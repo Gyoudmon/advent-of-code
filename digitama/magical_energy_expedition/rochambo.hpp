@@ -30,16 +30,16 @@ namespace WarGrey::AoC {
     };
 
     /******************************************* 声明游戏世界 ******************************************/
-    class RochamboWorld : public WarGrey::STEM::World {
+    class RochamboPlane : public WarGrey::STEM::Plane {
         public:
-            RochamboWorld() : World("Rock Paper Scissors", 60) {}
-            virtual ~RochamboWorld();
+            RochamboPlane(const char* name) : Plane(name) {}
+            virtual ~RochamboPlane() {}
 
         public:  // 覆盖游戏基本方法
-            void construct(int argc, char* argv[]) override;
+            void construct(float width, float height) override;
             void load(float width, float height) override;
             void reflow(float width, float height) override;
-            void update(uint32_t interval, uint32_t count, uint32_t uptime) override;
+            void update(uint32_t count, uint32_t interval, uint32_t uptime) override;
 
         public:
             bool can_select(WarGrey::STEM::IMatter* m) override;

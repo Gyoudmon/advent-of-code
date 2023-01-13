@@ -1,4 +1,4 @@
-#include "rock_paper_scissors.hpp"
+#include "rochambo.hpp"
 
 #include "../aoc.hpp"
 
@@ -85,33 +85,17 @@ static inline RPSShape smart_shape(RPSShape op_play, RPSOutcome outcome) {
 }
 
 /*************************************************************************************************/
-void WarGrey::AoC::RochamboWorld::construct(int argc, char* argv[]) {
-    std::string datin;
-
-    for (int idx = 1; idx < argc; idx ++) {
-        datin = std::string(argv[idx]);
-    }
-    
-    if (datin.size() > 0) {
-        this->load_strategy(datin);
-    } else {
-        this->load_strategy(digimon_path("mee/02.rps.dat"));
-    }
-
-    aoc_fonts_initialize();
+void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
+    this->load_strategy(digimon_path("mee/02.rps.dat"));
 }
 
-WarGrey::AoC::RochamboWorld::~RochamboWorld() {
-    aoc_fonts_destroy();
-}
-
-void WarGrey::AoC::RochamboWorld::load(float width, float height) {
-    this->title_let = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, title_desc));
+void WarGrey::AoC::RochamboPlane::load(float width, float height) {
+    this->title_let = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, this->name()));
     this->info_board_let = this->insert(new Labellet(aoc_font::text, GRAY, puzzle_fmt, tournament_desc, this->strategy.size()));
     this->guessed_score_let = this->insert(new Labellet(aoc_font::text, GOLDENROD, unknown_fmt, guessed_strategy_desc));
     this->designed_score_let = this->insert(new Labellet(aoc_font::text, SPRINGGREEN, unknown_fmt, designed_strategy_desc));
     this->outcome_let = this->insert(new Labellet(aoc_font::text, FORESTGREEN, " "));
-    this->tux = this->insert(new Sprite(digimon_path("tux", "", "stone/sprite")));
+    this->tux = this->insert(new Sprite(digimon_path("sprite/tux")));
 
     this->play_rules_let = this->insert(new Labellet(aoc_font::text, PURPLE, play_rule_fmt,
             shape_score(RPSShape::Rock), shape_score(RPSShape::Paper), shape_score(RPSShape::Scissor)));
@@ -121,7 +105,7 @@ void WarGrey::AoC::RochamboWorld::load(float width, float height) {
     this->on_task_done();
 }
 
-void WarGrey::AoC::RochamboWorld::reflow(float width, float height) {
+void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     this->move_to(this->info_board_let, width, 0.0F, MatterAnchor::RT);
     this->move_to(this->guessed_score_let, this->title_let, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->designed_score_let, this->guessed_score_let, MatterAnchor::LB, MatterAnchor::LT);
@@ -132,7 +116,7 @@ void WarGrey::AoC::RochamboWorld::reflow(float width, float height) {
     this->tux->play("walk");
 }
 
-void WarGrey::AoC::RochamboWorld::update(uint32_t interval, uint32_t count, uint32_t uptime) {
+void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
     switch (this->status) {
         case RPSStatus::SimulateWithGuessedStrategy: {
             if (this->current_round < this->strategy.size()) {
@@ -170,7 +154,7 @@ void WarGrey::AoC::RochamboWorld::update(uint32_t interval, uint32_t count, uint
     }
 }
 
-void WarGrey::AoC::RochamboWorld::after_select(IMatter* m, bool yes_or_no) {
+void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
     if (yes_or_no) {
         if (m == this->guessed_score_let) {
             this->current_round = 0;
@@ -184,19 +168,19 @@ void WarGrey::AoC::RochamboWorld::after_select(IMatter* m, bool yes_or_no) {
     }
 }
 
-bool WarGrey::AoC::RochamboWorld::can_select(IMatter* m) {
+bool WarGrey::AoC::RochamboPlane::can_select(IMatter* m) {
     return (this->status == RPSStatus::TaskDone);
 }
 
-void WarGrey::AoC::RochamboWorld::on_task_start(RPSStatus status) {
+void WarGrey::AoC::RochamboPlane::on_task_start(RPSStatus status) {
     this->status = status;
 }
 
-void WarGrey::AoC::RochamboWorld::on_task_done() {
+void WarGrey::AoC::RochamboPlane::on_task_done() {
     this->status = RPSStatus::TaskDone;
 }
 
-int WarGrey::AoC::RochamboWorld::round_score(RPSShape self_shape, RPSOutcome outcome) {
+int WarGrey::AoC::RochamboPlane::round_score(RPSShape self_shape, RPSOutcome outcome) {
     int shpscore = shape_score(self_shape);
     int outscore = outcome_score(outcome);
     int score = shpscore + outscore;
@@ -220,7 +204,7 @@ int WarGrey::AoC::RochamboWorld::round_score(RPSShape self_shape, RPSOutcome out
 }
 
 /*************************************************************************************************/
-void WarGrey::AoC::RochamboWorld::load_strategy(const std::string& pathname) {
+void WarGrey::AoC::RochamboPlane::load_strategy(const std::string& pathname) {
     std::ifstream datin(pathname);
     
     this->strategy.clear();

@@ -109,7 +109,7 @@ void WarGrey::AoC::CalorieCountingWorld::load(float width, float height) {
         for (auto elf : this->elves) {
             this->insert(elf);
             elf->switch_to_custome("normal");
-            elf->resize(0.19F);
+            elf->scale(0.19F);
 
             this->move_to(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
         }
@@ -160,7 +160,7 @@ void WarGrey::AoC::CalorieCountingWorld::reflow(float width, float height) {
     }
 }
 
-void WarGrey::AoC::CalorieCountingWorld::update(uint32_t interval, uint32_t count, uint32_t uptime) {
+void WarGrey::AoC::CalorieCountingWorld::update(uint32_t count, uint32_t interval, uint32_t uptime) {
     switch (this->status) {
         case CCStatus::CountOff: {
             if (this->current_elf_idx > 0) {
@@ -362,12 +362,12 @@ void WarGrey::AoC::CalorieCountingWorld::calm_top_elves_down() {
 
 void WarGrey::AoC::CalorieCountingWorld::excite_elf(Elfmon* elf, float scale) {
     elf->switch_to_custome("greeting");
-    elf->resize(scale);
+    elf->scale(scale);
 }
 
 void WarGrey::AoC::CalorieCountingWorld::calm_elf_down(Elfmon* elf, float scale) {
     elf->switch_to_custome("normal");
-    elf->resize(1.0F / scale);
+    elf->scale(1.0F / scale);
     this->move_elf_to_grid(elf);
 }
 
@@ -417,7 +417,6 @@ void WarGrey::AoC::CalorieCountingWorld::load_calories(const std::string& pathna
                     int idx = this->elves.size();
 
                     elf = new Elfmon(elf_name(idx), idx + 1);
-                    elf->enable_resizing(true, MatterAnchor::CB);
                 }
 
                 elf->food_calories.push_back(std::stoi(line));
@@ -434,7 +433,8 @@ void WarGrey::AoC::CalorieCountingWorld::load_calories(const std::string& pathna
 
 /*************************************************************************************************/
 WarGrey::AoC::Elfmon::Elfmon(const char* dirname, int id)
-    : Sprite(digimon_path(dirname, "", "stone/sprite")), id(id) {}
+    : Sprite(digimon_path(dirname, "", "stone/sprite"), MatterAnchor::CB)
+    , id(id) {}
 
 int WarGrey::AoC::Elfmon::calorie_total() {
     return vector_sum(this->food_calories);
