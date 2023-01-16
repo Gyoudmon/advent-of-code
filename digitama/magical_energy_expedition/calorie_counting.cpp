@@ -22,7 +22,7 @@ static const char* top1_desc = "个体食物最富";
 static const char* cmp_alg_desc = "比较法";
 static const char* srt_alg_desc = "排序法";
 
-static const char* topn_unknown_fmt = "前%d热量[%s]: (未知)";
+static const char* topn_unknown_fmt = "前%d热量[%s]";
 static const char* topn_fmt = "前%d热量[%s]: %d";
 
 static const float normal_scale_up = 1.6F;
@@ -79,6 +79,7 @@ void WarGrey::AoC::CalorieCountingWorld::construct(int argc, char* argv[]) {
     }
 
     aoc_fonts_initialize();
+    this->style = make_highlight_dimension_style(answer_fontsize, 6U, 0);
 }
 
 WarGrey::AoC::CalorieCountingWorld::~CalorieCountingWorld() {
@@ -89,9 +90,9 @@ void WarGrey::AoC::CalorieCountingWorld::load(float width, float height) {
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, title_desc));
     this->info_board = this->insert(new Labellet(aoc_font::title, GRAY, " "));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, unknown_fmt, population_desc));
-    this->top1_total = this->insert(new Labellet(aoc_font::text, ROYALBLUE, unknown_fmt, top1_desc));
-    this->topn_total = this->insert(new Labellet(aoc_font::text, FORESTGREEN, topn_unknown_fmt, this->top_count, cmp_alg_desc));
-    this->sorted_total = this->insert(new Labellet(aoc_font::text, SEAGREEN, topn_unknown_fmt, this->top_count, srt_alg_desc));
+    this->top1_total = this->insert(new Dimensionlet(this->style, "cal", top1_desc));
+    this->topn_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, cmp_alg_desc));
+    this->sorted_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, srt_alg_desc));
 
     for (int idx = 0; idx < this->top_count; idx ++) {
         this->dims.push_back(this->insert(new Labellet(aoc_font::dimension, SALMON, " ")));
@@ -187,7 +188,7 @@ void WarGrey::AoC::CalorieCountingWorld::update(uint32_t count, uint32_t interva
                     
                 if (self_cal > this->top_calorie) {
                     this->top_calorie = self_cal;
-                    this->top1_total->set_text(puzzle_fmt, top1_desc, self_cal);
+                    this->top1_total->set_value(self_cal);
                     this->excite_elf(this->elves[this->current_elf_idx], top_scale_up);
                     this->move_to(this->elves[this->current_elf_idx],
                         this->top1_total, MatterAnchor::RB,
@@ -232,7 +233,7 @@ void WarGrey::AoC::CalorieCountingWorld::update(uint32_t count, uint32_t interva
 
                     this->top_elf_indices[replaced_idx] = this->current_elf_idx;
                     this->excite_elf(this->elves[this->current_elf_idx], top_scale_up);
-                    this->topn_total->set_text(topn_fmt, this->top_count, cmp_alg_desc, vector_sum(this->top_calories));
+                    this->topn_total->set_value(vector_sum(this->top_calories));
                 } else {
                     this->move_elf_to_grid(this->elves[this->current_elf_idx]);
                 }
@@ -241,7 +242,7 @@ void WarGrey::AoC::CalorieCountingWorld::update(uint32_t count, uint32_t interva
                 this->current_elf_idx ++;
                 this->random_walk(this->current_elf_idx);
             } else {
-                this->topn_total->set_text(topn_fmt, this->top_count, cmp_alg_desc, vector_sum(this->top_calories));
+                this->topn_total->set_value(vector_sum(this->top_calories));
                 this->calm_top_elves_down();
                 this->on_task_done();
             }
@@ -264,7 +265,7 @@ void WarGrey::AoC::CalorieCountingWorld::update(uint32_t count, uint32_t interva
                         this->swap_elves(this->current_elf_idx, target_elf_idx);
                         this->excite_elf(this->elves[target_elf_idx], top_scale_up);
                         this->calm_elf_down(this->elves[this->current_elf_idx], top_scale_up);
-                        this->sorted_total->set_text(topn_fmt, this->top_count, srt_alg_desc, vector_sum(this->top_calories));
+                        this->sorted_total->set_value(vector_sum(this->top_calories));
                         this->top_calories[this->top_calories.size() - 1] = self_cal;
                     } else {
                         this->move_elf_to_grid(this->elves[this->current_elf_idx]);
@@ -277,7 +278,7 @@ void WarGrey::AoC::CalorieCountingWorld::update(uint32_t count, uint32_t interva
                     this->current_elf_idx = 0;
                 }
             } else {
-                this->sorted_total->set_text(topn_fmt, this->top_count, srt_alg_desc, vector_sum(this->top_calories));
+                this->sorted_total->set_value(vector_sum(this->top_calories));
                 this->calm_top_elves_down();
                 this->on_task_done();
             }

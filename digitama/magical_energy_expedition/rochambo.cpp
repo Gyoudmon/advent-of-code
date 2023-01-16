@@ -87,13 +87,14 @@ static inline RPSShape smart_shape(RPSShape op_play, RPSOutcome outcome) {
 /*************************************************************************************************/
 void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
     this->load_strategy(digimon_path("mee/02.rps.dat"));
+    this->style = make_highlight_dimension_style(answer_fontsize, 6U, 0);
 }
 
 void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->title_let = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, this->name()));
     this->info_board_let = this->insert(new Labellet(aoc_font::text, GRAY, puzzle_fmt, tournament_desc, this->strategy.size()));
-    this->guessed_score_let = this->insert(new Labellet(aoc_font::text, GOLDENROD, unknown_fmt, guessed_strategy_desc));
-    this->designed_score_let = this->insert(new Labellet(aoc_font::text, SPRINGGREEN, unknown_fmt, designed_strategy_desc));
+    this->guessed_score_let = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
+    this->designed_score_let = this->insert(new Dimensionlet(this->style, "", designed_strategy_desc));
     this->outcome_let = this->insert(new Labellet(aoc_font::text, FORESTGREEN, " "));
     this->tux = this->insert(new Sprite(digimon_path("sprite/tux")));
 
@@ -108,7 +109,7 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
 void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     this->move_to(this->info_board_let, width, 0.0F, MatterAnchor::RT);
     this->move_to(this->guessed_score_let, this->title_let, MatterAnchor::LB, MatterAnchor::LT);
-    this->move_to(this->designed_score_let, this->guessed_score_let, MatterAnchor::LB, MatterAnchor::LT);
+    this->move_to(this->designed_score_let, this->guessed_score_let, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->play_rules_let, this->info_board_let, MatterAnchor::RB, MatterAnchor::RT);
     this->move_to(this->outcome_rules_let, this->play_rules_let, MatterAnchor::RB, MatterAnchor::RT);
     this->move_to(this->outcome_let, width * 0.5F, height * 0.25F, MatterAnchor::CC);
@@ -126,7 +127,7 @@ void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint
                 RPSOutcome outcome = round_end(op_play, sf_play);
 
                 this->total_score += this->round_score(sf_play, outcome);
-                this->guessed_score_let->set_text(puzzle_fmt, guessed_strategy_desc, this->total_score);
+                this->guessed_score_let->set_value(this->total_score);
                 
                 this->current_round ++;
                 this->info_board_let->set_text(MatterAnchor::RC, puzzle_fmt, tournament_desc, this->strategy.size() - this->current_round);
@@ -142,7 +143,7 @@ void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint
                 RPSShape sf_play = smart_shape(op_play, outcome);
 
                 this->total_score += this->round_score(sf_play, outcome);
-                this->designed_score_let->set_text(puzzle_fmt, designed_strategy_desc, this->total_score);
+                this->designed_score_let->set_value(this->total_score);
                 
                 this->current_round ++;
                 this->info_board_let->set_text(MatterAnchor::RC, puzzle_fmt, tournament_desc, this->strategy.size() - this->current_round);

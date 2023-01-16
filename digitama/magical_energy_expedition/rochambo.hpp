@@ -31,46 +31,47 @@ namespace WarGrey::AoC {
 
     /******************************************* 声明游戏世界 ******************************************/
     class RochamboPlane : public WarGrey::STEM::Plane {
-        public:
-            RochamboPlane(const char* name) : Plane(name) {}
-            virtual ~RochamboPlane() {}
+    public:
+        RochamboPlane(const char* name) : Plane(name) {}
+        virtual ~RochamboPlane() {}
 
-        public:  // 覆盖游戏基本方法
-            void construct(float width, float height) override;
-            void load(float width, float height) override;
-            void reflow(float width, float height) override;
-            void update(uint32_t count, uint32_t interval, uint32_t uptime) override;
+    public:  // 覆盖游戏基本方法
+        void construct(float width, float height) override;
+        void load(float width, float height) override;
+        void reflow(float width, float height) override;
+        void update(uint32_t count, uint32_t interval, uint32_t uptime) override;
 
-        public:
-            bool can_select(WarGrey::STEM::IMatter* m) override;
-            void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
+    public:
+        bool can_select(WarGrey::STEM::IMatter* m) override;
+        void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
 
-        private:
-            void on_task_start(WarGrey::AoC::RPSStatus status);
-            void on_task_done();
+    private:
+        void on_task_start(WarGrey::AoC::RPSStatus status);
+        void on_task_done();
 
-        private:
-            int round_score(WarGrey::AoC::RPSShape self_shape, WarGrey::AoC::RPSOutcome outcome);
+    private:
+        int round_score(WarGrey::AoC::RPSShape self_shape, WarGrey::AoC::RPSOutcome outcome);
 
-        private:
-            void load_strategy(const std::string& pathname);
+    private:
+        void load_strategy(const std::string& pathname);
 
-        private: // 本游戏世界中的物体
-            WarGrey::STEM::Labellet* title_let;
-            WarGrey::STEM::Labellet* info_board_let;
-            WarGrey::STEM::Labellet* play_rules_let;
-            WarGrey::STEM::Labellet* outcome_rules_let;
-            WarGrey::STEM::Labellet* guessed_score_let;
-            WarGrey::STEM::Labellet* designed_score_let;
-            WarGrey::STEM::Labellet* outcome_let;
-            WarGrey::STEM::Sprite* tux;
-            
-        private:
-            WarGrey::AoC::RPSStatus status;
-            std::vector<std::pair<char, char>> strategy;
-
-        private: // Shared Variables
-            int current_round = 0;
-            int total_score = 0;
+    private: // 本游戏世界中的物体
+        WarGrey::STEM::Labellet* title_let;
+        WarGrey::STEM::Labellet* info_board_let;
+        WarGrey::STEM::Labellet* play_rules_let;
+        WarGrey::STEM::Labellet* outcome_rules_let;
+        WarGrey::STEM::Dimensionlet* guessed_score_let;
+        WarGrey::STEM::Dimensionlet* designed_score_let;
+        WarGrey::STEM::Labellet* outcome_let;
+        WarGrey::STEM::Sprite* tux;
+        
+    private:
+        WarGrey::STEM::DimensionStyle style;
+        WarGrey::AoC::RPSStatus status;
+        std::vector<std::pair<char, char>> strategy;
+        
+    private: // Shared Variables
+        int current_round = 0;
+        int total_score = 0;
     };
 }

@@ -10,16 +10,17 @@ namespace WarGrey::AoC {
 
     /* Fonts */
     static const int title_fontsize = 50;
-    static const int text_fontsize = 36;
+    static const int answer_fontsize = 36;
+    static const int text_fontsize = 32;
     static const int dim_fontsize = 24;
     static const int vertical_fontsize = 18;
 
     class aoc_font {
-        public:
-            static TTF_Font* title;
-            static TTF_Font* text;
-            static TTF_Font* dimension;
-            static TTF_Font* vertical;
+    public:
+        static TTF_Font* title;
+        static TTF_Font* text;
+        static TTF_Font* dimension;
+        static TTF_Font* vertical;
     };
 
     void aoc_fonts_initialize();
