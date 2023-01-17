@@ -1,6 +1,7 @@
 #include "digitama/magical_energy_expedition/calorie_counting.hpp"
 #include "digitama/magical_energy_expedition/rochambo.hpp"
 
+#include "digitama/big_bang/physics/random.hpp"
 #include "digitama/aoc.hpp"
 
 #include <vector>
@@ -10,10 +11,7 @@ using namespace WarGrey::STEM;
 
 /*************************************************************************************************/
 namespace {
-    static const char* task_names[] {
-        "冒\n险\n越\n来\n越\n深\n入\n了",
-        "计点卡路里", "猜拳大赛"
-    };
+    static const char* unknown_task_name = "冒\n险\n越\n来\n越\n深\n入\n了";
 
     class StarFruitlet : public WarGrey::STEM::Sprite {
     public:
@@ -25,45 +23,52 @@ namespace {
 
     class MagicalEnergyExpeditionPlane : public Plane {
     public:
-        MagicalEnergyExpeditionPlane() : Plane("Magical Energy Expedition") {}
+        MagicalEnergyExpeditionPlane(Cosmos* master)
+            : Plane("Magical Energy Expedition")
+            , master(master) {}
 
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
-            this->titlet = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 0, "魔法能量探险"));
+            this->logo = this->insert(new Sprite(digimon_path("logo", ".png")));
+            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 0, "魔法能量探险"));
             this->sledge = this->insert(new Sprite(digimon_path("sprite/sledge", ".png")));
             this->island = this->insert(new Sprite(digimon_path("sprite/island", ".png")));
             this->boat = this->insert(new Sprite(digimon_path("sprite/boat", ".png")));
 
             for (int idx = 0; idx < 25; idx ++) {
+                const char* task_name = this->master->plane_name(idx + 1);
+                
                 this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
-                if (idx < sizeof(task_names) / sizeof(char*) - 1) {
-                    std::string vname = day_to_string(idx + 1) + "\n" + string_to_vertical_name(task_names[idx + 1]);
+                this->stars[idx]->scale(0.05F);
+
+                if (task_name != nullptr) {
+                    std::string vname = day_to_string(idx + 1) + "\n" + string_to_vertical_name(task_name);
             
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, ROYALBLUE, "%s", vname.c_str())));
                     this->stars.back()->switch_to_custome("bright");
                 } else {
-                    std::string vname = day_to_string(idx + 1) + "\n" + task_names[0];
+                    std::string vname = day_to_string(idx + 1) + "\n" + unknown_task_name;
             
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, GAINSBORO, "%s", vname.c_str())));
                     this->stars.back()->switch_to_custome("dark");
                 }
-                this->stars[idx]->scale(0.05F);
             }
 
             this->tux = this->insert(new Sprite(digimon_path("sprite/tux")));
 
-            this->sledge->scale(0.80F);
+            this->sledge->scale(0.75F);
             this->island->scale(1.80F);
         }
         
         void reflow(float width, float height) override {
+            this->move_to(this->title, this->logo, MatterAnchor::RC, MatterAnchor::LC);
             this->move_to(this->sledge, width, 0.0F, MatterAnchor::RT);
             this->move_to(this->island, width * 0.5F, height * 0.5F, MatterAnchor::CC, 0.0F, float(title_fontsize));
             this->move_to(this->boat, this->island, MatterAnchor::LB, MatterAnchor::LB);
             
             for (int idx = 0; idx < this->stars.size(); idx ++) {
                 if (idx == 0) {
-                    this->move_to(this->stars[idx], this->titlet, MatterAnchor::LB, MatterAnchor::LT);
+                    this->move_to(this->stars[idx], this->logo, MatterAnchor::LB, MatterAnchor::LT);
                 } else {
                     this->move_to(this->stars[idx], this->stars[idx - 1], MatterAnchor::RC, MatterAnchor::LC);
                 }
@@ -72,7 +77,7 @@ namespace {
             }
 
             if (this->stars.size() == 0) {
-                this->move_to(this->tux, this->titlet, MatterAnchor::LB, MatterAnchor::LT);
+                this->move_to(this->tux, this->title, MatterAnchor::LB, MatterAnchor::LT);
             } else {
                 this->move_to(this->tux, this->stars[0], MatterAnchor::LB, MatterAnchor::LT);
                 this->tux->set_speed(5.0F, 0.0F);
@@ -100,6 +105,8 @@ namespace {
                     }
                 }
             }
+
+            this->move(this->boat, random_uniform(-1, 2), random_uniform(-1, 1));
         }
 
     public:
@@ -109,19 +116,30 @@ namespace {
 
         void after_select(IMatter* m, bool yes_or_no) override {
             if (yes_or_no) {
+                StarFruitlet* self = dynamic_cast<StarFruitlet*>(m);
 
+                if (self->day < this->master->plane_count()) {
+                    this->master->transfer_to_plane(self->day);
+                }
             }
         }
 
     private:
-        Labellet* titlet;
+        WarGrey::STEM::Sprite* logo;
+        Labellet* title;
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
         Sprite* sledge;
         Sprite* island;
         Sprite* boat;
         Sprite* tux;
+
+    private:
+        Cosmos* master;
     };
+
+    /*************************************************************************************************/
+    enum class CmdlineOps { TopCount, _ };
 
     class MagicalEnergyExpeditionCosmos : public Cosmos {
     public:
@@ -135,11 +153,45 @@ namespace {
 
     public:  // 覆盖游戏基本方法
         void construct(int argc, char* argv[]) override {
+            this->parse_cmdline_options(argc, argv);
             this->set_window_size(1200, 1200);
 
-            this->push_plane(new MagicalEnergyExpeditionPlane());
-            this->push_plane(new RochamboPlane(task_names[2]));
+            this->push_plane(new MagicalEnergyExpeditionPlane(this));
+            this->push_plane(new CalorieCountingPlane(this->top_count));
+            this->push_plane(new RochamboPlane());
         }
+
+    protected:
+        void update(uint32_t count, uint32_t interval, uint32_t uptime) override {
+            if (this->has_current_mission_completed()) {
+                this->transfer_to_plane(0);
+            }
+        }
+
+    private:
+        void parse_cmdline_options(int argc, char* argv[]) {
+            CmdlineOps opt = CmdlineOps::_;
+            std::string datin;
+
+            for (int idx = 1; idx < argc; idx ++) {
+                switch (opt) {
+                    case CmdlineOps::TopCount: {
+                        this->top_count = std::stoi(argv[idx]);
+                        opt = CmdlineOps::_;
+                    }; break;
+                    default: {
+                        if (strncmp("-n", argv[idx], 2) == 0) {
+                            opt = CmdlineOps::TopCount;
+                        } else {
+                            datin = std::string(argv[idx]);
+                        }
+                    }
+                }
+            }
+        }
+
+    private:
+        int top_count = 0;
     };
 }
 

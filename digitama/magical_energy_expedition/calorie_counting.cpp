@@ -16,14 +16,11 @@ using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
 
 /*************************************************************************************************/
-static const char* title_desc = "计点卡路里";
 static const char* population_desc = "精灵伙伴数量";
 static const char* top1_desc = "个体食物最富";
 static const char* cmp_alg_desc = "比较法";
 static const char* srt_alg_desc = "排序法";
-
 static const char* topn_unknown_fmt = "前%d热量[%s]";
-static const char* topn_fmt = "前%d热量[%s]: %d";
 
 static const float normal_scale_up = 1.6F;
 static const float top_scale_up = 2.0F;
@@ -41,53 +38,21 @@ static inline const char* elf_name(int hint) {
 }
 
 /*************************************************************************************************/
-namespace {
-    enum class CmdlineOps { TopCount, _ }; 
-}
-
-/*************************************************************************************************/
-void WarGrey::AoC::CalorieCountingWorld::construct(int argc, char* argv[]) {
-    CmdlineOps opt = CmdlineOps::_;
-    std::string datin;
-
-    for (int idx = 1; idx < argc; idx ++) {
-        switch (opt) {
-            case CmdlineOps::TopCount: {
-                this->top_count = std::stoi(argv[idx]);
-                opt = CmdlineOps::_;
-             }; break;
-            default: {
-                if (strncmp("-n", argv[idx], 2) == 0) {
-                    opt = CmdlineOps::TopCount;
-                } else {
-                    datin = std::string(argv[idx]);
-                }
-            }
-        }
-    }
+void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
+    this->load_calories(digimon_path("mee/01.cc.dat"));
     
-    if (datin.size() > 0) {
-        this->load_calories(datin);
-    } else {
-        this->load_calories(digimon_path("mee/01.cc.dat"));
-    }
-
     if (this->top_count <= 0) {
         this->top_count = 3;
     } else if (this->top_count > this->elves.size()) {
         this->top_count = this->elves.size();
     }
 
-    aoc_fonts_initialize();
     this->style = make_highlight_dimension_style(answer_fontsize, 6U, 0);
 }
 
-WarGrey::AoC::CalorieCountingWorld::~CalorieCountingWorld() {
-    aoc_fonts_destroy();
-}
-
-void WarGrey::AoC::CalorieCountingWorld::load(float width, float height) {
-    this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, title_desc));
+void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
+    this->logo = this->insert(new Sprite(digimon_path("logo", ".png")));
+    this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, this->name()));
     this->info_board = this->insert(new Labellet(aoc_font::title, GRAY, " "));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, unknown_fmt, population_desc));
     this->top1_total = this->insert(new Dimensionlet(this->style, "cal", top1_desc));
@@ -120,12 +85,13 @@ void WarGrey::AoC::CalorieCountingWorld::load(float width, float height) {
     this->on_task_done();
 }
 
-void WarGrey::AoC::CalorieCountingWorld::reflow(float width, float height) {
+void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
+    this->move_to(this->title, this->logo, MatterAnchor::RC, MatterAnchor::LC);
     this->move_to(this->info_board, width, 0.0F, MatterAnchor::RT);
-    this->move_to(this->population, this->title, MatterAnchor::LB, MatterAnchor::LT);
-    this->move_to(this->top1_total, this->population, MatterAnchor::LB, MatterAnchor::LT);
-    this->move_to(this->topn_total, this->top1_total, MatterAnchor::LB, MatterAnchor::LT);
-    this->move_to(this->sorted_total, this->topn_total, MatterAnchor::LB, MatterAnchor::LT);
+    this->move_to(this->population, this->logo, MatterAnchor::LB, MatterAnchor::LT);
+    this->move_to(this->top1_total, this->population, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
+    this->move_to(this->topn_total, this->top1_total, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
+    this->move_to(this->sorted_total, this->topn_total, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     
     if (this->elves.size() > 0) {
         float elf_width, elf_height;
@@ -161,7 +127,7 @@ void WarGrey::AoC::CalorieCountingWorld::reflow(float width, float height) {
     }
 }
 
-void WarGrey::AoC::CalorieCountingWorld::update(uint32_t count, uint32_t interval, uint32_t uptime) {
+void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
     switch (this->status) {
         case CCStatus::CountOff: {
             if (this->current_elf_idx > 0) {
@@ -287,7 +253,7 @@ void WarGrey::AoC::CalorieCountingWorld::update(uint32_t count, uint32_t interva
     }
 }
 
-void WarGrey::AoC::CalorieCountingWorld::after_select(IMatter* m, bool yes_or_no) {
+void WarGrey::AoC::CalorieCountingPlane::after_select(IMatter* m, bool yes_or_no) {
     if (yes_or_no) {
         if (m == this->population) {
             this->current_elf_idx = 0;
@@ -307,6 +273,8 @@ void WarGrey::AoC::CalorieCountingWorld::after_select(IMatter* m, bool yes_or_no
             this->top_calories.clear();
             this->top_elf_indices.clear();
             this->on_task_start(CCStatus::FindMaximumCaloriesViaSorting);
+        } else if (m == this->logo) {
+            this->status = CCStatus::MissionDone;
         } else {
             Elfmon* maybe_elf = dynamic_cast<Elfmon*>(m);
 
@@ -317,11 +285,11 @@ void WarGrey::AoC::CalorieCountingWorld::after_select(IMatter* m, bool yes_or_no
     }
 }
 
-bool WarGrey::AoC::CalorieCountingWorld::can_select(IMatter* m) {
+bool WarGrey::AoC::CalorieCountingPlane::can_select(IMatter* m) {
     return (this->status == CCStatus::TaskDone);
 }
 
-void WarGrey::AoC::CalorieCountingWorld::move_elf_to_grid(Elfmon* elf) {
+void WarGrey::AoC::CalorieCountingPlane::move_elf_to_grid(Elfmon* elf) {
     if (elf->id > 0) {
         int idx = elf->id - 1;
         int c = idx % this->col;
@@ -334,7 +302,7 @@ void WarGrey::AoC::CalorieCountingWorld::move_elf_to_grid(Elfmon* elf) {
     }
 }
 
-void WarGrey::AoC::CalorieCountingWorld::reflow_top_elves() {
+void WarGrey::AoC::CalorieCountingPlane::reflow_top_elves() {
     for (int idx = 0; idx < this->top_elf_indices.size(); idx ++) {
         int top_elf_idx = this->top_elf_indices[idx];
 
@@ -348,7 +316,7 @@ void WarGrey::AoC::CalorieCountingWorld::reflow_top_elves() {
     }
 }
 
-void WarGrey::AoC::CalorieCountingWorld::calm_top_elves_down() {
+void WarGrey::AoC::CalorieCountingPlane::calm_top_elves_down() {
     for (int idx = 0; idx < this->top_elf_indices.size(); idx ++) {
         int top_elf_idx = this->top_elf_indices[idx];
 
@@ -361,33 +329,33 @@ void WarGrey::AoC::CalorieCountingWorld::calm_top_elves_down() {
     }
 }
 
-void WarGrey::AoC::CalorieCountingWorld::excite_elf(Elfmon* elf, float scale) {
+void WarGrey::AoC::CalorieCountingPlane::excite_elf(Elfmon* elf, float scale) {
     elf->switch_to_custome("greeting");
     elf->scale(scale);
 }
 
-void WarGrey::AoC::CalorieCountingWorld::calm_elf_down(Elfmon* elf, float scale) {
+void WarGrey::AoC::CalorieCountingPlane::calm_elf_down(Elfmon* elf, float scale) {
     elf->switch_to_custome("normal");
     elf->scale(1.0F / scale);
     this->move_elf_to_grid(elf);
 }
 
-void WarGrey::AoC::CalorieCountingWorld::random_walk(int start_idx) {
+void WarGrey::AoC::CalorieCountingPlane::random_walk(int start_idx) {
     for (int idx = start_idx; idx < this->elves.size(); idx ++) {
         this->move(this->elves[idx], random_uniform(-micro_pace, micro_pace), random_uniform(-micro_pace, micro_pace));
     }
 }
 
-void WarGrey::AoC::CalorieCountingWorld::on_task_start(CCStatus status) {
+void WarGrey::AoC::CalorieCountingPlane::on_task_start(CCStatus status) {
     this->status = status;
 }
 
-void WarGrey::AoC::CalorieCountingWorld::on_task_done() {
+void WarGrey::AoC::CalorieCountingPlane::on_task_done() {
     this->status = CCStatus::TaskDone;
     this->info_board->set_text(MatterAnchor::RT, " ");
 }
 
-void WarGrey::AoC::CalorieCountingWorld::swap_elves(int self_idx, int target_idx) {
+void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx) {
     Elfmon* self = this->elves[self_idx];
     Elfmon* target = this->elves[target_idx];
     int temp_id = self->id;
@@ -399,8 +367,14 @@ void WarGrey::AoC::CalorieCountingWorld::swap_elves(int self_idx, int target_idx
     this->elves[target_idx] = self;
 }
 
+void WarGrey::AoC::CalorieCountingPlane::on_transfer(IPlane* from, IPlane* to) {
+    if (to == this) {
+        this->status = CCStatus::TaskDone;
+    }
+}
+
 /*************************************************************************************************/
-void WarGrey::AoC::CalorieCountingWorld::load_calories(const std::string& pathname) {
+void WarGrey::AoC::CalorieCountingPlane::load_calories(const std::string& pathname) {
     std::ifstream datin(pathname);
     Elfmon* elf = nullptr;
 

@@ -16,7 +16,6 @@ using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
 
 /*************************************************************************************************/
-static const char* title_desc = "猜拳大赛";
 static const char* tournament_desc = "剩余次数";
 static const char* guessed_strategy_desc = "猜测策略得分";
 static const char* designed_strategy_desc = "精灵策略得分";
@@ -91,6 +90,7 @@ void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
 }
 
 void WarGrey::AoC::RochamboPlane::load(float width, float height) {
+    this->logo = this->insert(new Sprite(digimon_path("logo", ".png")));
     this->title_let = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, this->name()));
     this->info_board_let = this->insert(new Labellet(aoc_font::text, GRAY, puzzle_fmt, tournament_desc, this->strategy.size()));
     this->guessed_score_let = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
@@ -107,8 +107,9 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
 }
 
 void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
+    this->move_to(this->title_let, this->logo, MatterAnchor::RC, MatterAnchor::LC);
     this->move_to(this->info_board_let, width, 0.0F, MatterAnchor::RT);
-    this->move_to(this->guessed_score_let, this->title_let, MatterAnchor::LB, MatterAnchor::LT);
+    this->move_to(this->guessed_score_let, this->logo, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->designed_score_let, this->guessed_score_let, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->play_rules_let, this->info_board_let, MatterAnchor::RB, MatterAnchor::RT);
     this->move_to(this->outcome_rules_let, this->play_rules_let, MatterAnchor::RB, MatterAnchor::RT);
@@ -165,6 +166,8 @@ void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
             this->current_round = 0;
             this->total_score = 0;
             this->on_task_start(RPSStatus::SimulateWithDesignedStrategy);
+        } else if (m == this->logo) {
+            this->status = RPSStatus::MissionDone;
         }
     }
 }
@@ -202,6 +205,12 @@ int WarGrey::AoC::RochamboPlane::round_score(RPSShape self_shape, RPSOutcome out
     }
 
     return score;
+}
+
+void WarGrey::AoC::RochamboPlane::on_transfer(IPlane* from, IPlane* to) {
+    if (to == this) {
+        this->status = RPSStatus::TaskDone;
+    }
 }
 
 /*************************************************************************************************/

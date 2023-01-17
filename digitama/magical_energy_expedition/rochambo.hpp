@@ -9,7 +9,8 @@ namespace WarGrey::AoC {
     enum class RPSStatus {
         SimulateWithGuessedStrategy,
         SimulateWithDesignedStrategy,
-        TaskDone
+        TaskDone,
+        MissionDone
     };
 
     enum class RPSShape {
@@ -32,7 +33,7 @@ namespace WarGrey::AoC {
     /******************************************* 声明游戏世界 ******************************************/
     class RochamboPlane : public WarGrey::STEM::Plane {
     public:
-        RochamboPlane(const char* name) : Plane(name) {}
+        RochamboPlane() : Plane("猜拳大赛") {}
         virtual ~RochamboPlane() {}
 
     public:  // 覆盖游戏基本方法
@@ -45,6 +46,10 @@ namespace WarGrey::AoC {
         bool can_select(WarGrey::STEM::IMatter* m) override;
         void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
 
+    public:
+        bool has_mission_completed() override { return this->status == RPSStatus::MissionDone; }
+        void on_transfer(IPlane* from, IPlane* to) override;
+
     private:
         void on_task_start(WarGrey::AoC::RPSStatus status);
         void on_task_done();
@@ -56,6 +61,7 @@ namespace WarGrey::AoC {
         void load_strategy(const std::string& pathname);
 
     private: // 本游戏世界中的物体
+        WarGrey::STEM::Sprite* logo;
         WarGrey::STEM::Labellet* title_let;
         WarGrey::STEM::Labellet* info_board_let;
         WarGrey::STEM::Labellet* play_rules_let;

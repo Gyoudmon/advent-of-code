@@ -24,17 +24,18 @@ namespace WarGrey::AoC {
         FindMaximumCalorie,
         FindMaximumCalories,
         FindMaximumCaloriesViaSorting,
-        TaskDone
+        TaskDone,
+        MissionDone,
     };
     
     /******************************************* 声明游戏世界 ******************************************/
-    class CalorieCountingWorld : public WarGrey::STEM::World {
+    class CalorieCountingPlane : public WarGrey::STEM::Plane {
     public:
-        CalorieCountingWorld() : World("Calorie Counting", 8) {}
-        virtual ~CalorieCountingWorld();
+        CalorieCountingPlane(int n = 3) : Plane("计点卡路里"), top_count(n) {}
+        virtual ~CalorieCountingPlane() {}
 
     public:  // 覆盖游戏基本方法
-        void construct(int argc, char* argv[]) override;
+        void construct(float width, float height) override;
         void load(float width, float height) override;
         void reflow(float width, float height) override;
         void update(uint32_t count, uint32_t interval, uint32_t uptime) override;
@@ -42,6 +43,10 @@ namespace WarGrey::AoC {
     public:
         bool can_select(WarGrey::STEM::IMatter* m) override;
         void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
+
+    public:
+        bool has_mission_completed() override { return this->status == CCStatus::MissionDone; }
+        void on_transfer(WarGrey::STEM::IPlane* from, WarGrey::STEM::IPlane* to) override;
 
     private:
         void on_task_start(WarGrey::AoC::CCStatus status);
@@ -60,6 +65,7 @@ namespace WarGrey::AoC {
         void load_calories(const std::string& pathname);
 
     private: // 本游戏世界中的物体
+        WarGrey::STEM::Sprite* logo;
         WarGrey::STEM::Labellet* title;
         WarGrey::STEM::Labellet* population;
         WarGrey::STEM::Dimensionlet* top1_total;
