@@ -56,7 +56,7 @@ namespace {
 
             this->tux = this->insert(new Sprite(digimon_path("sprite/tux")));
 
-            this->sledge->scale(0.75F);
+            this->sledge->scale(0.80F);
             this->island->scale(1.80F);
         }
         
