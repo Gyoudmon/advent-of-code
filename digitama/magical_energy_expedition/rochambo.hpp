@@ -9,6 +9,7 @@ namespace WarGrey::AoC {
     enum class RPSStatus {
         SimulateWithGuessedStrategy,
         SimulateWithDesignedStrategy,
+        SimulateWithRandomStrategy,
         TaskDone,
         MissionDone
     };
@@ -48,28 +49,35 @@ namespace WarGrey::AoC {
 
     public:
         bool has_mission_completed() override { return this->status == RPSStatus::MissionDone; }
-        void on_transfer(IPlane* from, IPlane* to) override;
+        void on_enter(IPlane* from) override;
 
     private:
         void on_task_start(WarGrey::AoC::RPSStatus status);
         void on_task_done();
 
     private:
-        int round_score(WarGrey::AoC::RPSShape self_shape, WarGrey::AoC::RPSOutcome outcome);
+        int round_score(WarGrey::AoC::RPSShape op_play, WarGrey::AoC::RPSShape sf_play, WarGrey::AoC::RPSOutcome outcome);
+        void tux_step(float x);
+        void switch_play_custome(WarGrey::STEM::Sprite* target, WarGrey::AoC::RPSShape play);
 
     private:
         void load_strategy(const std::string& pathname);
 
     private: // 本游戏世界中的物体
         WarGrey::STEM::Sprite* logo;
-        WarGrey::STEM::Labellet* title_let;
-        WarGrey::STEM::Labellet* info_board_let;
-        WarGrey::STEM::Labellet* play_rules_let;
-        WarGrey::STEM::Labellet* outcome_rules_let;
-        WarGrey::STEM::Dimensionlet* guessed_score_let;
-        WarGrey::STEM::Dimensionlet* designed_score_let;
-        WarGrey::STEM::Labellet* outcome_let;
+        WarGrey::STEM::Labellet* titlet;
+        WarGrey::STEM::Dimensionlet* guessed_score;
+        WarGrey::STEM::Dimensionlet* designed_score;
+        WarGrey::STEM::Dimensionlet* random_score;
+        WarGrey::STEM::Labellet* outcome_desc;
         WarGrey::STEM::Sprite* tux;
+        WarGrey::STEM::SpriteGridSheet* snack;
+        WarGrey::STEM::Sprite* op_play;
+        WarGrey::STEM::Sprite* sf_play;
+        WarGrey::STEM::Sprite* play_icons[3];
+        WarGrey::STEM::Labellet* play_scores[3];
+        WarGrey::STEM::Sprite* outcome_icons[3];
+        WarGrey::STEM::Labellet* outcome_scores[3];
         
     private:
         WarGrey::STEM::DimensionStyle style;
@@ -79,5 +87,13 @@ namespace WarGrey::AoC {
     private: // Shared Variables
         int current_round = 0;
         int total_score = 0;
+        float tux_distance;
+        float tux_x0;
+        float tux_y0;
+
+    private: // for Progress-bar
+        float distance_score;
+        int guessed_final_score;
+        int designed_final_score;
     };
 }

@@ -46,7 +46,7 @@ namespace WarGrey::AoC {
 
     public:
         bool has_mission_completed() override { return this->status == CCStatus::MissionDone; }
-        void on_transfer(WarGrey::STEM::IPlane* from, WarGrey::STEM::IPlane* to) override;
+        void on_enter(WarGrey::STEM::IPlane* from) override;
 
     private:
         void on_task_start(WarGrey::AoC::CCStatus status);
@@ -72,6 +72,7 @@ namespace WarGrey::AoC {
         WarGrey::STEM::Dimensionlet* topn_total;
         WarGrey::STEM::Dimensionlet* sorted_total;
         WarGrey::STEM::Labellet* info_board;
+        WarGrey::STEM::SpriteGridSheet* snack;
         std::vector<WarGrey::AoC::Elfmon*> elves;
         std::vector<WarGrey::STEM::Labellet*> dims;
         

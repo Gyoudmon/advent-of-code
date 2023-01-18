@@ -17,7 +17,7 @@ using namespace WarGrey::AoC;
 
 /*************************************************************************************************/
 static const char* population_desc = "精灵伙伴数量";
-static const char* top1_desc = "个体食物最富";
+static const char* top1_desc = "个体食物最多";
 static const char* cmp_alg_desc = "比较法";
 static const char* srt_alg_desc = "排序法";
 static const char* topn_unknown_fmt = "前%d热量[%s]";
@@ -58,7 +58,11 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->top1_total = this->insert(new Dimensionlet(this->style, "cal", top1_desc));
     this->topn_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, cmp_alg_desc));
     this->sorted_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, srt_alg_desc));
-
+    
+    this->snack = this->insert(new SpriteGridSheet(digimon_path("sprite/snacks", ".png"), 3, 4, 2, 2));
+    this->snack->scale(0.30F);
+    this->snack->set_fps(2);
+    
     for (int idx = 0; idx < this->top_count; idx ++) {
         this->dims.push_back(this->insert(new Labellet(aoc_font::dimension, SALMON, " ")));
     }
@@ -81,13 +85,12 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
         }
         this->end_update_sequence();
     }
-
-    this->on_task_done();
 }
 
 void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
     this->move_to(this->title, this->logo, MatterAnchor::RC, MatterAnchor::LC);
-    this->move_to(this->info_board, width, 0.0F, MatterAnchor::RT);
+    this->move_to(this->snack, width, 0.0F, MatterAnchor::RT);
+    this->move_to(this->info_board, this->snack, MatterAnchor::LC, MatterAnchor::RC);
     this->move_to(this->population, this->logo, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->top1_total, this->population, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->topn_total, this->top1_total, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
@@ -125,6 +128,11 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
             }
         }
     }
+}
+
+void WarGrey::AoC::CalorieCountingPlane::on_enter(IPlane* from) {
+    this->on_task_done();
+    this->snack->play("");
 }
 
 void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
@@ -365,12 +373,6 @@ void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx
 
     this->elves[self_idx] = target;
     this->elves[target_idx] = self;
-}
-
-void WarGrey::AoC::CalorieCountingPlane::on_transfer(IPlane* from, IPlane* to) {
-    if (to == this) {
-        this->status = CCStatus::TaskDone;
-    }
 }
 
 /*************************************************************************************************/
