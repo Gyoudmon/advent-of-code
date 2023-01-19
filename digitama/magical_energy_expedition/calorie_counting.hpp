@@ -1,14 +1,15 @@
 #pragma once // 确保只被 include 一次
 
 #include "../big_bang/game.hpp"
+#include "../sprite/ulpc.hpp"
 
 #include <vector>
 
 namespace WarGrey::AoC {
     /******************************************* 声明游戏精灵 ******************************************/
-    class Elfmon : public WarGrey::STEM::Sprite {
+    class Elfmon : public WarGrey::AoC::ElfSheet {
     public:
-        Elfmon(const char* dirname, int id);
+        Elfmon(const char* name, int id);
 
     public:
         int calorie_total();
@@ -56,7 +57,7 @@ namespace WarGrey::AoC {
         void move_elf_to_grid(WarGrey::AoC::Elfmon* elf);
         void excite_elf(WarGrey::AoC::Elfmon* elf, float scale);
         void reflow_top_elves();
-        void calm_elf_down(WarGrey::AoC::Elfmon* elf, float scale);
+        void calm_elf_down(WarGrey::AoC::Elfmon* elf);
         void calm_top_elves_down();
         void random_walk(int start_idx);
         void swap_elves(int self_idx, int target_idx);

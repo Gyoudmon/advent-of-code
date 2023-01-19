@@ -24,16 +24,17 @@ static const char* topn_unknown_fmt = "前%d热量[%s]";
 
 static const float normal_scale_up = 1.6F;
 static const float top_scale_up = 2.0F;
+static const float elf_scale = 0.64F;
 
 static const int micro_pace = 3;
-static const int elf_type_count = 3;
+static const int elf_type_count = 4;
 
 static inline const char* elf_name(int hint) {
     switch ((hint < elf_type_count) ? hint : random_uniform(0, elf_type_count - 1)) {
-    case 1: return "fairy"; break;
-    case 2: return "goblin"; break;
-    case 3: return "mermaid"; break;
-    default: return "elf";
+    case 1: return "female"; break;
+    case 2: return "dress"; break;
+    case 3: return "goblin"; break;
+    default: return "male";
     }
 }
 
@@ -59,7 +60,7 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->topn_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, cmp_alg_desc));
     this->sorted_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, srt_alg_desc));
     
-    this->snack = this->insert(new SpriteGridSheet(digimon_path("sprite/snacks", ".png"), 3, 4, 2, 2));
+    this->snack = this->insert(new SpriteGridSheet(digimon_path("spritesheet/snacks", ".png"), 3, 4, 2, 2));
     this->snack->scale(0.30F);
     this->snack->set_fps(2);
     
@@ -78,8 +79,9 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
         this->begin_update_sequence();
         for (auto elf : this->elves) {
             this->insert(elf);
-            elf->switch_to_custome("normal");
-            elf->scale(0.19F);
+            elf->set_fps(8);
+            elf->play("lwalk");
+            elf->scale(elf_scale);
 
             this->move_to(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
         }
@@ -104,10 +106,10 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
         this->title->feed_extent(0.0F, 0.0F, nullptr, &title_height);
         this->topn_total->feed_extent(0.0F, 0.0F, &lbl_width, &lbl_height);
         
-        this->cell_width = elf_width * 1.618F;
-        this->cell_height = elf_height * 1.618F;
+        this->cell_width = elf_width;
+        this->cell_height = elf_height;
         this->grid_xoff = lbl_width + float(text_fontsize);
-        this->grid_yoff = title_height + lbl_height * 0.0F;
+        this->grid_yoff = title_height + lbl_height * 1.0F;
 
         this->col = int(flfloor((width - this->grid_xoff) / this->cell_width)) - 1;
         this->row = int(flfloor((height - this->grid_yoff) / this->cell_height));
@@ -139,7 +141,7 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
     switch (this->status) {
         case CCStatus::CountOff: {
             if (this->current_elf_idx > 0) {
-                this->calm_elf_down(this->elves[this->current_elf_idx - 1], normal_scale_up);
+                this->calm_elf_down(this->elves[this->current_elf_idx - 1]);
             }
                 
             if (this->current_elf_idx < this->elves.size()) {
@@ -164,28 +166,22 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
                     this->top_calorie = self_cal;
                     this->top1_total->set_value(self_cal);
                     this->excite_elf(this->elves[this->current_elf_idx], top_scale_up);
-                    this->move_to(this->elves[this->current_elf_idx],
-                        this->top1_total, MatterAnchor::RB,
-                        MatterAnchor::LB, float(dim_fontsize) * 0.618F);
+                    this->move_to(this->elves[this->current_elf_idx], this->top1_total, MatterAnchor::RB, MatterAnchor::LB);
                     
                     if (this->prev_top_elf_id >= 0) {
-                        this->calm_elf_down(this->elves[this->prev_top_elf_id], top_scale_up);
+                        this->calm_elf_down(this->elves[this->prev_top_elf_id]);
                     }
 
                     this->prev_top_elf_id = this->current_elf_idx;
                 } else {
                     this->move_elf_to_grid(this->elves[this->current_elf_idx]);
-
-                    if (this->prev_top_elf_id >= 0) {
-                        this->elves[this->prev_top_elf_id]->switch_to_next_custome();
-                    }
                 }
 
                 this->current_elf_idx ++;
                 this->random_walk(this->current_elf_idx);
             } else {
                 if (this->prev_top_elf_id >= 0) {
-                    this->calm_elf_down(this->elves[this->prev_top_elf_id], top_scale_up);
+                    this->calm_elf_down(this->elves[this->prev_top_elf_id]);
                 }
 
                 this->on_task_done();
@@ -202,7 +198,7 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
                     int replaced_elf_idx = this->top_elf_indices[replaced_idx];
 
                     if (replaced_elf_idx >= 0) {
-                        this->calm_elf_down(this->elves[replaced_elf_idx], top_scale_up);
+                        this->calm_elf_down(this->elves[replaced_elf_idx]);
                     }
 
                     this->top_elf_indices[replaced_idx] = this->current_elf_idx;
@@ -238,7 +234,7 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
 
                         this->swap_elves(this->current_elf_idx, target_elf_idx);
                         this->excite_elf(this->elves[target_elf_idx], top_scale_up);
-                        this->calm_elf_down(this->elves[this->current_elf_idx], top_scale_up);
+                        this->calm_elf_down(this->elves[this->current_elf_idx]);
                         this->sorted_total->set_value(vector_sum(this->top_calories));
                         this->top_calories[this->top_calories.size() - 1] = self_cal;
                     } else {
@@ -315,7 +311,6 @@ void WarGrey::AoC::CalorieCountingPlane::reflow_top_elves() {
         int top_elf_idx = this->top_elf_indices[idx];
 
         if (top_elf_idx >= 0) {
-            this->elves[top_elf_idx]->switch_to_next_custome();
             this->move_to(this->elves[top_elf_idx], this->dims[idx], MatterAnchor::CT, MatterAnchor::CB);
             this->dims[idx]->set_text("%d", this->elves[top_elf_idx]->calorie_total());
         } else {
@@ -329,7 +324,7 @@ void WarGrey::AoC::CalorieCountingPlane::calm_top_elves_down() {
         int top_elf_idx = this->top_elf_indices[idx];
 
         if (top_elf_idx >= 0) {
-            this->calm_elf_down(this->elves[top_elf_idx], top_scale_up);
+            this->calm_elf_down(this->elves[top_elf_idx]);
             this->dims[idx]->set_text(" ");
         } else {
             break;
@@ -338,13 +333,13 @@ void WarGrey::AoC::CalorieCountingPlane::calm_top_elves_down() {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::excite_elf(Elfmon* elf, float scale) {
-    elf->switch_to_custome("greeting");
+    elf->play("dspellcast");
     elf->scale(scale);
 }
 
-void WarGrey::AoC::CalorieCountingPlane::calm_elf_down(Elfmon* elf, float scale) {
-    elf->switch_to_custome("normal");
-    elf->scale(1.0F / scale);
+void WarGrey::AoC::CalorieCountingPlane::calm_elf_down(Elfmon* elf) {
+    elf->play("lwalk");
+    elf->scale_to(elf_scale);
     this->move_elf_to_grid(elf);
 }
 
@@ -366,10 +361,10 @@ void WarGrey::AoC::CalorieCountingPlane::on_task_done() {
 void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx) {
     Elfmon* self = this->elves[self_idx];
     Elfmon* target = this->elves[target_idx];
-    int temp_id = self->id;
+    int self_id = self->id;
 
     self->id = target->id;
-    target->id = temp_id;
+    target->id = self_id;
 
     this->elves[self_idx] = target;
     this->elves[target_idx] = self;
@@ -409,9 +404,7 @@ void WarGrey::AoC::CalorieCountingPlane::load_calories(const std::string& pathna
 }
 
 /*************************************************************************************************/
-WarGrey::AoC::Elfmon::Elfmon(const char* dirname, int id)
-    : Sprite(digimon_path(dirname, "", "stone/sprite"), MatterAnchor::CB)
-    , id(id) {}
+WarGrey::AoC::Elfmon::Elfmon(const char* name, int id) : ElfSheet(name), id(id) {}
 
 int WarGrey::AoC::Elfmon::calorie_total() {
     return vector_sum(this->food_calories);

@@ -2,6 +2,7 @@
 #include "digitama/magical_energy_expedition/rochambo.hpp"
 
 #include "digitama/big_bang/physics/random.hpp"
+#include "digitama/sprite/ulpc.hpp"
 #include "digitama/aoc.hpp"
 
 #include <vector>
@@ -31,9 +32,9 @@ namespace {
         void load(float width, float height) override {
             this->logo = this->insert(new Sprite(digimon_path("logo", ".png")));
             this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 0, "魔法能量探险"));
-            this->sledge = this->insert(new Sprite(digimon_path("sprite/sledge", ".png")));
-            this->island = this->insert(new Sprite(digimon_path("sprite/island", ".png")));
-            this->boat = this->insert(new Sprite(digimon_path("sprite/boat", ".png")));
+            this->sledge = this->insert(new Sprite(digimon_path("sledge", ".png")));
+            this->island = this->insert(new Sprite(digimon_path("island", ".png")));
+            this->boat = this->insert(new Sprite(digimon_path("boat", ".png")));
 
             for (int idx = 0; idx < 25; idx ++) {
                 const char* task_name = this->master->plane_name(idx + 1);
@@ -55,6 +56,10 @@ namespace {
             }
 
             this->tux = this->insert(new Sprite(digimon_path("sprite/tux")));
+            this->elves[0] = this->insert(new ElfSheet("male"));
+            this->elves[1] = this->insert(new ElfSheet("dress"));
+            this->elves[2] = this->insert(new ElfSheet("goblin"));
+            this->elves[3] = this->insert(new ElfSheet("female"));
 
             this->sledge->scale(0.80F);
             this->island->scale(1.80F);
@@ -65,6 +70,10 @@ namespace {
             this->move_to(this->sledge, width, 0.0F, MatterAnchor::RT);
             this->move_to(this->island, width * 0.5F, height * 0.5F, MatterAnchor::CC, 0.0F, float(title_fontsize));
             this->move_to(this->boat, this->island, MatterAnchor::LB, MatterAnchor::LB);
+            this->move_to(this->elves[0], this->boat, MatterAnchor::LC, MatterAnchor::RC);
+            this->move_to(this->elves[1], this->elves[0], MatterAnchor::LC, MatterAnchor::RC);
+            this->move_to(this->elves[2], this->sledge, MatterAnchor::RB, MatterAnchor::RT);
+            this->move_to(this->elves[3], this->elves[2], MatterAnchor::LC, MatterAnchor::RC);
             
             for (int idx = 0; idx < this->stars.size(); idx ++) {
                 if (idx == 0) {
@@ -102,27 +111,47 @@ namespace {
                 }
             }
 
-            this->move(this->boat, random_uniform(-1, 2), random_uniform(-1, 1));
+            /* move the expedition team */ {
+                float dx = float(random_uniform(-1, 2));
+                float dy = float(random_uniform(-1, 1));
+
+                this->move(this->boat, dx, dy);
+                this->move(this->elves[0], dx, dy);
+                this->move(this->elves[1], dx, dy);
+            }
         }
 
         void on_enter(IPlane* from) override {
-            this->tux->wear("santa_hat");
             this->tux->play("walk");
             this->tux->set_border_strategy(BorderStrategy::IGNORE);
-            this->tux->set_speed(5.0F, 0.0F);
+            this->tux->set_speed(4.0F, 0.0F);
+
+            this->elves[0]->play("rwalk");
+            this->elves[1]->play("rwalk");
+            this->elves[2]->play("lwalk");
+            this->elves[3]->play("lwalk");
         }
 
     public:
         bool can_select(WarGrey::STEM::IMatter* m) override {
-            return (dynamic_cast<StarFruitlet*>(m) != nullptr);
+            return (dynamic_cast<StarFruitlet*>(m) != nullptr)
+                    || (m == this->tux);
         }
 
         void after_select(IMatter* m, bool yes_or_no) override {
             if (yes_or_no) {
-                StarFruitlet* self = dynamic_cast<StarFruitlet*>(m);
+                if (m == this->tux) {
+                    if (this->tux->is_wearing()) {
+                        this->tux->take_off();
+                    } else {
+                        this->tux->wear("santa_hat");
+                    }
+                } else {
+                    StarFruitlet* self = dynamic_cast<StarFruitlet*>(m);
 
-                if (self->day < this->master->plane_count()) {
-                    this->master->transfer_to_plane(self->day);
+                    if (self->day < this->master->plane_count()) {
+                        this->master->transfer_to_plane(self->day);
+                    }
                 }
             }
         }
@@ -132,11 +161,12 @@ namespace {
         Labellet* title;
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
+        Sprite* tux;
+        ElfSheet* elves[4];
         Sprite* sledge;
         Sprite* island;
         Sprite* boat;
-        Sprite* tux;
-
+        
     private:
         Cosmos* master;
     };

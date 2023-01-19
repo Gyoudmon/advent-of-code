@@ -101,7 +101,7 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->guessed_score = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
     this->designed_score = this->insert(new Dimensionlet(this->style, "", designed_strategy_desc));
     this->random_score = this->insert(new Dimensionlet(this->style, "", random_strategy_desc));
-    this->snack = this->insert(new SpriteGridSheet(digimon_path("sprite/snacks", ".png"), 3, 4, 2, 2));
+    this->snack = this->insert(new SpriteGridSheet(digimon_path("spritesheet/snacks", ".png"), 3, 4, 2, 2));
     this->tux = this->insert(new Sprite(digimon_path("sprite/tux")));
     
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
