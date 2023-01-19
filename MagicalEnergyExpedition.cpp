@@ -80,11 +80,7 @@ namespace {
                 this->move_to(this->tux, this->title, MatterAnchor::LB, MatterAnchor::LT);
             } else {
                 this->move_to(this->tux, this->stars[0], MatterAnchor::LB, MatterAnchor::LT);
-                this->tux->set_speed(5.0F, 0.0F);
-                this->tux->set_border_strategy(BorderStrategy::IGNORE);
             }
-
-            this->tux->play("walk");
         }
 
         void update(uint32_t count, uint32_t interval, uint32_t uptime) override {
@@ -107,6 +103,13 @@ namespace {
             }
 
             this->move(this->boat, random_uniform(-1, 2), random_uniform(-1, 1));
+        }
+
+        void on_enter(IPlane* from) override {
+            this->tux->wear("santa_hat");
+            this->tux->play("walk");
+            this->tux->set_border_strategy(BorderStrategy::IGNORE);
+            this->tux->set_speed(5.0F, 0.0F);
         }
 
     public:
