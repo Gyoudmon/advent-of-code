@@ -52,7 +52,7 @@ void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
-    this->logo = this->insert(new Sprite(digimon_path("logo", ".png")));
+    this->logo = this->insert(new Sprite("logo.png"));
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, this->name()));
     this->info_board = this->insert(new Labellet(aoc_font::title, GRAY, " "));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, unknown_fmt, population_desc));
@@ -60,7 +60,7 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->topn_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, cmp_alg_desc));
     this->sorted_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, srt_alg_desc));
     
-    this->snack = this->insert(new SpriteGridSheet(digimon_path("spritesheet/snacks", ".png"), 3, 4, 2, 2));
+    this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
     this->snack->scale(0.30F);
     this->snack->set_fps(2);
     
@@ -235,8 +235,8 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
                         this->swap_elves(this->current_elf_idx, target_elf_idx);
                         this->excite_elf(this->elves[target_elf_idx], top_scale_up);
                         this->calm_elf_down(this->elves[this->current_elf_idx]);
-                        this->sorted_total->set_value(vector_sum(this->top_calories));
                         this->top_calories[this->top_calories.size() - 1] = self_cal;
+                        this->sorted_total->set_value(vector_sum(this->top_calories));
                     } else {
                         this->move_elf_to_grid(this->elves[this->current_elf_idx]);
                     }

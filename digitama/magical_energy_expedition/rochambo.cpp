@@ -96,35 +96,34 @@ void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
 }
 
 void WarGrey::AoC::RochamboPlane::load(float width, float height) {
-    this->logo = this->insert(new Sprite(digimon_path("logo", ".png")));
+    this->logo = this->insert(new Sprite("logo.png"));
     this->titlet = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, this->name()));
     this->guessed_score = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
     this->designed_score = this->insert(new Dimensionlet(this->style, "", designed_strategy_desc));
     this->random_score = this->insert(new Dimensionlet(this->style, "", random_strategy_desc));
-    this->snack = this->insert(new SpriteGridSheet(digimon_path("spritesheet/snacks", ".png"), 3, 4, 2, 2));
-    this->tux = this->insert(new Sprite(digimon_path("sprite/tux")));
+    this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
+    this->tux = this->insert(new Sprite("sprite/tux"));
     
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
         this->play_scores[idx] = this->insert(new Labellet(aoc_font::text, PURPLE, rule_score_fmt, r_play_points[idx]));
-        this->play_icons[idx] = this->insert(new Sprite(digimon_path("sprite/rochambo")));
-        this->play_icons[idx]->switch_to_custome(r_play_names[idx]);
+        this->play_icons[idx] = this->insert(new Sprite("sprite/rochambo"));
+        this->play_icons[idx]->switch_to_costume(r_play_names[idx]);
         this->play_icons[idx]->scale(0.36F);
     }
 
     for (int idx = 0; idx < sizeof(this->outcome_icons) / sizeof(Sprite*); idx ++) {
         this->outcome_scores[idx] = this->insert(new Labellet(aoc_font::text, ROYALBLUE, rule_score_fmt, r_outcome_points[idx]));
-        this->outcome_icons[idx] = this->insert(new Sprite(digimon_path("sprite/tux")));
-        this->outcome_icons[idx]->switch_to_custome(r_outcome_names[idx]);
+        this->outcome_icons[idx] = this->insert(new Sprite("sprite/tux"));
+        this->outcome_icons[idx]->switch_to_costume(r_outcome_names[idx]);
         this->outcome_icons[idx]->scale(0.618F);
     }
 
-    this->change_mode(1);
+    this->shift_to_mode(1);
     this->outcome_desc = this->insert(new Labellet(aoc_font::text, FORESTGREEN, " "));
-    this->op_play = this->insert(new Sprite(digimon_path("sprite/rochambo")));
-    this->sf_play = this->insert(new Sprite(digimon_path("sprite/rochambo")));
+    this->op_play = this->insert(new Sprite("sprite/rochambo"));
+    this->sf_play = this->insert(new Sprite("sprite/rochambo"));
     this->op_play->scale(+0.618F, 0.618F);
     this->sf_play->scale(-0.618F, 0.618F);
-    this->change_mode(0);
 }
 
 void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
@@ -249,14 +248,14 @@ bool WarGrey::AoC::RochamboPlane::can_select(IMatter* m) {
 
 void WarGrey::AoC::RochamboPlane::on_task_start(RPSStatus status) {
     this->status = status;
-    this->change_mode(1);
+    this->shift_to_mode(1);
     this->move_to(this->tux, this->tux_x0, this->tux_y0, MatterAnchor::CC);
     this->tux_step(0.0F);
 }
 
 void WarGrey::AoC::RochamboPlane::on_task_done() {
     this->status = RPSStatus::TaskDone;
-    this->change_mode(0);
+    this->shift_to_mode(0);
 }
 
 int WarGrey::AoC::RochamboPlane::round_score(RPSShape op_shape, RPSShape sf_shape, RPSOutcome outcome) {
@@ -267,23 +266,23 @@ int WarGrey::AoC::RochamboPlane::round_score(RPSShape op_shape, RPSShape sf_shap
     switch (outcome) {
         case RPSOutcome::Lose: {
             this->outcome_desc->set_text_color(CRIMSON);
-            this->tux->switch_to_custome(r_outcome_names[2]);
+            this->tux->switch_to_costume(r_outcome_names[2]);
             this->outcome_desc->set_text(MatterAnchor::CC, outcome_fmt, shpscore, outscore);
         }; break;
         case RPSOutcome::Win: {
             this->outcome_desc->set_text_color(FORESTGREEN);
-            this->tux->switch_to_custome(r_outcome_names[0]);
+            this->tux->switch_to_costume(r_outcome_names[0]);
             this->outcome_desc->set_text(MatterAnchor::CC, outcome_fmt, shpscore, outscore);
         }; break;
         case RPSOutcome::Draw: {
             this->outcome_desc->set_text_color(DARKORANGE);
-            this->tux->switch_to_custome(r_outcome_names[1]);
+            this->tux->switch_to_costume(r_outcome_names[1]);
             this->outcome_desc->set_text(MatterAnchor::CC, outcome_fmt, shpscore, outscore);
         }; break;
     }
 
-    this->switch_play_custome(this->op_play, op_shape);
-    this->switch_play_custome(this->sf_play, sf_shape);
+    this->switch_play_costume(this->op_play, op_shape);
+    this->switch_play_costume(this->sf_play, sf_shape);
     this->tux_step(float(score) / this->distance_score * this->tux_distance);
 
     return score;
@@ -293,14 +292,14 @@ void WarGrey::AoC::RochamboPlane::tux_step(float dx) {
     this->move(this->tux, dx, 0.0F);
     this->move_to(this->op_play, this->tux, MatterAnchor::LT, MatterAnchor::RB);
     this->move_to(this->sf_play, this->tux, MatterAnchor::RT, MatterAnchor::LB);
-    this->move_to(this->outcome_desc, this->tux, MatterAnchor::CB, MatterAnchor::CT);
+    this->move_to(this->outcome_desc, this->tux, MatterAnchor::CT, MatterAnchor::CB);
 }
 
-void WarGrey::AoC::RochamboPlane::switch_play_custome(Sprite* target, RPSShape play) {
+void WarGrey::AoC::RochamboPlane::switch_play_costume(Sprite* target, RPSShape play) {
     switch (play) {
-        case RPSShape::Rock: target->switch_to_custome("rock"); break;
-        case RPSShape::Paper: target->switch_to_custome("paper"); break;
-        case RPSShape::Scissor: target->switch_to_custome("scissor"); break;
+        case RPSShape::Rock: target->switch_to_costume("rock"); break;
+        case RPSShape::Paper: target->switch_to_costume("paper"); break;
+        case RPSShape::Scissor: target->switch_to_costume("scissor"); break;
         default: ;
     }
 }

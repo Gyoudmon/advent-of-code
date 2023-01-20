@@ -16,7 +16,7 @@ namespace {
 
     class StarFruitlet : public WarGrey::STEM::Sprite {
     public:
-        StarFruitlet(int day) : Sprite(digimon_path("sprite/star")), day(day) {}
+        StarFruitlet(int day) : Sprite("sprite/star"), day(day) {}
         
     public:
         int day;
@@ -30,11 +30,11 @@ namespace {
 
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
-            this->logo = this->insert(new Sprite(digimon_path("logo", ".png")));
+            this->logo = this->insert(new Sprite("logo.png"));
             this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 0, "魔法能量探险"));
-            this->sledge = this->insert(new Sprite(digimon_path("sledge", ".png")));
-            this->island = this->insert(new Sprite(digimon_path("island", ".png")));
-            this->boat = this->insert(new Sprite(digimon_path("boat", ".png")));
+            this->sledge = this->insert(new Sprite("sledge.png"));
+            this->island = this->insert(new Sprite("island.png"));
+            this->boat = this->insert(new Sprite("boat.png"));
 
             for (int idx = 0; idx < 25; idx ++) {
                 const char* task_name = this->master->plane_name(idx + 1);
@@ -46,16 +46,16 @@ namespace {
                     std::string vname = day_to_string(idx + 1) + "\n" + string_to_vertical_name(task_name);
             
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, ROYALBLUE, "%s", vname.c_str())));
-                    this->stars.back()->switch_to_custome("bright");
+                    this->stars.back()->switch_to_costume("bright");
                 } else {
                     std::string vname = day_to_string(idx + 1) + "\n" + unknown_task_name;
             
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, GAINSBORO, "%s", vname.c_str())));
-                    this->stars.back()->switch_to_custome("dark");
+                    this->stars.back()->switch_to_costume("dark");
                 }
             }
 
-            this->tux = this->insert(new Sprite(digimon_path("sprite/tux")));
+            this->tux = this->insert(new Sprite("sprite/tux"));
             this->elves[0] = this->insert(new ElfSheet("male"));
             this->elves[1] = this->insert(new ElfSheet("dress"));
             this->elves[2] = this->insert(new ElfSheet("goblin"));
@@ -178,9 +178,11 @@ namespace {
     public:
         MagicalEnergyExpeditionCosmos() : Cosmos(24) {
             aoc_fonts_initialize();
+            imgdb_setup(__ZONE__ "stone");
         }
 
         virtual ~MagicalEnergyExpeditionCosmos() {
+            imgdb_teardown();
             aoc_fonts_destroy();
         }
 

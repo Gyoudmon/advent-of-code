@@ -58,7 +58,7 @@ namespace WarGrey::AoC {
     private:
         int round_score(WarGrey::AoC::RPSShape op_play, WarGrey::AoC::RPSShape sf_play, WarGrey::AoC::RPSOutcome outcome);
         void tux_step(float x);
-        void switch_play_custome(WarGrey::STEM::Sprite* target, WarGrey::AoC::RPSShape play);
+        void switch_play_costume(WarGrey::STEM::Sprite* target, WarGrey::AoC::RPSShape play);
 
     private:
         void load_strategy(const std::string& pathname);

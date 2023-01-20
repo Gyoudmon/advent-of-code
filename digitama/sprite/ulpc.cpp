@@ -6,7 +6,7 @@ using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
 
 /*************************************************************************************************/
-static const std::string ulpc_moves [][13] = {
+static const char* ulpc_moves [][13] = {
     { "uspellcast-1", "uspellcast-2", "uspellcast-3", "uspellcast-4", "uspellcast-5", "uspellcast-6", "uspellcast-7", "", "", "", "", "", "" },
     { "lspellcast-1", "lspellcast-2", "lspellcast-3", "lspellcast-4", "lspellcast-5", "lspellcast-6", "lspellcast-7", "", "", "", "", "", "" },
     { "dspellcast-1", "dspellcast-2", "dspellcast-3", "dspellcast-4", "dspellcast-5", "dspellcast-6", "dspellcast-7", "", "", "", "", "", "" },
@@ -36,13 +36,12 @@ static const std::string ulpc_moves [][13] = {
 };
 
 /*************************************************************************************************/
-WarGrey::AoC::SpriteULPCSheet::SpriteULPCSheet(const char* pathname) : SpriteULPCSheet(std::string(pathname)) {}
 WarGrey::AoC::SpriteULPCSheet::SpriteULPCSheet(const std::string& pathname) : SpriteGridSheet(pathname, 21, 13) {}
 
-const std::string& WarGrey::AoC::SpriteULPCSheet::custome_grid_to_name(int r, int c) {
+const char* WarGrey::AoC::SpriteULPCSheet::costume_grid_to_name(int r, int c) {
     return ulpc_moves[r][c];
 }
 
 /*************************************************************************************************/
 WarGrey::AoC::ElfSheet::ElfSheet(const char* name)
-    : SpriteULPCSheet(digimon_path(name, ".png", "stone/spritesheet/elf")) {}
+    : SpriteULPCSheet(imgdb_build_path("spritesheet/elf", name, ".png")) {}
