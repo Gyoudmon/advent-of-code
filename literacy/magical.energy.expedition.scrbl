@@ -18,6 +18,7 @@
 
 @include-section[(submod "mee/01.calorie.counting.rkt" doc)]
 @include-section[(submod "mee/02.rock.paper.scissors.rkt" doc)]
+@include-section[(submod "mee/03.rucksack.reorganization.rkt" doc)]
 
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-reference[]

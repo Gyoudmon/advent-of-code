@@ -25,7 +25,7 @@
 然后依据如下简单规则决出胜负：石头砸烂剪刀、剪刀碎掉布、布以柔克刚包裹石头；
 而如果双方手型一致，则算平局。
 
-为答谢你昨天的帮助，有一位小精灵愿意给你一份加密策略，声称一定能帮你获得优胜。
+为答谢你昨天的帮助，有一只小精灵愿意给你一份加密策略，声称一定能帮你获得优胜。
 这份加密策略看起来是这样的：
 
 @tabular[#:style 'boxed #:sep @hspace[1]
@@ -34,7 +34,7 @@
                (list "C" "Z"))]
 
 精灵说：“左边那一列代表对手出的手型， A 指代石头，B 指代布，C 指代剪刀。
-右边那列……” 不巧，这个时候别的精灵喊它过去帮忙搭帐篷了，它也就真的撇下你
+右边那列……” 不巧，这个时候别的精灵喊她过去帮忙搭帐篷了，她也就真的撇下你
 去帮忙了。
 
 没办法，你只好自己猜了，第二列肯定指我自己要出的手型，并且， X 指石头，
@@ -117,7 +117,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
 @handbook-chunk[<定义函数simulate-with-guessed-strategy>
                 (code:comment #,($argv [/dev/datin "与加密策略关联的输入源"]))
                 (define simulate-with-guessed-strategy
-                  (λ [/dev/datin]
+                  (lambda [/dev/datin]
                     <读取-模拟-累加-循环>))]
 
 回忆昨天的思路，今天的任务是一个@racketcommentfont{读取-模拟-累加}循环（@racketidfont{rsal}, read-simulate-accumulate-loop），
@@ -168,7 +168,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
 
 @tamer-action[#:requires ["../literacy.rkt"]
               (with-aoc-data-from "mee/02.rps.dat" #:do
-                  simulate-with-guessed-strategy)]
+                simulate-with-guessed-strategy)]
 
 那只精灵帮其他精灵搭完帐篷后又溜出来找你了，继续之前的规则解读：“右边那一列决定了
 你策略上的输赢， X 指输掉比赛，Y 指跟对手打平，Z 指你必须赢。总之，祝你好运。”
@@ -218,7 +218,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
 @handbook-chunk[<定义函数simulate-with-designed-strategy>
                 (code:comment #,($argv [/dev/datin "与加密策略关联的输入源"]))
                 (define simulate-with-designed-strategy
-                  (λ [/dev/datin]
+                  (lambda [/dev/datin]
                     (let rsal ([total 0])
                       (define line (read-line /dev/datin))
                       (if (string? line)

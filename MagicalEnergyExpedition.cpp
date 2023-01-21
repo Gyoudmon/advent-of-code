@@ -32,7 +32,7 @@ namespace {
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
             this->logo = this->insert(new Sprite("logo.png"));
-            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞快递能量探险"));
+            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞魔法能量探险"));
             this->sledge = this->insert(new Sprite("sledge.png"));
             this->island = this->insert(new Sprite("island.png"));
             this->boat = this->insert(new Sprite("boat.png"));

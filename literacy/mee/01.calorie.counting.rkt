@@ -44,7 +44,7 @@
 
  ]
 
-当精灵饿了或馋了时，它们需要知道问谁去要零食，即需要知道谁带的卡路里最多。
+当精灵饿了或馋了时，他们需要知道问谁去要零食，即需要知道谁带的卡路里最多。
 上面的例子中，是第四只精灵携带的食物卡路里含量最高，达到了 @racket[24000] 大卡。
 
 于是，为伺候好这些精灵，我们需要定义一个函数 @racketid[find-maximum-calorie]
@@ -53,7 +53,7 @@
 @handbook-chunk[<定义函数find-maximum-calorie>
                 (code:comment #,($argv [/dev/datin "与卡路里清单关联的输入源"]))
                 (define find-maximum-calorie
-                  (λ [/dev/datin]
+                  (lambda [/dev/datin]
                     <读取-记录-替换-循环>))]
 
 检阅清单的过程就是个简单的@racketcommentfont{读取-记录-替换}循环（@racketidfont{rrsl}, read-record-substitute-loop），
@@ -83,12 +83,12 @@
 
 @tamer-action[#:requires ["../literacy.rkt"]
               (with-aoc-data-from "mee/01.cc.dat" #:do
-                  find-maximum-calorie)]
+                find-maximum-calorie)]
 
 顺便说一遍，上面的函数定义采用了@bold{纯函数式}风格，虽然有两个@bold{变量}
-（@racketvarfont{max:cal} 和 @racketvarfont{self:cal}），但实际上它们的值从头到尾都没有变过；
+（@racketvarfont{max:cal} 和 @racketvarfont{self:cal}），但实际上他们的值从头到尾都没有变过；
 每一轮循环都相当于是一次（递归）函数调用，并且比对着那俩变量创建了新的@bold{位置}，
-本该用来修改它们的值也被放到新的位置去了，而它们原来的位置在哪，里面有什么都已经不重要了。
+本该用来修改他们的值也被放到新的位置去了，而他们原来的位置在哪，里面有什么都已经不重要了。
 这种思路需要专业引导，初学者一时半会不能适应是正常现象。
 
 当你在冥思苦想上面那都是些啥玩意的时候，精灵们又开始搞事了：天，这么点卡路里迟早会被消耗完的！
@@ -121,7 +121,7 @@
 @handbook-chunk[<定义函数find-maximum-calories>
                 (code:comment #,($argv [/dev/datin "与卡路里清单关联的输入源"] [n "需要关注的前几名精灵数量"]))
                 (define find-maximum-calories
-                  (λ [/dev/datin n]
+                  (lambda [/dev/datin n]
                     (let rrsl (<初始化卡路里列表>
                                [self:cal 0])
                       (define line (read-line /dev/datin))
