@@ -26,6 +26,20 @@ static inline RPSShape random_shape() {
     return static_cast<RPSShape>(random_uniform(1, 3));
 }
 
+static inline RPSShape name_to_shape(const char* name) {
+    RPSShape shape = RPSShape::_;
+
+    if (strcmp(name, "rock") == 0) {
+        shape = RPSShape::Rock;
+    } else if (strcmp(name, "paper") == 0) {
+        shape = RPSShape::Paper;
+    } else if (strcmp(name, "scissor") == 0) {
+        shape = RPSShape::Scissor;
+    }
+
+    return shape;
+}
+
 static inline RPSShape char_to_shape(char ch) {
     switch (ch) {
         case 'A': case 'X': return RPSShape::Rock; break;
@@ -52,7 +66,7 @@ static inline int outcome_score(RPSOutcome outcome) {
     return static_cast<int>(outcome);
 }
 
-static inline RPSOutcome round_end(RPSShape opponent, RPSShape self) {
+static inline RPSOutcome round_outcome(RPSShape opponent, RPSShape self) {
     RPSOutcome end = RPSOutcome::_;
 
     if (opponent == self) {
@@ -86,7 +100,7 @@ static inline RPSShape smart_shape(RPSShape op_play, RPSOutcome outcome) {
 
 static const char* r_play_names [] = { "scissor", "paper", "rock" };
 static const int r_play_points  [] = { shape_score(RPSShape::Scissor), shape_score(RPSShape::Paper), shape_score(RPSShape::Rock) };
-static const char* r_outcome_names [] = { "backflip", "idle-0", "duck-0" };
+static const char* r_outcome_names [] = { "lshoot", "lthrust", "hurt" };
 static const int r_outcome_points  [] = { outcome_score(RPSOutcome::Win), outcome_score(RPSOutcome::Draw), outcome_score(RPSOutcome::Lose) };
 
 /*************************************************************************************************/
@@ -103,6 +117,9 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->random_score = this->insert(new Dimensionlet(this->style, "", random_strategy_desc));
     this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
     this->tux = this->insert(new Sprite("sprite/tux"));
+
+    this->elves[0] = this->insert(new ElfSheet("dress"));
+    this->elves[1] = this->insert(new ElfSheet("male"));
     
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
         this->play_scores[idx] = this->insert(new Labellet(aoc_font::text, PURPLE, rule_score_fmt, r_play_points[idx]));
@@ -113,17 +130,17 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
 
     for (int idx = 0; idx < sizeof(this->outcome_icons) / sizeof(Sprite*); idx ++) {
         this->outcome_scores[idx] = this->insert(new Labellet(aoc_font::text, ROYALBLUE, rule_score_fmt, r_outcome_points[idx]));
-        this->outcome_icons[idx] = this->insert(new Sprite("sprite/tux"));
-        this->outcome_icons[idx]->switch_to_costume(r_outcome_names[idx]);
-        this->outcome_icons[idx]->scale(0.618F);
+        this->outcome_icons[idx] = this->insert(new ElfSheet("santa_claus"));
+        this->outcome_icons[idx]->play(r_outcome_names[idx]);
+        this->outcome_icons[idx]->scale(0.80F);
     }
 
-    this->shift_to_mode(1);
     this->outcome_desc = this->insert(new Labellet(aoc_font::text, FORESTGREEN, " "));
-    this->op_play = this->insert(new Sprite("sprite/rochambo"));
-    this->sf_play = this->insert(new Sprite("sprite/rochambo"));
-    this->op_play->scale(+0.618F, 0.618F);
-    this->sf_play->scale(-0.618F, 0.618F);
+    this->l_play = this->insert(new Sprite("sprite/rochambo"));
+    this->r_play = this->insert(new Sprite("sprite/rochambo"));
+
+    this->l_play->scale(+0.618F, 0.618F);
+    this->r_play->scale(-0.618F, 0.618F);
 }
 
 void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
@@ -132,13 +149,15 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     this->move_to(this->designed_score, this->guessed_score, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->random_score, this->designed_score, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     
-    this->tux_x0 = width * 0.25F;
-    this->tux_y0 = height * 0.618F;
-    this->tux_distance = width * 0.5F;
+    this->round_x0 = width * 0.50F;
+    this->round_y0 = height * 0.42F;
+
+    this->race_x0 = width * 0.25F;
+    this->race_y0 = height * 0.72F;
+    this->race_distance = width * 0.5F;
     
-    this->move_to(this->snack, width * 0.75F, this->tux_y0, MatterAnchor::LC);
-    this->move_to(this->tux, this->tux_x0, this->tux_y0, MatterAnchor::RC);
-    this->tux_step(0.0F);
+    this->move_to(this->snack, width * 0.75F, this->race_y0, MatterAnchor::LC);
+    this->move_to(this->tux, this->race_x0, this->race_y0, MatterAnchor::RC);
     
     /* reflow scores */ {
         float xdist = float(text_fontsize);
@@ -155,7 +174,7 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
         }
 
         for (int idx = 0; idx < sizeof(this->outcome_icons) / sizeof(Sprite*); idx ++) {
-            this->move_to(this->outcome_icons[idx], this->play_icons[idx], MatterAnchor::LB, MatterAnchor::LT);
+            this->move_to(this->outcome_icons[idx], this->play_icons[idx], MatterAnchor::CB, MatterAnchor::CT);
             this->move_to(this->outcome_scores[idx], this->play_scores[idx], 0.5F, this->outcome_icons[idx], 0.5F, MatterAnchor::CC);
         }
     }
@@ -171,73 +190,73 @@ void WarGrey::AoC::RochamboPlane::on_enter(IPlane* from) {
 
 void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
     switch (this->status) {
-        case RPSStatus::SimulateWithGuessedStrategy: {
+        case RPSStatus::SimulateTheTournament: {
             if (this->current_round < this->strategy.size()) {
                 std::pair<char, char> play = this->strategy[this->current_round];
                 RPSShape op_play = char_to_shape(play.first);
-                RPSShape sf_play = char_to_shape(play.second);
-                RPSOutcome outcome = round_end(op_play, sf_play);
+                RPSShape sf_play_g = char_to_shape(play.second);
+                RPSOutcome outcome_g = round_outcome(op_play, sf_play_g);
+                RPSOutcome outcome_d = char_to_outcome(play.second);
+                RPSShape sf_play_d = smart_shape(op_play, outcome_d);
+                RPSShape sf_play_r = random_shape();
+                RPSOutcome outcome_r = round_outcome(op_play, sf_play_r);
 
-                this->total_score += this->round_score(op_play, sf_play, outcome);
-                this->guessed_score->set_value(this->total_score);
+                this->switch_play_costume(this->l_play, op_play);
+                this->switch_play_costume(this->r_play, sf_play_g);
+
+                this->guessed_total_score += this->round_score(this->tux, op_play, sf_play_g, outcome_g);
+                this->guessed_score->set_value(this->guessed_total_score);
+
+                this->designed_total_score += this->round_score(this->elves[0], op_play, sf_play_d, outcome_d);
+                this->designed_score->set_value(this->designed_total_score);
+
+                this->random_total_score += this->round_score(this->elves[1], op_play, sf_play_r, outcome_r);
+                this->random_score->set_value(this->random_total_score);
                 
                 this->current_round ++;
             } else {
                 this->on_task_done();
             }
         }; break;
-        case RPSStatus::SimulateWithDesignedStrategy: {
-            if (this->current_round < this->strategy.size()) {
-                std::pair<char, char> play = this->strategy[this->current_round];
-                RPSShape op_play = char_to_shape(play.first);
-                RPSOutcome outcome = char_to_outcome(play.second);
-                RPSShape sf_play = smart_shape(op_play, outcome);
-
-                this->total_score += this->round_score(op_play, sf_play, outcome);
-                this->designed_score->set_value(this->total_score);
-                
-                this->current_round ++;
-            } else {
-                this->on_task_done();
+        default: {
+            if (this->round_self == nullptr) {
+                this->l_play->switch_to_costume(random_uniform(0, 2));
+                this->r_play->switch_to_costume(random_uniform(0, 2));
             }
-        }; break;
-        case RPSStatus::SimulateWithRandomStrategy: {
-            if (this->current_round < this->strategy.size()) {
-                std::pair<char, char> play = this->strategy[this->current_round];
-                RPSShape op_play = char_to_shape(play.first);
-                RPSShape sf_play = random_shape();
-                RPSOutcome outcome = round_end(op_play, sf_play);
-
-                this->total_score += this->round_score(op_play, sf_play, outcome);
-                this->random_score->set_value(this->total_score);
-                
-                this->current_round ++;
-            } else {
-                this->on_task_done();
-            }
-        }; break;
-        default: /* do nothing */;
+        };
     }
 }
 
 void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
     if (yes_or_no) {
-        if (m == this->guessed_score) {
+        if (m == this->tux) {
             this->current_round = 0;
-            this->total_score = 0;
-            this->on_task_start(RPSStatus::SimulateWithGuessedStrategy);
-        } else if (m == this->designed_score) {
-            this->current_round = 0;
-            this->total_score = 0;
-            this->on_task_start(RPSStatus::SimulateWithDesignedStrategy);
-        } else if (m == this->random_score) {
-            this->current_round = 0;
-            this->total_score = 0;
-            this->guessed_score->set_value(this->guessed_final_score);
-            this->designed_score->set_value(this->designed_final_score);
-            this->on_task_start(RPSStatus::SimulateWithRandomStrategy);
+            this->guessed_total_score = 0;
+            this->designed_total_score = 0;
+            this->random_total_score = 0;
+            this->on_task_start(RPSStatus::SimulateTheTournament);
+        } else if ((m == this->elves[0]) || (m == this->elves[1])) {
+            if (this->round_self == nullptr) {
+                if (m == this->elves[0]) {
+                    this->round_self = this->l_play;
+                    this->move_to(this->outcome_desc, this->elves[0], MatterAnchor::LT, MatterAnchor::RT);
+                    this->round_score(this->r_play, this->l_play);
+                } else if (m == this->elves[1]) {
+                    this->round_self = this->r_play;
+                    this->move_to(this->outcome_desc, this->elves[1], MatterAnchor::RT, MatterAnchor::LT);
+                    this->round_score(this->l_play, this->r_play);
+                }
+            } else {
+                this->round_self = nullptr;
+                this->on_task_done();
+            }
         } else if (m == this->logo) {
             this->status = RPSStatus::MissionDone;
+        }
+    } else {
+        if ((m == this->elves[0]) || (m == this->elves[1])) {
+            this->round_self = nullptr;
+            this->on_task_done();
         }
     }
 }
@@ -248,51 +267,94 @@ bool WarGrey::AoC::RochamboPlane::can_select(IMatter* m) {
 
 void WarGrey::AoC::RochamboPlane::on_task_start(RPSStatus status) {
     this->status = status;
-    this->shift_to_mode(1);
-    this->move_to(this->tux, this->tux_x0, this->tux_y0, MatterAnchor::CC);
-    this->tux_step(0.0F);
+
+    this->round_self = nullptr;
+
+    this->elves[0]->scale_to(1.0F);
+    this->elves[1]->scale_to(1.0F);
+    
+    this->move_to(this->tux, this->race_x0, this->race_y0, MatterAnchor::CC);
+    this->move_to(elves[0], this->tux, MatterAnchor::CT, MatterAnchor::CB);
+    this->move_to(elves[1], this->tux, MatterAnchor::CB, MatterAnchor::CT);
+
+    this->move_to(this->l_play, this->snack, MatterAnchor::LT, MatterAnchor::LB);
+    this->move_to(this->r_play, this->snack, MatterAnchor::RT, MatterAnchor::RB);
+
+    this->elves[0]->play("rwalk");
+    this->elves[1]->play("rwalk");
 }
 
 void WarGrey::AoC::RochamboPlane::on_task_done() {
     this->status = RPSStatus::TaskDone;
-    this->shift_to_mode(0);
+
+    this->elves[0]->scale_to(1.618F);
+    this->elves[1]->scale_to(1.618F);
+
+    this->move_to(this->elves[0], this->round_x0, this->round_y0, MatterAnchor::RC);
+    this->move_to(this->elves[1], this->elves[0], MatterAnchor::RC, MatterAnchor::LC);
+    
+    this->move_to(this->l_play, this->elves[0], MatterAnchor::CT, MatterAnchor::CB);
+    this->move_to(this->r_play, this->elves[1], MatterAnchor::CT, MatterAnchor::CB);
+    
+    this->elves[0]->play("rslash");
+    this->elves[1]->play("lslash");
+    this->outcome_desc->set_text("");
 }
 
-int WarGrey::AoC::RochamboPlane::round_score(RPSShape op_shape, RPSShape sf_shape, RPSOutcome outcome) {
+int WarGrey::AoC::RochamboPlane::round_score(ISprite* racer, RPSShape op_shape, RPSShape sf_shape, RPSOutcome outcome) {
     int shpscore = shape_score(sf_shape);
+    int outscore = outcome_score(outcome);
+    int score = shpscore + outscore;
+
+    this->move(racer, float(score) / this->distance_score * this->race_distance, 0.0F);
+
+    return score;
+}
+
+int WarGrey::AoC::RochamboPlane::round_score(Sprite* opponent, Sprite* self) {
+    RPSShape op_play = name_to_shape(opponent->current_costume_name());
+    RPSShape sf_play = name_to_shape(self->current_costume_name());
+    RPSOutcome outcome = round_outcome(op_play, sf_play);
+    int shpscore = shape_score(sf_play);
     int outscore = outcome_score(outcome);
     int score = shpscore + outscore;
     
     switch (outcome) {
         case RPSOutcome::Lose: {
+            if (this->round_self == this->l_play) {
+                this->elves[0]->play("hurt");
+                this->elves[1]->play("lshoot");
+            } else {
+                this->elves[0]->play("rshoot");
+                this->elves[1]->play("hurt");
+            }
+
             this->outcome_desc->set_text_color(CRIMSON);
-            this->tux->switch_to_costume(r_outcome_names[2]);
             this->outcome_desc->set_text(MatterAnchor::CC, outcome_fmt, shpscore, outscore);
         }; break;
         case RPSOutcome::Win: {
+            if (this->round_self == this->l_play) {
+                this->elves[0]->play("rshoot");
+                this->elves[1]->play("hurt");
+            } else {
+                this->elves[0]->play("hurt");
+                this->elves[1]->play("lshoot");
+            }
+
             this->outcome_desc->set_text_color(FORESTGREEN);
-            this->tux->switch_to_costume(r_outcome_names[0]);
             this->outcome_desc->set_text(MatterAnchor::CC, outcome_fmt, shpscore, outscore);
         }; break;
         case RPSOutcome::Draw: {
+            this->elves[0]->play("rthrust");
+            this->elves[1]->play("lthrust");
+
             this->outcome_desc->set_text_color(DARKORANGE);
-            this->tux->switch_to_costume(r_outcome_names[1]);
             this->outcome_desc->set_text(MatterAnchor::CC, outcome_fmt, shpscore, outscore);
         }; break;
+        default: ;
     }
 
-    this->switch_play_costume(this->op_play, op_shape);
-    this->switch_play_costume(this->sf_play, sf_shape);
-    this->tux_step(float(score) / this->distance_score * this->tux_distance);
-
     return score;
-}
-
-void WarGrey::AoC::RochamboPlane::tux_step(float dx) {
-    this->move(this->tux, dx, 0.0F);
-    this->move_to(this->op_play, this->tux, MatterAnchor::LT, MatterAnchor::RB);
-    this->move_to(this->sf_play, this->tux, MatterAnchor::RT, MatterAnchor::LB);
-    this->move_to(this->outcome_desc, this->tux, MatterAnchor::CT, MatterAnchor::CB);
 }
 
 void WarGrey::AoC::RochamboPlane::switch_play_costume(Sprite* target, RPSShape play) {
@@ -326,7 +388,7 @@ void WarGrey::AoC::RochamboPlane::load_strategy(const std::string& pathname) {
                 if ((op_play != RPSShape::_) && (sf_play != RPSShape::_)) {
                     this->strategy.push_back(std::pair<char, char>(op_char, sf_char));
                 
-                    this->guessed_final_score += shape_score(sf_play) + outcome_score(round_end(op_play, sf_play));
+                    this->guessed_final_score += shape_score(sf_play) + outcome_score(round_outcome(op_play, sf_play));
                     this->designed_final_score += shape_score(smart_shape(op_play, outcome)) + outcome_score(outcome);
                 }
             }

@@ -9,7 +9,7 @@ namespace WarGrey::AoC {
     /******************************************* 声明游戏精灵 ******************************************/
     class Elfmon : public WarGrey::AoC::ElfSheet {
     public:
-        Elfmon(const char* name, int id);
+        Elfmon(int id);
 
     public:
         int calorie_total();

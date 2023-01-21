@@ -13,6 +13,7 @@ using namespace WarGrey::STEM;
 /*************************************************************************************************/
 namespace {
     static const char* unknown_task_name = "冒\n险\n越\n来\n越\n深\n入\n了";
+    static const int elf_on_boat_count = 0;
 
     class StarFruitlet : public WarGrey::STEM::Sprite {
     public:
@@ -31,7 +32,7 @@ namespace {
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
             this->logo = this->insert(new Sprite("logo.png"));
-            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 0, "魔法能量探险"));
+            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞快递能量探险"));
             this->sledge = this->insert(new Sprite("sledge.png"));
             this->island = this->insert(new Sprite("island.png"));
             this->boat = this->insert(new Sprite("boat.png"));
@@ -56,10 +57,14 @@ namespace {
             }
 
             this->tux = this->insert(new Sprite("sprite/tux"));
-            this->elves[0] = this->insert(new ElfSheet("male"));
-            this->elves[1] = this->insert(new ElfSheet("dress"));
-            this->elves[2] = this->insert(new ElfSheet("goblin"));
-            this->elves[3] = this->insert(new ElfSheet("female"));
+            this->tux->wear("santa_hat");
+
+            for (int idx = 0; idx < santa_elf_type_count; idx ++) {
+                this->elves[idx] = this->insert(new ElfSheet(idx));
+                if (idx < elf_on_boat_count) {
+                    this->elves[idx]->scale(0.618F);
+                }
+            }
 
             this->sledge->scale(0.80F);
             this->island->scale(1.80F);
@@ -70,10 +75,22 @@ namespace {
             this->move_to(this->sledge, width, 0.0F, MatterAnchor::RT);
             this->move_to(this->island, width * 0.5F, height * 0.5F, MatterAnchor::CC, 0.0F, float(title_fontsize));
             this->move_to(this->boat, this->island, MatterAnchor::LB, MatterAnchor::LB);
-            this->move_to(this->elves[0], this->boat, MatterAnchor::LC, MatterAnchor::RC);
-            this->move_to(this->elves[1], this->elves[0], MatterAnchor::LC, MatterAnchor::RC);
-            this->move_to(this->elves[2], this->sledge, MatterAnchor::RB, MatterAnchor::RT);
-            this->move_to(this->elves[3], this->elves[2], MatterAnchor::LC, MatterAnchor::RC);
+
+            for (int idx = 0; idx < elf_on_boat_count; idx ++) {
+                if (idx == 0) {
+                    this->move_to(this->elves[idx], this->boat, MatterAnchor::LB, MatterAnchor::RB);
+                } else {
+                    this->move_to(this->elves[idx], this->elves[idx - 1], MatterAnchor::LB, MatterAnchor::RB);
+                }
+            }
+
+            for (int idx = elf_on_boat_count; idx < santa_elf_type_count; idx ++) {
+                if (idx == elf_on_boat_count) {
+                    this->move_to(this->elves[idx], this->sledge, MatterAnchor::RB, MatterAnchor::RT);
+                } else {
+                    this->move_to(this->elves[idx], this->elves[idx - 1], MatterAnchor::LC, MatterAnchor::RC);
+                }
+            }
             
             for (int idx = 0; idx < this->stars.size(); idx ++) {
                 if (idx == 0) {
@@ -116,8 +133,9 @@ namespace {
                 float dy = float(random_uniform(-1, 1));
 
                 this->move(this->boat, dx, dy);
-                this->move(this->elves[0], dx, dy);
-                this->move(this->elves[1], dx, dy);
+                for (int idx = 0; idx < elf_on_boat_count; idx ++) {
+                    this->move(this->elves[idx], dx, dy);
+                }
             }
         }
 
@@ -125,11 +143,14 @@ namespace {
             this->tux->play("walk");
             this->tux->set_border_strategy(BorderStrategy::IGNORE);
             this->tux->set_speed(4.0F, 0.0F);
-
-            this->elves[0]->play("rwalk");
-            this->elves[1]->play("rwalk");
-            this->elves[2]->play("lwalk");
-            this->elves[3]->play("lwalk");
+            
+            for (int idx = 0; idx < santa_elf_type_count; idx ++) {
+                if (idx < elf_on_boat_count) {
+                    this->elves[idx]->play("rwalk");
+                } else {
+                    this->elves[idx]->play("lwalk");
+                }
+            }
         }
 
     public:
@@ -162,7 +183,7 @@ namespace {
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
         Sprite* tux;
-        ElfSheet* elves[4];
+        ElfSheet* elves[santa_elf_type_count];
         Sprite* sledge;
         Sprite* island;
         Sprite* boat;

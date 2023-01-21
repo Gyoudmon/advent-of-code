@@ -27,16 +27,6 @@ static const float top_scale_up = 2.0F;
 static const float elf_scale = 0.64F;
 
 static const int micro_pace = 3;
-static const int elf_type_count = 4;
-
-static inline const char* elf_name(int hint) {
-    switch ((hint < elf_type_count) ? hint : random_uniform(0, elf_type_count - 1)) {
-    case 1: return "female"; break;
-    case 2: return "dress"; break;
-    case 3: return "goblin"; break;
-    default: return "male";
-    }
-}
 
 /*************************************************************************************************/
 void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
@@ -386,9 +376,7 @@ void WarGrey::AoC::CalorieCountingPlane::load_calories(const std::string& pathna
                 elf = nullptr;
             } else {
                 if (elf == nullptr) {
-                    int idx = this->elves.size();
-
-                    elf = new Elfmon(elf_name(idx), idx + 1);
+                    elf = new Elfmon(this->elves.size() + 1);
                 }
 
                 elf->food_calories.push_back(std::stoi(line));
@@ -404,7 +392,7 @@ void WarGrey::AoC::CalorieCountingPlane::load_calories(const std::string& pathna
 }
 
 /*************************************************************************************************/
-WarGrey::AoC::Elfmon::Elfmon(const char* name, int id) : ElfSheet(name), id(id) {}
+WarGrey::AoC::Elfmon::Elfmon(int id) : ElfSheet(id - 1), id(id) {}
 
 int WarGrey::AoC::Elfmon::calorie_total() {
     return vector_sum(this->food_calories);

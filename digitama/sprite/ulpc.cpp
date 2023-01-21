@@ -1,11 +1,13 @@
 #include "ulpc.hpp"
 
-#include "../big_bang/datum/path.hpp"
+#include "../big_bang/physics/random.hpp"
 
 using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
 
 /*************************************************************************************************/
+static const char* elves [] = { "male", "female", "dress", "skirt", "pixie" };
+
 static const char* ulpc_moves [][13] = {
     { "uspellcast-1", "uspellcast-2", "uspellcast-3", "uspellcast-4", "uspellcast-5", "uspellcast-6", "uspellcast-7", "", "", "", "", "", "" },
     { "lspellcast-1", "lspellcast-2", "lspellcast-3", "lspellcast-4", "lspellcast-5", "lspellcast-6", "lspellcast-7", "", "", "", "", "", "" },
@@ -35,6 +37,10 @@ static const char* ulpc_moves [][13] = {
     { "hurt-1", "hurt-2", "hurt-3", "hurt-4", "hurt-5", "hurt-6", "", "", "", "", "", "", "" }
 };
 
+static inline const char* random_elf_name(int hint) {
+    return elves[(hint < santa_elf_type_count) ? hint : random_uniform(0, santa_elf_type_count - 1)];
+}
+
 /*************************************************************************************************/
 WarGrey::AoC::SpriteULPCSheet::SpriteULPCSheet(const std::string& pathname) : SpriteGridSheet(pathname, 21, 13) {}
 
@@ -43,5 +49,5 @@ const char* WarGrey::AoC::SpriteULPCSheet::costume_grid_to_name(int r, int c) {
 }
 
 /*************************************************************************************************/
-WarGrey::AoC::ElfSheet::ElfSheet(const char* name)
-    : SpriteULPCSheet(imgdb_build_path("spritesheet/elf", name, ".png")) {}
+WarGrey::AoC::ElfSheet::ElfSheet(const char* name) : SpriteULPCSheet(imgdb_build_path("spritesheet/elf", name, ".png")) {}
+WarGrey::AoC::ElfSheet::ElfSheet(int hint) : SpriteULPCSheet(imgdb_build_path("spritesheet/elf", random_elf_name(hint), ".png")) {}

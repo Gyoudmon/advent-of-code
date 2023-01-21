@@ -1,15 +1,14 @@
 #pragma once // 确保只被 include 一次
 
 #include "../big_bang/game.hpp"
+#include "../sprite/ulpc.hpp"
 
 #include <vector>
 
 namespace WarGrey::AoC {
     /******************************************* 声明游戏状态 ******************************************/
     enum class RPSStatus {
-        SimulateWithGuessedStrategy,
-        SimulateWithDesignedStrategy,
-        SimulateWithRandomStrategy,
+        SimulateTheTournament,
         TaskDone,
         MissionDone
     };
@@ -56,8 +55,8 @@ namespace WarGrey::AoC {
         void on_task_done();
 
     private:
-        int round_score(WarGrey::AoC::RPSShape op_play, WarGrey::AoC::RPSShape sf_play, WarGrey::AoC::RPSOutcome outcome);
-        void tux_step(float x);
+        int round_score(WarGrey::STEM::ISprite* racer, WarGrey::AoC::RPSShape op_play, WarGrey::AoC::RPSShape sf_play, WarGrey::AoC::RPSOutcome outcome);
+        int round_score(WarGrey::STEM::Sprite* opponent, WarGrey::STEM::Sprite* self);
         void switch_play_costume(WarGrey::STEM::Sprite* target, WarGrey::AoC::RPSShape play);
 
     private:
@@ -72,12 +71,13 @@ namespace WarGrey::AoC {
         WarGrey::STEM::Labellet* outcome_desc;
         WarGrey::STEM::Sprite* tux;
         WarGrey::STEM::SpriteGridSheet* snack;
-        WarGrey::STEM::Sprite* op_play;
-        WarGrey::STEM::Sprite* sf_play;
+        WarGrey::STEM::Sprite* l_play;
+        WarGrey::STEM::Sprite* r_play;
         WarGrey::STEM::Sprite* play_icons[3];
         WarGrey::STEM::Labellet* play_scores[3];
-        WarGrey::STEM::Sprite* outcome_icons[3];
+        WarGrey::AoC::ElfSheet* outcome_icons[3];
         WarGrey::STEM::Labellet* outcome_scores[3];
+        WarGrey::AoC::ElfSheet* elves[2];
         
     private:
         WarGrey::STEM::DimensionStyle style;
@@ -86,14 +86,23 @@ namespace WarGrey::AoC {
         
     private: // Shared Variables
         int current_round = 0;
-        int total_score = 0;
-        float tux_distance;
-        float tux_x0;
-        float tux_y0;
+        int guessed_total_score;
+        int designed_total_score;
+        int random_total_score;
+
+    private:
+        float round_x0;
+        float round_y0;
+        float race_distance;
+        float race_x0;
+        float race_y0;
 
     private: // for Progress-bar
         float distance_score;
         int guessed_final_score;
         int designed_final_score;
+
+    private:
+        WarGrey::STEM::IMatter* round_self = nullptr;
     };
 }

@@ -4,6 +4,7 @@
 
 namespace WarGrey::AoC {
     /* Constants */
+    static const char* title0_fmt = "C++ 降临节: %s";
     static const char* title_fmt = "C++ 降临节: [第%d天] %s";
     static const char* puzzle_fmt = "%s: %d";
     static const char* unknown_fmt = "%s: (未知)";
