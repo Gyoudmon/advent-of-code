@@ -69,7 +69,7 @@ def find_misplaced_item(line):
     return list(shared_dict.keys())[0]
 
 ###################################################################################################
-def do_aoc_datum_from(src):
+def do_for_rucksack_organization(src):
     lines = []
     
     for line in src:
@@ -83,11 +83,11 @@ def main(argc, argv):
     if argc > 1:
         try:
             with open(argv[1], 'r') as src:
-                do_aoc_datum_from(src)
+                do_for_rucksack_organization(src)
         except FileNotFoundError:
             pass
     else:
-        do_aoc_datum_from(sys.stdin)
+        do_for_rucksack_organization(sys.stdin)
 
     return 0
 
