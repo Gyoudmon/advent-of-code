@@ -81,7 +81,7 @@
 
 接下来就可以通过传入清单文件来执行了：
 
-@tamer-action[#:requires ["../literacy.rkt"]
+@tamer-action[#:requires ["../aoc.rkt"]
               (with-aoc-data-from "mee/01.cc.dat" #:do
                 find-maximum-calorie)]
 

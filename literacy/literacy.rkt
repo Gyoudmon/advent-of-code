@@ -48,13 +48,6 @@
                      (racketvalfont name:rest) ~ desc:rest ...) ...)))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define with-aoc-data-from
-  (lambda [path #:do f . argv]
-    (call-with-input-file* (digimon-path 'stone path)
-      (lambda [/dev/stdin]
-        (apply f /dev/stdin argv)))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define question
   (lambda argv
     (racketresultfont argv)))

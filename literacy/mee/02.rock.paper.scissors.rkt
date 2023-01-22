@@ -166,7 +166,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
 
 接下来就可以通过传入策略文件来模拟了：
 
-@tamer-action[#:requires ["../literacy.rkt"]
+@tamer-action[#:requires ["../aoc.rkt"]
               (with-aoc-data-from "mee/02.rps.dat" #:do
                 simulate-with-guessed-strategy)]
 
