@@ -5,6 +5,10 @@
 /*************************************************************************************************/
 static const unsigned int DICT_SIZE = 53;
 
+static inline void dict_zero(char dict[]) {
+    memset(dict, 0, DICT_SIZE * sizeof(char));
+}
+
 /*************************************************************************************************/
 int item_priority(char ch) {
     int prior = 0;
@@ -19,7 +23,7 @@ int item_priority(char ch) {
 }
 
 void feed_item_dict(char dict[], char* line, size_t endpos) {
-    memset(dict, 0, DICT_SIZE * sizeof(char));
+    dict_zero(dict);
 
     for (int idx = 0; idx < endpos; idx ++) {
         dict[item_priority(line[idx])] = line[idx];
@@ -27,7 +31,7 @@ void feed_item_dict(char dict[], char* line, size_t endpos) {
 }
 
 void feed_shared_item_dict(char dict[], char dict0[], char* line, size_t start, size_t endpos) {
-    memset(dict, 0, DICT_SIZE * sizeof(char));
+    dict_zero(dict);
 
     for (int idx = start; idx < endpos; idx ++) {
         int prior = item_priority(line[idx]);
@@ -58,24 +62,46 @@ void do_for_rucksack_organization(FILE* in, int n) {
     size_t capacity = 0;
     ssize_t read;
 
-    char misplaced_dict[DICT_SIZE];
-    char **badge_dicts = (char**)malloc(n * sizeof(char**));
+    char misplaced_dict1[DICT_SIZE];
+    char misplaced_dict2[DICT_SIZE];
+    char **badge_dicts = (char**)malloc((n - 1)* sizeof(char**));
     int misplaced_prior_sum = 0;
     int badge_prior_sum = 0;
     int count = 0;
 
-    for (int idx = 0; idx < n; idx ++) {
-        badge_dicts[idx] = (char*)malloc(DICT_SIZE * sizeof(char));
+    for (int idx = 0; idx < n - 1; idx ++) {
+        badge_dicts[idx] = (char*)calloc(DICT_SIZE, sizeof(char));
     }
-    
+
     while ((read = getline(&line, &capacity, in)) != -1) {
         size_t endpos = read - 1;
         
         /* solve part one */ {
             size_t midpos = endpos / 2;
+
+            dict_zero(misplaced_dict1);
+            dict_zero(misplaced_dict2);
         
-            feed_item_dict(misplaced_dict, line, midpos);
-            misplaced_prior_sum += find_shared_item_dict(misplaced_dict, line, midpos, endpos);
+            for (int idx = 0; idx < midpos; idx ++) {
+                if (line[idx] == line[idx + midpos]) {
+                    misplaced_prior_sum += item_priority(line[idx]);
+                    break;
+                } else {
+                    int prior1 = item_priority(line[idx]);
+                    int prior2 = item_priority(line[idx + midpos]);
+
+                    if (misplaced_dict2[prior1] != '\0') {
+                        misplaced_prior_sum += prior1;
+                        break;
+                    } else if (misplaced_dict1[prior2] != '\0') {
+                        misplaced_prior_sum += prior2;
+                        break;
+                    } else {
+                        misplaced_dict1[prior1] = line[idx];
+                        misplaced_dict2[prior2] = line[idx + midpos];
+                    }
+                }
+            }
         }
 
         /* solve part two */ {
@@ -97,7 +123,7 @@ void do_for_rucksack_organization(FILE* in, int n) {
     printf("%d\n", badge_prior_sum);
 
     /* release memory */ {
-        for (int idx = 0; idx < n; idx ++) {
+        for (int idx = 0; idx < n - 1; idx ++) {
             free(badge_dicts[idx]);
         }
     
