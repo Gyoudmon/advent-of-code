@@ -120,7 +120,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
                   (lambda [/dev/datin]
                     <读取-模拟-累加-循环>))]
 
-回忆昨天的思路，今天的任务是一个@racketcommentfont{读取-模拟-累加}循环（@racketidfont{rsal}, read-simulate-accumulate-loop），
+回忆昨天的思路，今天的谜题是一个@racketcommentfont{读取-模拟-累加}循环（@racketidfont{rsal}, read-simulate-accumulate-loop），
 即逐行读取策略指导，每读到一行，就按照该轮策略模拟比赛，然后将结果累加。直到没有更多内容为止，函数返回总得分。
 
 @handbook-chunk[<读取-模拟-累加-循环>
@@ -133,7 +133,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
                         (rsal (+ total <模拟本轮比赛>)))
                       total))]
 
-本任务的总体结构比昨天的简单，但细节是魔鬼。头脑风暴一下，模拟比赛的过程似乎还挺繁琐，
+本谜题的总体结构比昨天的简单，但细节是魔鬼。头脑风暴一下，模拟比赛的过程似乎还挺繁琐，
 要先解密策略文件：
 
 @handbook-chunk[<定义策略解密函数>

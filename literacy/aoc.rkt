@@ -23,3 +23,14 @@
 (define read-single-line
   (lambda [/dev/stdin]
     (read-line /dev/stdin 'any)))
+
+(define make-read-lines
+  (lambda [n]
+    (λ [/dev/stdin]
+      (let read-n-lines ([ls null]
+                         [rest n])
+        (cond [(<= rest 0) (if (null? ls) eof (reverse ls))]
+              [else (let ([line (read-single-line /dev/stdin)])
+                      (cond [(string? line) (read-n-lines (cons line ls) (sub1 rest))]
+                            [(null? ls) eof]
+                            [else (reverse ls)]))])))))

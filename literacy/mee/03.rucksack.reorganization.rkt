@@ -4,6 +4,9 @@
 
 @(define-aoc-bib D3RR "Rucksack Reorganization" 3)
 
+@(define the-core-in-thinking
+   @question{如何将每一行杂乱无章的原始文本转化为对我们有用的数据和信息})
+
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-root-story{第三天：背包重组}
 
@@ -13,7 +16,9 @@
                 (module tamer racket/base
                   <定义物品类型优先级函数>
                   <定义物品类型字典构造函数>
-                  <定义函数find-misplaced-item>)]
+                  <定义共有物品类型查找函数>
+                  <定义函数find-misplaced-item>
+                  <定义函数find-badge-item>)]
 
 有一只精灵的重要任务是将丛林探险物资装进背包，但不幸的是，这只精灵并没有严格照着打包指令做事，因此有部分物品需要重新整理。
 
@@ -73,7 +78,7 @@
 语言作者不知道你会怎么处理每一行字符串，但无论你做什么，都得先有那一行字符串才行。
 
 至此，我们的思维已经悄悄提升，正式将@defterm{列表}(@racket[list])作为一个基本数据类型来思考。@tech{列表}是所有
-宣称自己支持@bold{函数式编程}的程序语言的基本数据类型。譬如，Python 的有 list 和 tuple 等；C++ 有 list 和
+宣称自己支持@bold{函数式编程}的程序语言的基本数据类型。譬如，Python 有 list 和 tuple 等；C++ 有 list 和
 vector 等； C 比较麻烦，没有现成的可用。注意，数组不能替代@tech{列表}，因为数组要求所有项都同为一个类型，
 列表则没有这个要求。实际上，列表里的项往往不是同一类型。
 
@@ -113,13 +118,13 @@ vector 等； C 比较麻烦，没有现成的可用。注意，数组不能替�
 通过前面的例子，这个函数的功能已经很明确了，就是@question{依次检查后半段的每一个字符，看它是否出现在前半段中}，或者
 @question{依次检查前半段的每一个字符，看它是否出现在后半段中}。从关键字@bold{依次}可以推断，算法的主要结构肯定也是
 循环，因此一种肯定有效的算法可能是这样的：依次提取半段中的字符，再拿这个字符依次跟另半段中的每一个字符比较，直到找到
-两段中都有的字符、或没有更多的字符，为止。这是最简单的算法，但是也是效率最低的算法。
+两段中都有的字符、或没有更多的字符为止。这是最简单的算法，但是也是效率最低的算法。
 
 回忆一下，当碰到不认识的汉字或英文单词时，你会怎么来认识它？不过，现在我们要重点思考的内容，不是你根据什么规则来快速查字典，
 而是为什么你会想到字典这个东西？字典代表的是一种什么样的东西呢？像字典这样的@bold{能够根据关键字快速定位其内容}的数据
-结构称为@bold{哈希表}（Hash Table），简称哈希（@racket[hash]），它也是一种相当基础也相当重要的数据类型。将列表作为基
-础数据类型的语言一般也会直接提供一种或几种哈希类型，不过它们的名字就可能五花八门了。譬如，Python 的哈希就叫字典（dict）；
-C++ 的哈希叫映射（map）；C 不直接提供哈希表。
+结构称为@defterm{哈希表}（Hash Table），简称哈希（@racket[hash]），它也是一种相当基础也相当重要的数据类型。将列表作为基
+础数据类型的语言一般也会直接提供一种或几种哈希类型，不过它们的名字就可能五花八门了。譬如，Python 的哈希表就叫字典（dict）；
+C++ 的哈希表叫映射（map）；C 不直接提供哈希表。
 
 总之，计算机也有查字典的权利和能力。于是，@question{找到放错了的物品类型}问题就转化成了@racketcommentfont{构造字典-查字典}
 问题。这个字典里只包含某个背包的一个隔间里的全部物品类型。
@@ -152,21 +157,31 @@ C++ 的哈希叫映射（map）；C 不直接提供哈希表。
 Python 可以通过@bold{自动序列装包/拆包}达到同样的目的，但那仍然只是返回一个值。其具体过程是：将多个返回值搜集进一个元组，
 然后将这个元组作为单个值返回，接着再一个一个把这个元组里的值取出来分别赋值给其他变量。
 
+同理，从字典中查找共有物品也是一个常用操作，单独定义成函数 @racket[make-shared-item-dict]，其返回值也是一个字典，
+该字典只包括共有物品类型。
+
+@handbook-chunk[<定义共有物品类型查找函数>
+                (code:comment #,($argv [dict "源字典"] [items "物品清字符串"] [start "物品清字符串循环开始的位置"]))
+                (define (make-shared-item-dict dict items start)
+                  (for/hash ([ch (in-string items start)]
+                             #:when (hash-has-key? dict ch))
+                    <返回物品类型字典中的条目>))]
+
+该函数几乎与 @racket[make-item-dict] 一样，除了 @racket[in-string] 循环提取字符的范围外，还多了一个 @racket[#:when]
+用于指明循环执行的条件，即：只有源字典中已经存在的关键字才会作为新字典的关键字返回。
+
 @handbook-chunk[<查找字典中存在的物品类型>
-                (for/first ([ch (in-string line midpos)]
-                            #:when (hash-has-key? dict ch))
-                  ch)]
+                (car
+                 (hash-keys
+                  (make-shared-item-dict dict line midpos)))]
 
-这次隐藏循环的是 @racket[for/first]，它的意思@racketcommentfont{收集到循环执行一次的结果就立即退出}，因此确定循环是否执行
-的条件至关重要。在本任务中，即：一旦出现字典中存在的物品类型就不用再继续找下去了，直接返回该物品类型即可。
-
-特别的，如果输入参数不合理导致循环一次都没有执行，那函数最终会返回 @racket[#false]。在真实的软件中，必须要考虑这种情况。
+现在我们姑且假设每个背包里都有且只有一个共有物品类型，因此上面的代码片段并未做容错处理。但在真实的软件中，必须要考虑其他情况，
+有可能不存在（或存在多个）共有物品类型，并有可能导致运行时错误。
 
 至此，我们完成了对物品清单的解析。至于为什么要同时定义 @racket[find-misplaced-items] 和 @racket[find-misplaced-item]
 两个函数，后面这个看似完全多余啊，算法可以直接放在 @racket[find-misplaced-items] 循环里面吗？可以啊，不影响本次任务。
 不过，上面虽然定义了（复数形式的） @racket[find-misplaced-items]，但它仅仅只是出现在本文档中用作演示常用循环，其代码并没有
-实际包含在最终的可执行程序里。因为这个循环过于常用，我们完全没必要每次都敲一遍，把精力省下来关注@question{如何将每一行
-杂乱无章的原始文本转化为对我们有用的数据和信息}才是正经。
+实际包含在最终的可执行程序里。因为这个循环过于常用，我们完全没必要每次都敲一遍，把精力省下来关注 @the-core-in-thinking 才是正经。
 
 而且，还记得我们上面分析的结论吗：@racketcommentfont{针对清单中的每一行的操作}就转化为了@racketcommentfont{针对字符串列表中
 的每一项的操作}。换句话说，我们可以直接调用 @racket[find-misplaced-item]，并传给它一个字符串作为参数，用于测试算法是否靠谱，
@@ -185,10 +200,7 @@ Python 可以通过@bold{自动序列装包/拆包}达到同样的目的，但�
               (find-misplaced-item
                "CrZsJsPPZsGzwwsLwLmpwMDw")]
 
-函数的输出跟例子不能说完全相同，简直就是一摸一样啊。
-
-不过呢，本算法仍然还有改进空间，一丝不苟地为一个隔间创建完整的字典总觉得很没必要（比如，当放错了的物品恰好在两个隔间里都是第一个时），
-可不可以一边创建一边检查呢？请课后思考并尽量写程序验证你想法。【提示：同时给两个隔间分别创建一个字典，检查时两个隔间同时交叉比较。】
+函数的输出跟例子里的结论不能说完全相同，简直就是一摸一样啊。
 
 以上，是我们为应对精灵的信口开河而做的准备工作。接下来就该处理精灵们真正要你解决的问题了。为了定好出错物品类型的重组顺序，精灵们规定
 每种类型的物品都有一个优先级：
@@ -200,28 +212,28 @@ Python 可以通过@bold{自动序列装包/拆包}达到同样的目的，但�
 
 @handbook-chunk[<定义物品类型优先级函数>
                 (code:comment #,($argv [ich "代表物品类型的字符"]))
-                (define (item-type-priority ich)
+                (define (item-priority ich)
                   (cond [(char<=? #\a ich #\z)
                          (+ (char->integer ich) (- 97) 1)]
                         [(char<=? #\A ich #\Z)
                          (+ (char->integer ich) (- 65) 27)]
                         [else 0]))
 
-                (code:comment #,($argv [items "代表物品类型的字符列表"]))
+                (code:comment #,($argv [items "代表共有物品类型的字符列表"]))
                 (define (priority-sum items)
                   (for/sum ([ich (in-list items)]
                             #:when (char? ich))
-                    (item-type-priority ich)))]
+                    (item-priority ich)))]
 
 优先级函数没啥特别要说的，如果对其中的神秘数字 @racket[97] 和 @racket[65] 感兴趣，可以@bold{谷歌}关键字 @bold{ASCII 码}，
 看看字母 @litchar{A} 和 @litchar{a} 在该编码中的具体位置。
 
-在前面的例子中，六个放错了的物品类型的优先级分别是 @tamer-datum['item-type-priority #\p](@litchar{p})、
- @tamer-datum['item-type-priority #\L](@litchar{L})、 @tamer-datum['item-type-priority #\P](@litchar{P})、
- @tamer-datum['item-type-priority #\v](@litchar{v})、 @tamer-datum['item-type-priority #\t](@litchar{t})
-和 @tamer-datum['item-type-priority #\s](@litchar{s})，它们的和为 @tamer-datum['priority-sum '(#\p #\L #\P #\v #\t #\s)]。
+在前面的例子中，六个放错了的物品类型的优先级分别是 @tamer-datum['item-priority #\p](@litchar{p})、
+ @tamer-datum['item-priority #\L](@litchar{L})、 @tamer-datum['item-priority #\P](@litchar{P})、
+ @tamer-datum['item-priority #\v](@litchar{v})、 @tamer-datum['item-priority #\t](@litchar{t})
+和 @tamer-datum['item-priority #\s](@litchar{s})，它们的和为 @tamer-datum['priority-sum '(#\p #\L #\P #\v #\t #\s)]。
 
-于是，在找到所有放错了的物品类型之后，请计算@question{它们的优先级之和}。
+于是，第一个谜题是@question{在找到所有放错了的物品类型之后，计算它们的优先级之和}。
 
 @tamer-action[#:requires ["../aoc.rkt"]
               (code:comment "注意，函数 read-aoc-data 隐藏了读文件小循环")
@@ -230,6 +242,144 @@ Python 可以通过@bold{自动序列装包/拆包}达到同样的目的，但�
                  #:from "mee/03.rr.dat"
                  #:for-each-do find-misplaced-item))
               (priority-sum all-misplaced-items)]
+
+在你忙着找出所有放错了的物品类型之后，精灵们又碰到新的麻烦了。在本次远征中，出于安全考虑，精灵们决定三人一组成立小队。
+每个小队都有自己的专属徽章，徽章上面的内容即是每队三只精灵都共同携带的@bold{一种}物品类型。也就是说，如果某队的徽章
+是个弓箭，那该队所有三只精灵的背包里都会有弓箭，并且其他所有物品都最多只能有两只精灵携带（否则队徽上就不只一种物品了）。
+
+问题在于，不少精灵忘了在队徽上贴“真品”标识了，不得已只好回收所有队徽从新贴标签；然而又没人记录哪一个徽章属于哪个队。
+于是，这些干活毛手毛脚的精灵只好来求助你了。
+
+假如，精灵们给的物品类型清单就是按组写的，每三行代表一个组，每组一个队徽，那队徽就是该组的三行清单里那唯一的共同物品类型。
+于是，从本任务前面的例子中可以得到两个精灵小队，第一队背包里有
+
+@tabular[#:style 'boxed #:sep @hspace[1]
+         (list (list "vJrwpWtwJgWrhcsFMMfFFhFp")
+               (list "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL")
+               (list "PmmdzqPrVvPwwTWBwg"))]
+队里三只精灵唯一共同持有的物品是 @litchar{r}；第二队背包里有：
+@tabular[#:style 'boxed #:sep @hspace[1]
+         (list (list "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn")
+               (list "ttgJtRGJQctTZtZT")
+               (list "CrZsJsPPZsGzwwsLwLmpwMDw"))]
+队里三只精灵唯一共同持有的物品是 @litchar{Z}。
+
+这两队的徽章的优先级之和是 @tamer-datum['priority-sum '(#\r #\Z)]（@tamer-datum['item-priority #\r](@litchar{r})
+@racket[+] @tamer-datum['item-priority #\Z](@litchar{Z})）。
+
+于是，第二个谜题是@question{在找到所有小队的徽章之后，计算它们所代表的物品类型的优先级之和}。
+
+@tech{列表}和@tech{哈希表}是本次任务中的核心数据结构，但是我们更应该关注的依然还是它们的存到所引发的我们思维方式的提升，
+更通俗一点地说就是问题与问题之间的相互转化。
+
+在前一个谜题中，我们已经能够理解，关注文件操作的大循环意义不大，核心应该放在@|the-core-in-thinking|。但是在第二个谜题中，
+一个很明显的不同是，这个问题需要一次读取三条物品清单。那么，原先针对单个物品清单的基本循环还能直接用吗？比如，
+
+@handbook-chunk[<定义函数find-badge-items>
+                (code:comment #,($argv [/dev/datin "与背包物品清单关联的输入源"]))
+                (define (find-badge-items /dev/datin)
+                  (for/list ([lines <针对每一组物品清单>])
+                    (find-badge-item lines)))]
+
+对比该函数与 @racket[find-misplaced-items]，它俩结构完全一致，唯一的差别仅有@racketcommentfont{每次读取的行数}。
+这跟第一天的两个谜题有点像，那天我们选了列表作为解决方案，本题也可沿用同样的思路。于是，
+
+@handbook-chunk[<针对每一组物品清单>
+                (in-port <创建每次读三行函数> /dev/datin)]
+
+现在你应该不会再对 @litchar{in-} 打头的函数陌生了。譬如，前面的 @racket[in-lines] 函数的功能是
+@racketcommentfont{从文件中每次读取一行，并依次提供给循环使用}。这里不妨大胆猜猜看，这个 @racket[in-port] 函数的功能
+应该也是读取文件，但要按照它的第二个参数的要求来读。本任务中是要@racketcommentfont{一次读取三行}，每次读取之后返回
+一个包含三个字符串的列表。
+
+实际上，@racket[in-lines] 就是当第二个参数是函数 @racket[read-line] 时的 @racket[in-port]。有点拗口，现在需要
+记住的是，函数本身也是可以当作参数传递给其他函数的，只要那些函数被声明为可以接受函数类型的参数。这其实就是数学中的
+@bold{复合函数}概念，而我们一直在提的@bold{函数式编程}跟数学函数的关系相当密切。
+
+于是，对于本题，我们只需提供一个@racketcommentfont{每次读取三行}的函数 @racket[read-3-lines] 即可：
+
+@handbook-chunk[<创建每次读三行函数>
+                (make-read-lines 3)]
+
+只是，这个 @racket[read-3-lines] 不如@racketcommentfont{每次读取一行}的 @racket[read-line] 常用。一般语言
+不会直接提供，需要我们自己去写。该函数逻辑并不复杂，无非就是重复3次 @racket[read-line]，所以我直接提供了函数
+@racket[make-read-lines]，用于创建一个@racketcommentfont{每次读取n行}的函数。该函数特殊在，它的返回值是另一个函数。
+考虑到真实软件中需要检查输入文件是否合乎契约，这个返回的函数最后一次实际读到的列表的大小可能会小于n。
+
+以下例子演示了如何借助 @racket[make-read-lines] 分别读取前三天任务的前三行输入数据。注意区分 @racket[read-line]
+和 @racket[(make-read-lines 1)] 的区别。
+
+@tamer-action[(with-aoc-data-from "mee/01.cc.dat" #:do
+                read-line)
+              (with-aoc-data-from "mee/01.cc.dat" #:do
+                (make-read-lines 1))
+              (with-aoc-data-from "mee/02.rps.dat" #:do
+                (make-read-lines 2))
+              (with-aoc-data-from "mee/03.rr.dat" #:do
+                (make-read-lines 3))]
+
+到这里，有关文件输入的大循环的奥秘就都解开了。从现在开始，我们将不再关注文件输入大循环，而只关注@question{我们需要读取
+什么样的数据}和@question{如何处理这些数据}。处理后者的函数是重点，处理前者的函数只是文件原始内容和后者之间的@bold{管道}。
+就好像你家浴室的花洒，水管里只能流出水柱，但从花洒里出来的水就跟花洒的形状有关了，不同形状的水适用于不同的洗澡目的。
+
+最后来完成第二个谜题的核心部分，也即@question{如何处理每三行物品清单}的函数 @racket[find-badge-item]：
+
+@handbook-chunk[<定义函数find-badge-item>
+                (code:comment #,($argv [items "小队所有精灵的物品清单列表"]))
+                (define find-badge-item
+                  (lambda [items]
+                    (car
+                     (hash-keys
+                      <依次构造共有物品类型字典>))))]
+
+从@racketcommentfont{构造字典-查字典}的角度来看，该函数的功能仍然是从字典中找出唯一存在的物品类型，差别在于@question{从
+ 原先的两个隔间里找}变成了@question{从三个背包里找}。构造字典的过程仅差在循环开始或结束的位置。于是，上面靠直觉单独定义的函数
+@racket[make-item-dict] 和 @racket[make-shared-item-dict] 就派上用场了：
+
+@handbook-chunk[<依次构造共有物品类型字典>
+                (for/fold ([dct <第一个背包的物品类型字典>])
+                          ([item (in-list (cdr items))])
+                  (make-shared-item-dict dct item 0))]
+
+从第二个背包开始，查找共有物品的过程就没有差别了，都是@racketcommentfont{在上次循环产生的共有物品字典中查找本次循环中有的物品}。
+这里使用了一类特殊循环 @racket[for/fold]，它允许循环过程能够直接操作上一次循环产生的结果。从这个描述中，你看到@bold{递归}的影子了吗？
+实际上，@italic{fold} 是@bold{函数式编程}中的一种既典型又灵活的高级运算，中文直译为@bold{折叠}，在其他语言里也可能以别的同义概念
+的形式出现。总之，其他 @litchar{for/} 型循环都可以用 @italic{fold} 操作来实现。不过，今天的信息量太多了，这个以后再详细说吧。
+
+@italic{fold} 操作需要一个初始值，那自然就是第一个背包的物品清单字典：
+
+@handbook-chunk[<第一个背包的物品类型字典>
+                (let ([item (car items)])
+                  (make-item-dict item (string-length item)))]
+
+同理，我们可以通过直接传入前面例子中的字符串列表来测试 @racket[find-badge-item]：
+
+@tamer-action[(find-badge-item
+               (list "vJrwpWtwJgWrhcsFMMfFFhFp"
+                     "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL"
+                     "PmmdzqPrVvPwwTWBwg"))
+              (find-badge-item
+               (list "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn"
+                     "ttgJtRGJQctTZtZT"
+                     "CrZsJsPPZsGzwwsLwLmpwMDw"))]
+
+至此，任务完成：
+
+@tamer-action[(define all-badge-items
+                (read-aoc-data
+                 #:from "mee/03.rr.dat"
+                 #:with (make-read-lines 3)
+                 #:for-each-do find-badge-item))
+              (priority-sum all-badge-items)]
+
+在本任务中，精灵们还算识相，没有提过分的要求。比如在优先级上做文章，要求你给个重组方案。不过，我倒是还想多提一个问题：
+对于 C 这种不直接提供@tech{列表}和@tech{哈希表}的语言来说，就用唯一开箱即用的数组，如何完成本任务？既然本任务跟优先级
+关系不大，那作者如此设置的用意是什么呢？由于优先级与代表物品类型的字符是一一对应关系，那显然用优先级作为哈希表的关键字
+也没有问题；又因为优先级是连续自然数，适合用作数组的索引，且几乎不会浪费存储空间。因此，在本任务中，使用数组与使用
+@tech{列表}和@tech{哈希表}差别不算大，请课后自行写程序验证这个说法。
+
+计算机最擅长处理的数据类型显然是数字，然而人类极其不擅长将数字与概念建立联系。因此总想着在程序中给数字起个有意义的名字，
+要不然过不了多久自己的程序就会变成天书。但又不得不想出一整套规则用数字来表示概念以便让计算机高效干活。这个拧巴……
 
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-reference[]
