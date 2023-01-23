@@ -44,7 +44,7 @@ void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
 void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->logo = this->insert(new Sprite("logo.png"));
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, this->name()));
-    this->info_board = this->insert(new Labellet(aoc_font::title, GRAY, " "));
+    this->info_board = this->insert(new Labellet(aoc_font::title, GRAY, ""));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, unknown_fmt, population_desc));
     this->top1_total = this->insert(new Dimensionlet(this->style, "cal", top1_desc));
     this->topn_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, cmp_alg_desc));
@@ -66,7 +66,6 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
         y0 = fl2fxi(height * 0.5F);
         yn = fl2fxi(height) - text_fontsize;
 
-        this->begin_update_sequence();
         for (auto elf : this->elves) {
             this->insert(elf);
             elf->set_fps(8);
@@ -75,7 +74,6 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
 
             this->move_to(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
         }
-        this->end_update_sequence();
     }
 }
 
@@ -345,7 +343,7 @@ void WarGrey::AoC::CalorieCountingPlane::on_task_start(CCStatus status) {
 
 void WarGrey::AoC::CalorieCountingPlane::on_task_done() {
     this->status = CCStatus::TaskDone;
-    this->info_board->set_text(MatterAnchor::RT, " ");
+    this->info_board->set_text(MatterAnchor::RT, "");
 }
 
 void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx) {

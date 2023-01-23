@@ -14,6 +14,7 @@ using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
 
 /*************************************************************************************************/
+static const char* population_desc = "大赛剩余轮数";
 static const char* guessed_strategy_desc = "猜测策略得分";
 static const char* designed_strategy_desc = "精灵策略得分";
 static const char* random_strategy_desc = "随机策略得分";
@@ -112,6 +113,7 @@ void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
 void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->logo = this->insert(new Sprite("logo.png"));
     this->titlet = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, this->name()));
+    this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, puzzle_fmt, population_desc, this->strategy.size()));
     this->guessed_score = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
     this->designed_score = this->insert(new Dimensionlet(this->style, "", designed_strategy_desc));
     this->random_score = this->insert(new Dimensionlet(this->style, "", random_strategy_desc));
@@ -145,15 +147,16 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
 
 void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     this->move_to(this->titlet, this->logo, MatterAnchor::RC, MatterAnchor::LC);
-    this->move_to(this->guessed_score, this->logo, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
+    this->move_to(this->population, this->logo, MatterAnchor::LB, MatterAnchor::LT);
+    this->move_to(this->guessed_score, this->population, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->designed_score, this->guessed_score, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->random_score, this->designed_score, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     
     this->round_x0 = width * 0.50F;
-    this->round_y0 = height * 0.42F;
+    this->round_y0 = height * 0.50F;
 
     this->race_x0 = width * 0.25F;
-    this->race_y0 = height * 0.72F;
+    this->race_y0 = height * 0.80F;
     this->race_distance = width * 0.5F;
     
     this->move_to(this->snack, width * 0.75F, this->race_y0, MatterAnchor::LC);
@@ -214,7 +217,9 @@ void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint
                 this->random_score->set_value(this->random_total_score);
                 
                 this->current_round ++;
+                this->population->set_text(puzzle_fmt, population_desc, this->strategy.size() - this->current_round);
             } else {
+                this->population->set_text(puzzle_fmt, population_desc, this->strategy.size());
                 this->on_task_done();
             }
         }; break;
@@ -229,7 +234,7 @@ void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint
 
 void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
     if (yes_or_no) {
-        if (m == this->tux) {
+        if ((m == this->guessed_score) || (m == this->designed_score) || (m == this->random_score) || (m == this->tux)) {
             this->current_round = 0;
             this->guessed_total_score = 0;
             this->designed_total_score = 0;

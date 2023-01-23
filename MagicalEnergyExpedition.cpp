@@ -1,5 +1,6 @@
 #include "digitama/magical_energy_expedition/calorie_counting.hpp"
 #include "digitama/magical_energy_expedition/rochambo.hpp"
+#include "digitama/magical_energy_expedition/rucksack_reorganization.hpp"
 
 #include "digitama/big_bang/physics/random.hpp"
 #include "digitama/sprite/ulpc.hpp"
@@ -32,7 +33,7 @@ namespace {
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
             this->logo = this->insert(new Sprite("logo.png"));
-            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞魔法能量探险"));
+            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞能量水果"));
             this->sledge = this->insert(new Sprite("sledge.png"));
             this->island = this->insert(new Sprite("island.png"));
             this->boat = this->insert(new Sprite("boat.png"));
@@ -193,7 +194,7 @@ namespace {
     };
 
     /*************************************************************************************************/
-    enum class CmdlineOps { TopCount, _ };
+    enum class CmdlineOps { TopCount, GroupSize, _ };
 
     class MagicalEnergyExpeditionCosmos : public Cosmos {
     public:
@@ -215,6 +216,7 @@ namespace {
             this->push_plane(new MagicalEnergyExpeditionPlane(this));
             this->push_plane(new CalorieCountingPlane(this->top_count));
             this->push_plane(new RochamboPlane());
+            this->push_plane(new RucksackReorganizationPlane(this->group_size));
         }
 
     protected:
@@ -235,9 +237,15 @@ namespace {
                         this->top_count = std::stoi(argv[idx]);
                         opt = CmdlineOps::_;
                     }; break;
+                    case CmdlineOps::GroupSize: {
+                        this->group_size = std::stoi(argv[idx]);
+                        opt = CmdlineOps::_;
+                    }; break;
                     default: {
-                        if (strncmp("-n", argv[idx], 2) == 0) {
+                        if (strncmp("--tc", argv[idx], 5) == 0) {
                             opt = CmdlineOps::TopCount;
+                        } else if (strncmp("--gs", argv[idx], 5) == 0) {
+                            opt = CmdlineOps::GroupSize;
                         } else {
                             datin = std::string(argv[idx]);
                         }
@@ -248,6 +256,7 @@ namespace {
 
     private:
         int top_count = 0;
+        int group_size = 0;
     };
 }
 

@@ -22,6 +22,7 @@ namespace WarGrey::AoC {
         static TTF_Font* text;
         static TTF_Font* dimension;
         static TTF_Font* vertical;
+        static TTF_Font* mono;
     };
 
     void aoc_fonts_initialize();

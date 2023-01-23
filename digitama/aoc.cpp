@@ -8,6 +8,7 @@ TTF_Font* WarGrey::AoC::aoc_font::title = nullptr;
 TTF_Font* WarGrey::AoC::aoc_font::text = nullptr;
 TTF_Font* WarGrey::AoC::aoc_font::dimension = nullptr;
 TTF_Font* WarGrey::AoC::aoc_font::vertical = nullptr;
+TTF_Font* WarGrey::AoC::aoc_font::mono = nullptr;
 
 /*************************************************************************************************/
 void WarGrey::AoC::aoc_fonts_initialize() {
@@ -16,6 +17,7 @@ void WarGrey::AoC::aoc_fonts_initialize() {
         aoc_font::text = game_create_font(font_basename(game_font::unicode), text_fontsize);
         aoc_font::dimension = game_create_font(font_basename(game_font::math), dim_fontsize);
         aoc_font::vertical = game_create_font(font_basename(game_font::unicode), vertical_fontsize);
+        aoc_font::mono = game_create_font(font_basename(game_font::monospace), text_fontsize);
     }
 }
 
@@ -24,6 +26,7 @@ void WarGrey::AoC::aoc_fonts_destroy() {
     game_font_destroy(aoc_font::text);
     game_font_destroy(aoc_font::dimension);
     game_font_destroy(aoc_font::vertical);
+    game_font_destroy(aoc_font::mono);
 }
 
 /*************************************************************************************************/

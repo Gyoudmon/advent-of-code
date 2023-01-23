@@ -65,6 +65,7 @@ namespace WarGrey::AoC {
     private: // 本游戏世界中的物体
         WarGrey::STEM::Sprite* logo;
         WarGrey::STEM::Labellet* titlet;
+        WarGrey::STEM::Labellet* population;
         WarGrey::STEM::Dimensionlet* guessed_score;
         WarGrey::STEM::Dimensionlet* designed_score;
         WarGrey::STEM::Dimensionlet* random_score;
