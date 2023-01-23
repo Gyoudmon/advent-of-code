@@ -188,7 +188,7 @@ void WarGrey::AoC::RochamboPlane::on_enter(IPlane* from) {
     
     this->tux->play("walk");
     this->snack->set_fps(2);
-    this->snack->play("");
+    this->snack->play();
 }
 
 void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {

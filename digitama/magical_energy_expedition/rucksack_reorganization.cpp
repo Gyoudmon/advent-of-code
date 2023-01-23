@@ -33,6 +33,101 @@ static inline const char* random_rucksack_gender(int hint) {
 }
 
 /*************************************************************************************************/
+static const unsigned int DICT_SIZE = 53;
+static char misplaced_dict1[DICT_SIZE];
+static char misplaced_dict2[DICT_SIZE];
+
+static inline void dict_zero(char dict[]) {
+    memset(dict, 0, DICT_SIZE * sizeof(char));
+}
+
+static int item_priority(char ch) {
+    int prior = 0;
+
+    if ((ch >= 'a') && (ch <= 'z')) {
+        prior = int(ch - 'a' + 1);
+    } else if ((ch >= 'A') && (ch <= 'Z')) {
+        prior = int(ch - 'A' + 27);
+    }
+
+    return prior;
+}
+
+static int misplaced_item_priority(const std::string& item_list) {
+    const char* items = item_list.c_str();
+    int midpos = item_list.size() / 2;
+    int priority = 0;
+
+    dict_zero(misplaced_dict1);
+    dict_zero(misplaced_dict2);
+        
+    for (int idx = 0; idx < midpos; idx ++) {
+        if (items[idx] == items[idx + midpos]) {
+            priority = item_priority(items[idx]);
+            break;
+        } else {
+            int prior1 = item_priority(items[idx]);
+            int prior2 = item_priority(items[idx + midpos]);
+
+            if (misplaced_dict2[prior1] != '\0') {
+                priority = prior1;
+                break;
+            } else if (misplaced_dict1[prior2] != '\0') {
+                priority = prior2;
+                break;
+            } else {
+                misplaced_dict1[prior1] = items[idx];
+                misplaced_dict2[prior2] = items[idx + midpos];
+            }
+        }
+    }
+
+    return priority;
+}
+
+static void feed_item_dict(char dict[], const char* items, size_t endpos) {
+    dict_zero(dict);
+
+    for (int idx = 0; idx < endpos; idx ++) {
+        dict[item_priority(items[idx])] = items[idx];
+    }
+}
+
+static void feed_shared_item_dict(char dict[], char dict0[], const char* items, size_t endpos) {
+    dict_zero(dict);
+
+    for (int idx = 0; idx < endpos; idx ++) {
+        int prior = item_priority(items[idx]);
+
+        if (dict0[prior] != '\0') {
+            dict[prior] = items[idx];
+        }
+    }
+}
+
+static int find_last_shared_item_prior(char dict0[], const char* items, size_t endpos) {
+    int last_shared_item_prior = 0;
+
+    for (int idx = 0; idx < endpos; idx ++) {
+        int prior = item_priority(items[idx]);
+
+        if (dict0[prior] != '\0') {
+            last_shared_item_prior = prior;
+        }
+    }
+
+    return last_shared_item_prior;
+}
+
+/*************************************************************************************************/
+WarGrey::AoC::RucksackReorganizationPlane::~RucksackReorganizationPlane() {
+    for (int idx = 0; idx < this->group_size - 1; idx ++) {
+        free(this->badge_dicts[idx]);
+    }
+    
+    free(this->badge_dicts);
+}
+
 void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float height) {
     this->load_item_list(digimon_path("mee/03.rr.dat"));
     
@@ -40,6 +135,11 @@ void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float hei
         this->group_size = 3;
     } else if (this->group_size > this->rucksacks.size()) {
         this->group_size = this->rucksacks.size();
+    }
+
+    this->badge_dicts = (char**)malloc((this->group_size - 1)* sizeof(char**));
+    for (int idx = 0; idx < this->group_size - 1; idx ++) {
+        this->badge_dicts[idx] = (char*)malloc(DICT_SIZE * sizeof(char));
     }
 
     this->style = make_highlight_dimension_style(answer_fontsize, 5U, 0);
@@ -103,13 +203,39 @@ void WarGrey::AoC::RucksackReorganizationPlane::on_enter(IPlane* from) {
 
 void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
     switch (this->status) {
-        case RRStatus::CountOff: {
+        case RRStatus::FindMisplacedItems: {
             if (this->current_rucksack_idx < this->rucksacks.size()) {
                 this->rucksacks[this->current_rucksack_idx]->switch_to_next_costume();
                 this->display_items(this->rucksacks[this->current_rucksack_idx]);
-                this->population->set_text(puzzle_fmt, population_desc, ++ this->current_rucksack_idx);
+                
+                this->misplaced_item_priority_sum += misplaced_item_priority(this->rucksacks[this->current_rucksack_idx]->items);
+                this->misplaced_sum->set_value(this->misplaced_item_priority_sum);
+
+                this->current_rucksack_idx ++;
             } else {
-                this->population->set_text(puzzle_fmt, population_desc, this->rucksacks.size());
+                this->on_task_done();
+            }
+        }; break;
+        case RRStatus::FindBadgeItems: {
+            if (this->current_rucksack_idx < this->rucksacks.size()) {
+                const char* items = this->rucksacks[this->current_rucksack_idx]->items.c_str();
+                size_t endpos = this->rucksacks[this->current_rucksack_idx]->items.size();
+                size_t gidx = this->current_rucksack_idx % this->group_size;
+                
+                if (gidx == 0) {
+                    feed_item_dict(badge_dicts[gidx], items, endpos);
+                } else if (gidx < this->group_size - 1) {
+                    feed_shared_item_dict(badge_dicts[gidx], badge_dicts[gidx - 1], items, endpos);
+                } else {
+                    this->badge_item_priority_sum += find_last_shared_item_prior(badge_dicts[gidx - 1], items, endpos);
+                    this->badge_sum->set_value(this->badge_item_priority_sum);
+                }
+
+                this->rucksacks[this->current_rucksack_idx]->switch_to_next_costume();
+                this->display_items(this->rucksacks[this->current_rucksack_idx]);
+                
+                this->current_rucksack_idx ++;
+            } else {
                 this->on_task_done();
             }
         }; break;
@@ -119,18 +245,29 @@ void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t 
 
 void WarGrey::AoC::RucksackReorganizationPlane::after_select(IMatter* m, bool yes_or_no) {
     if (yes_or_no) {
-        if (m == this->population) {
+        if (m == this->misplaced_sum) {
             this->current_rucksack_idx = 0;
-            this->on_task_start(RRStatus::CountOff);
+            this->misplaced_item_priority_sum = 0;
+            this->on_task_start(RRStatus::FindMisplacedItems);
+        } else if (m == this->badge_sum) {
+            this->current_rucksack_idx = 0;
+            this->badge_item_priority_sum = 0;
+            this->on_task_start(RRStatus::FindBadgeItems);
         } else if (m == this->logo) {
             this->status = RRStatus::MissionDone;
         } else {
             Rucksack* self = dynamic_cast<Rucksack*>(m);
 
             if (self != nullptr) {
-                self->switch_to_prev_costume();
                 this->display_items(self);
+                self->play();
             }
+        }
+    } else {
+        Rucksack* self = dynamic_cast<Rucksack*>(m);
+
+        if (self != nullptr) {
+            self->stop();
         }
     }
 }

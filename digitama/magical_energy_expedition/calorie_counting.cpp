@@ -122,7 +122,7 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
 
 void WarGrey::AoC::CalorieCountingPlane::on_enter(IPlane* from) {
     this->on_task_done();
-    this->snack->play("");
+    this->snack->play();
 }
 
 void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {

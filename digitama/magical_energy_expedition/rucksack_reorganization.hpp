@@ -18,7 +18,8 @@ namespace WarGrey::AoC {
 
     /******************************************* 声明游戏状态 ******************************************/
     enum class RRStatus {
-        CountOff,
+        FindMisplacedItems,
+        FindBadgeItems,
         TaskDone,
         MissionDone,
     };
@@ -27,7 +28,7 @@ namespace WarGrey::AoC {
     class RucksackReorganizationPlane : public WarGrey::STEM::Plane {
     public:
         RucksackReorganizationPlane(int n = 3) : Plane("背包重组"), group_size(n) {}
-        virtual ~RucksackReorganizationPlane() {}
+        virtual ~RucksackReorganizationPlane();
 
     public:  // 覆盖游戏基本方法
         void construct(float width, float height) override;
@@ -78,7 +79,12 @@ namespace WarGrey::AoC {
     private: // shared variable
         int current_rucksack_idx;
 
+    private: // for FindMisplacedItems
+        int misplaced_item_priority_sum;
+
     private: // for FindBadgeItem
+        char** badge_dicts;
+        int badge_item_priority_sum;
         int group_size;
     };
 }
