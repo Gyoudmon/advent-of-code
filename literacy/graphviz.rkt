@@ -7,6 +7,7 @@
 
 (require digimon/format)
 (require digimon/git)
+(require digimon/digitama/git/numstat)
 (require digimon/digitama/git/langstat)
 
 (require racket/date)
@@ -250,7 +251,8 @@
 (define handbook-statistics
   (lambda [#:gitstat-width [git-width #false] #:gitstat-radius [git-radius #false] #:recursive? [recursive? #true]
            #:ignore [exclude-submodules null] #:filter [filter null] #:subgroups [subgroups git-default-subgroups]
-           #:altcolors [altcolors null] #:since [since #false] #:date-delta [date-delta (* 3600 24 31)]]
+           #:altcolors [altcolors null] #:since [since #false] #:date-delta [date-delta (* 3600 24 31)]
+           #:lang-delta-only? [lang-delta-only? #false]]
     (define all-files (git-list-tree #:recursive? recursive? #:ignore-submodule exclude-submodules #:filter filter))
     (define all-numstats (git-numstat #:recursive? recursive? #:ignore-submodule exclude-submodules #:since since #:filter filter))
     (define lang-files (git-files->langfiles all-files null subgroups))
@@ -258,7 +260,10 @@
     (define lang-stats (git-numstats->langstats all-numstats null subgroups))
     
     (define src-file (for/fold ([count 0]) ([lf (in-hash-values lang-files)]) (+ count (length (git-language-content lf)))))
-    (define-values (insertions deletions) (git-numstats->additions+deletions* all-numstats))
+    (define-values (insertions deletions)
+      (if (not lang-delta-only?)
+          (git-numstats->additions+deletions* all-numstats)
+          (git-langstats->additions+deletions* lang-stats)))
     
     (define sorted-langfiles (sort (hash-values lang-sizes) >= #:key git-language-content))
     (define langstats (for/list ([(id lang) (in-hash lang-stats)] #:when (hash-has-key? lang-sizes id)) lang))
