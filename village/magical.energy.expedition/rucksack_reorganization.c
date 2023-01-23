@@ -42,7 +42,7 @@ void feed_shared_item_dict(char dict[], char dict0[], char* line, size_t start, 
     }
 }
 
-int find_shared_item_dict(char dict0[], char* line, size_t start, size_t endpos) {
+int find_last_shared_item_prior(char dict0[], char* line, size_t start, size_t endpos) {
     int last_shared_item_prior = 0;
 
     for (int idx = start; idx < endpos; idx ++) {
@@ -112,7 +112,7 @@ void do_for_rucksack_organization(FILE* in, int n) {
             } else if (badge_idx < n - 1) {
                 feed_shared_item_dict(badge_dicts[badge_idx], badge_dicts[badge_idx - 1], line, 0, endpos);
             } else {
-                badge_prior_sum += find_shared_item_dict(badge_dicts[badge_idx - 1], line, 0, endpos);
+                badge_prior_sum += find_last_shared_item_prior(badge_dicts[badge_idx - 1], line, 0, endpos);
             }
 
             count ++;

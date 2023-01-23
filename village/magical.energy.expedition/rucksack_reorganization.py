@@ -4,7 +4,7 @@ import sys
 import string
 
 ###################################################################################################
-def line_group_by_count(lines, n):
+def group_item_list(lines, n):
     groups = []
     rest = lines
 
@@ -76,7 +76,7 @@ def do_for_rucksack_organization(src):
         lines.append(line.strip())
 
     print(priority_sum(map(find_misplaced_item, lines)))
-    print(priority_sum(map(find_badge_item, line_group_by_count(lines, 3))))
+    print(priority_sum(map(find_badge_item, group_item_list(lines, 3))))
 
 ###################################################################################################
 def main(argc, argv):
