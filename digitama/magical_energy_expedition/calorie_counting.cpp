@@ -26,6 +26,7 @@ static const float normal_scale_up = 1.6F;
 static const float top_scale_up = 2.0F;
 static const float elf_scale = 0.64F;
 
+static const int grid_column = 16;
 static const int micro_pace = 3;
 
 /*************************************************************************************************/
@@ -67,12 +68,10 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
         yn = fl2fxi(height) - text_fontsize;
 
         for (auto elf : this->elves) {
-            this->insert(elf);
+            this->insert(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
             elf->set_fps(8);
             elf->play("lwalk");
             elf->scale(elf_scale);
-
-            this->move_to(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
         }
     }
 }
@@ -87,20 +86,14 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
     this->move_to(this->sorted_total, this->topn_total, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     
     if (this->elves.size() > 0) {
-        float elf_width, elf_height;
-        float lbl_width, lbl_height, title_height;
+        float lbl_width, lbl_height;
+        float gxoff, gyoff;
         
-        this->elves[0]->feed_extent(0.0F, 0.0F, &elf_width, &elf_height);
-        this->title->feed_extent(0.0F, 0.0F, nullptr, &title_height);
         this->topn_total->feed_extent(0.0F, 0.0F, &lbl_width, &lbl_height);
         
-        this->cell_width = elf_width;
-        this->cell_height = elf_height;
-        this->grid_xoff = lbl_width + float(text_fontsize);
-        this->grid_yoff = title_height + lbl_height * 1.0F;
-
-        this->col = int(flfloor((width - this->grid_xoff) / this->cell_width)) - 1;
-        this->row = int(flfloor((height - this->grid_yoff) / this->cell_height));
+        gxoff = lbl_width + float(text_fontsize);
+        gyoff = float(title_fontsize) + lbl_height * 1.0F;
+        this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(text_fontsize));
 
         /* reflow top elves labels */ {
             float yoff, cwidth, cheight;
@@ -283,14 +276,7 @@ bool WarGrey::AoC::CalorieCountingPlane::can_select(IMatter* m) {
 
 void WarGrey::AoC::CalorieCountingPlane::move_elf_to_grid(Elfmon* elf) {
     if (elf->id > 0) {
-        int idx = elf->id - 1;
-        int c = idx % this->col;
-        int r = idx / this->col;
-
-        this->move_to(elf,
-            (c + 0.5F) * this->cell_width + this->grid_xoff,
-            (r + 1.0F) * this->cell_height + this->grid_yoff,
-            MatterAnchor::CB);
+        this->move_to_grid(elf, elf->id - 1, MatterAnchor::CB);
     }
 }
 

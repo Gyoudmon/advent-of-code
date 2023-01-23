@@ -24,6 +24,8 @@ static const char* badge_desc = "队徽物品优先级总和";
 static const float rucksack_size = 36.0F;
 static const float rucksack_grid_ratio = 1.15F;
 
+static const int grid_column = 16;
+
 static inline const char* random_rucksack_style(int hint) {
     return rucksack_styles[random_uniform(0, sizeof(rucksack_styles) / sizeof(char*) - 1)];
 }
@@ -183,20 +185,15 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
     this->move_to(this->info_board, this->badge_sum, MatterAnchor::LB, MatterAnchor::LT);
     
     if (this->rucksacks.size() > 0) {
-        float elf_width, elf_height;
-        float lbl_width, lbl_height, title_height;
+        float lbl_width, lbl_height;
+        float gxoff, gyoff;
         
-        this->rucksacks[0]->feed_extent(0.0F, 0.0F, &elf_width, &elf_height);
-        this->title->feed_extent(0.0F, 0.0F, nullptr, &title_height);
         this->badge_sum->feed_extent(0.0F, 0.0F, &lbl_width, &lbl_height);
         
-        this->cell_width = elf_width * rucksack_grid_ratio;
-        this->cell_height = elf_height * rucksack_grid_ratio;
-        this->grid_xoff = lbl_width + float(text_fontsize);
-        this->grid_yoff = title_height + lbl_height * 0.0F;
+        gxoff = lbl_width + float(text_fontsize);
+        gyoff = float(title_fontsize) + lbl_height * 0.0F;
 
-        this->col = int(flfloor((width - this->grid_xoff) / this->cell_width)) - 1;
-        this->row = int(flfloor((height - this->grid_yoff) / this->cell_height));
+        this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(text_fontsize));
 
         for (int idx = 0; idx < this->rucksacks.size(); idx ++) {
             this->move_rucksack_to_grid(this->rucksacks[idx]);
@@ -285,14 +282,7 @@ bool WarGrey::AoC::RucksackReorganizationPlane::can_select(IMatter* m) {
 
 void WarGrey::AoC::RucksackReorganizationPlane::move_rucksack_to_grid(Rucksack* rs) {
     if (rs->id > 0) {
-        int idx = rs->id - 1;
-        int c = idx % this->col;
-        int r = idx / this->col;
-
-        this->move_to(rs,
-            (c + 0.5F) * this->cell_width + this->grid_xoff,
-            (r + 1.0F) * this->cell_height + this->grid_yoff,
-            MatterAnchor::CB);
+        this->move_to_grid(rs, rs->id - 1, MatterAnchor::CB);
     }
 }
 

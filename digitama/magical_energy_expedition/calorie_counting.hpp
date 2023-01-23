@@ -76,14 +76,6 @@ namespace WarGrey::AoC {
         WarGrey::STEM::SpriteGridSheet* snack;
         std::vector<WarGrey::AoC::Elfmon*> elves;
         std::vector<WarGrey::STEM::Labellet*> dims;
-        
-    private: // 精灵网格参数
-        float grid_xoff;
-        float grid_yoff;
-        float cell_width;
-        float cell_height;
-        int row;
-        int col;
 
     private:
         WarGrey::AoC::CCStatus status;

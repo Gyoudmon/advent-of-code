@@ -65,14 +65,6 @@ namespace WarGrey::AoC {
         WarGrey::STEM::Dimensionlet* misplaced_sum;
         WarGrey::STEM::Dimensionlet* badge_sum;
         std::vector<WarGrey::AoC::Rucksack*> rucksacks;
-        
-    private: // 精灵网格参数
-        float grid_xoff;
-        float grid_yoff;
-        float cell_width;
-        float cell_height;
-        int row;
-        int col;
 
     private:
         WarGrey::AoC::RRStatus status;
