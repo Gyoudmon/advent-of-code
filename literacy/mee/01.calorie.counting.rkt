@@ -10,7 +10,7 @@
 故事原文见 @~cite[D1CC]。故事中的任务将按如下程序结构展开：
 
 @handbook-chunk[<calorie:*>
-                (module tamer racket 
+                (module advent racket 
                   <定义函数find-maximum-calorie>
                   <定义函数find-maximum-calories>)]
 

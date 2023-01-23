@@ -10,7 +10,7 @@
 故事原文见 @~cite[D2RPS]。故事中的任务将按如下程序结构展开：
 
 @handbook-chunk[<rochambo:*>
-                (module tamer racket/base
+                (module advent racket/base
                   <定义比赛规则函数>
                   <定义策略解密函数>
                   <定义策略规则函数>

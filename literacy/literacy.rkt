@@ -23,6 +23,8 @@
 (tamer-default-figure-label-tail ". ")
 (tamer-default-figure-label-style 'bold)
 
+(tamer-story-submodule-name 'advent)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define-syntax (define-aoc-bib stx)
   (syntax-case stx []

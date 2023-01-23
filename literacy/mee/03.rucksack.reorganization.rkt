@@ -13,7 +13,7 @@
 故事原文见 @~cite[D3RR]。故事中的任务将按如下程序结构展开：
 
 @handbook-chunk[<rucksack-reorganization:*>
-                (module tamer racket/base
+                (module advent racket/base
                   <定义物品类型优先级函数>
                   <定义物品类型字典构造函数>
                   <定义共有物品类型查找函数>
