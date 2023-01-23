@@ -216,7 +216,7 @@ namespace {
             this->push_plane(new MagicalEnergyExpeditionPlane(this));
             this->push_plane(new CalorieCountingPlane(this->top_count));
             this->push_plane(new RochamboPlane());
-            this->push_plane(new RucksackReorganizationPlane(this->group_size));
+            this->push_plane(new RucksackReorganizationPlane());
         }
 
     protected:
@@ -237,15 +237,9 @@ namespace {
                         this->top_count = std::stoi(argv[idx]);
                         opt = CmdlineOps::_;
                     }; break;
-                    case CmdlineOps::GroupSize: {
-                        this->group_size = std::stoi(argv[idx]);
-                        opt = CmdlineOps::_;
-                    }; break;
                     default: {
                         if (strncmp("--tc", argv[idx], 5) == 0) {
                             opt = CmdlineOps::TopCount;
-                        } else if (strncmp("--gs", argv[idx], 5) == 0) {
-                            opt = CmdlineOps::GroupSize;
                         } else {
                             datin = std::string(argv[idx]);
                         }
@@ -256,7 +250,6 @@ namespace {
 
     private:
         int top_count = 0;
-        int group_size = 0;
     };
 }
 

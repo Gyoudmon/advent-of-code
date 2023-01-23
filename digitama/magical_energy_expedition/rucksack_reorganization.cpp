@@ -33,10 +33,6 @@ static inline const char* random_rucksack_gender(int hint) {
 }
 
 /*************************************************************************************************/
-static const unsigned int DICT_SIZE = 53;
-static char misplaced_dict1[DICT_SIZE];
-static char misplaced_dict2[DICT_SIZE];
-
 static inline void dict_zero(char dict[]) {
     memset(dict, 0, DICT_SIZE * sizeof(char));
 }
@@ -51,38 +47,6 @@ static int item_priority(char ch) {
     }
 
     return prior;
-}
-
-static int misplaced_item_priority(const std::string& item_list) {
-    const char* items = item_list.c_str();
-    int midpos = item_list.size() / 2;
-    int priority = 0;
-
-    dict_zero(misplaced_dict1);
-    dict_zero(misplaced_dict2);
-        
-    for (int idx = 0; idx < midpos; idx ++) {
-        if (items[idx] == items[idx + midpos]) {
-            priority = item_priority(items[idx]);
-            break;
-        } else {
-            int prior1 = item_priority(items[idx]);
-            int prior2 = item_priority(items[idx + midpos]);
-
-            if (misplaced_dict2[prior1] != '\0') {
-                priority = prior1;
-                break;
-            } else if (misplaced_dict1[prior2] != '\0') {
-                priority = prior2;
-                break;
-            } else {
-                misplaced_dict1[prior1] = items[idx];
-                misplaced_dict2[prior2] = items[idx + midpos];
-            }
-        }
-    }
-
-    return priority;
 }
 
 static void feed_item_dict(char dict[], const char* items, size_t endpos) {
@@ -120,26 +84,69 @@ static int find_last_shared_item_prior(char dict0[], const char* items, size_t e
 }
 
 /*************************************************************************************************/
-WarGrey::AoC::RucksackReorganizationPlane::~RucksackReorganizationPlane() {
-    for (int idx = 0; idx < this->group_size - 1; idx ++) {
-        free(this->badge_dicts[idx]);
+static int misplaced_item_priority(const std::string& item_list, char misplaced_dict1[], char misplaced_dict2[]) {
+    const char* items = item_list.c_str();
+    int midpos = item_list.size() / 2;
+    int priority = 0;
+
+    dict_zero(misplaced_dict1);
+    dict_zero(misplaced_dict2);
+        
+    for (int idx = 0; idx < midpos; idx ++) {
+        if (items[idx] == items[idx + midpos]) {
+            priority = item_priority(items[idx]);
+            break;
+        } else {
+            int prior1 = item_priority(items[idx]);
+            int prior2 = item_priority(items[idx + midpos]);
+
+            if (misplaced_dict2[prior1] != '\0') {
+                priority = prior1;
+                break;
+            } else if (misplaced_dict1[prior2] != '\0') {
+                priority = prior2;
+                break;
+            } else {
+                misplaced_dict1[prior1] = items[idx];
+                misplaced_dict2[prior2] = items[idx + midpos];
+            }
+        }
     }
-    
-    free(this->badge_dicts);
+
+    return priority;
+}
+
+static int badge_item_priority(char* badge_dicts[], const char* items[], size_t sizes[], int n) {
+    int last_shared_item_prior = 0;
+    int midx = n - 1;
+
+    if (midx > 1) {
+        feed_item_dict(badge_dicts[0], items[0], sizes[0]);
+
+        for (int badge_idx = 1; badge_idx < midx; badge_idx ++) {
+            feed_shared_item_dict(badge_dicts[badge_idx], badge_dicts[badge_idx - 1], items[badge_idx], sizes[badge_idx]);
+        }
+
+        last_shared_item_prior = find_last_shared_item_prior(badge_dicts[midx - 1], items[midx], sizes[midx]);
+    }
+
+    return last_shared_item_prior;
+}
+
+/*************************************************************************************************/
+WarGrey::AoC::RucksackReorganizationPlane::~RucksackReorganizationPlane() {
+    for (int idx = 0; idx < sizeof(this->badge_dicts) / sizeof(char*); idx ++) {
+        delete [] this->badge_dicts[idx];
+    }
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float height) {
     this->load_item_list(digimon_path("mee/03.rr.dat"));
-    
-    if (this->group_size <= 0) {
-        this->group_size = 3;
-    } else if (this->group_size > this->rucksacks.size()) {
-        this->group_size = this->rucksacks.size();
-    }
 
-    this->badge_dicts = (char**)malloc((this->group_size - 1)* sizeof(char**));
-    for (int idx = 0; idx < this->group_size - 1; idx ++) {
-        this->badge_dicts[idx] = (char*)malloc(DICT_SIZE * sizeof(char));
+    for (int idx = 0; idx < sizeof(this->badge_dicts) / sizeof(char*); idx ++) {
+        // the `badge_dicts` is an array of 1-dim array, instead of a 2-dim array
+        // using a 2-dim array might cause the damn 'segfault'
+        this->badge_dicts[idx] = new char[DICT_SIZE];
     }
 
     this->style = make_highlight_dimension_style(answer_fontsize, 5U, 0);
@@ -205,10 +212,12 @@ void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t 
     switch (this->status) {
         case RRStatus::FindMisplacedItems: {
             if (this->current_rucksack_idx < this->rucksacks.size()) {
-                this->rucksacks[this->current_rucksack_idx]->switch_to_next_costume();
-                this->display_items(this->rucksacks[this->current_rucksack_idx]);
+                Rucksack* self = this->rucksacks[this->current_rucksack_idx];
+
+                self->switch_to_next_costume();
+                this->display_items(self);
                 
-                this->misplaced_item_priority_sum += misplaced_item_priority(this->rucksacks[this->current_rucksack_idx]->items);
+                this->misplaced_item_priority_sum += misplaced_item_priority(self->items, this->misplaced_dict1, this->misplaced_dict2);
                 this->misplaced_sum->set_value(this->misplaced_item_priority_sum);
 
                 this->current_rucksack_idx ++;
@@ -217,24 +226,22 @@ void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t 
             }
         }; break;
         case RRStatus::FindBadgeItems: {
-            if (this->current_rucksack_idx < this->rucksacks.size()) {
-                const char* items = this->rucksacks[this->current_rucksack_idx]->items.c_str();
-                size_t endpos = this->rucksacks[this->current_rucksack_idx]->items.size();
-                size_t gidx = this->current_rucksack_idx % this->group_size;
-                
-                if (gidx == 0) {
-                    feed_item_dict(badge_dicts[gidx], items, endpos);
-                } else if (gidx < this->group_size - 1) {
-                    feed_shared_item_dict(badge_dicts[gidx], badge_dicts[gidx - 1], items, endpos);
-                } else {
-                    this->badge_item_priority_sum += find_last_shared_item_prior(badge_dicts[gidx - 1], items, endpos);
-                    this->badge_sum->set_value(this->badge_item_priority_sum);
+            size_t n = sizeof(this->group_sizes) / sizeof(size_t);
+            int rest = this->rucksacks.size() - this->current_rucksack_idx;
+
+            if (rest >= n) {
+                for (int idx = 0; idx < n; idx ++) {
+                    Rucksack* self = this->rucksacks[this->current_rucksack_idx + idx];
+
+                    self->switch_to_next_costume();
+                    this->group_items[idx] = self->items.c_str();
+                    this->group_sizes[idx] = self->items.size();
                 }
 
-                this->rucksacks[this->current_rucksack_idx]->switch_to_next_costume();
-                this->display_items(this->rucksacks[this->current_rucksack_idx]);
+                this->badge_item_priority_sum += badge_item_priority(this->badge_dicts, this->group_items, this->group_sizes, n);
+                this->badge_sum->set_value(this->badge_item_priority_sum);
                 
-                this->current_rucksack_idx ++;
+                this->current_rucksack_idx += n;
             } else {
                 this->on_task_done();
             }

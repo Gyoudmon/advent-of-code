@@ -7,6 +7,8 @@
 
 namespace WarGrey::AoC {
     /******************************************* 声明游戏精灵 ******************************************/
+    static const unsigned int DICT_SIZE = 53;
+
     class Rucksack : public WarGrey::STEM::Sprite {
     public:
         Rucksack(const std::string& items, int id);
@@ -27,7 +29,7 @@ namespace WarGrey::AoC {
     /******************************************* 声明游戏世界 ******************************************/
     class RucksackReorganizationPlane : public WarGrey::STEM::Plane {
     public:
-        RucksackReorganizationPlane(int n = 3) : Plane("背包重组"), group_size(n) {}
+        RucksackReorganizationPlane() : Plane("背包重组") {}
         virtual ~RucksackReorganizationPlane();
 
     public:  // 覆盖游戏基本方法
@@ -81,10 +83,13 @@ namespace WarGrey::AoC {
 
     private: // for FindMisplacedItems
         int misplaced_item_priority_sum;
+        char misplaced_dict1[DICT_SIZE];
+        char misplaced_dict2[DICT_SIZE];
 
     private: // for FindBadgeItem
-        char** badge_dicts;
+        char* badge_dicts[2];
+        const char* group_items[3];
+        size_t group_sizes[3];
         int badge_item_priority_sum;
-        int group_size;
     };
 }
