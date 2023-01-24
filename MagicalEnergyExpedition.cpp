@@ -231,6 +231,8 @@ namespace {
             CmdlineOps opt = CmdlineOps::_;
             std::string datin;
 
+            // this->set_cmdwin_height(32);
+
             for (int idx = 1; idx < argc; idx ++) {
                 switch (opt) {
                     case CmdlineOps::TopCount: {

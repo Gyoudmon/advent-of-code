@@ -22,8 +22,6 @@ static const char* misplaced_desc = "错放物品优先级总和";
 static const char* badge_desc = "队徽物品优先级总和";
 
 static const float rucksack_size = 36.0F;
-static const float rucksack_grid_ratio = 1.15F;
-
 static const int grid_column = 16;
 
 static inline const char* random_rucksack_style(int hint) {
@@ -162,18 +160,9 @@ void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) 
     this->misplaced_sum = this->insert(new Dimensionlet(this->style, "", misplaced_desc));
     this->badge_sum = this->insert(new Dimensionlet(this->style, "", badge_desc));
     
-    if (this->rucksacks.size() > 0) {
-        int x0, xn, y0, yn;
-
-        x0 = fl2fxi(width * 0.32F);
-        xn = fl2fxi(width) - text_fontsize;
-        y0 = fl2fxi(height * 0.5F);
-        yn = fl2fxi(height) - text_fontsize;
-
-        for (auto rucksack : this->rucksacks) {
-            this->insert(rucksack);
-            rucksack->resize(rucksack_size);
-        }
+    for (auto rucksack : this->rucksacks) {
+        this->insert(rucksack);
+        rucksack->resize(rucksack_size);
     }
 }
 
@@ -185,13 +174,12 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
     this->move_to(this->info_board, this->badge_sum, MatterAnchor::LB, MatterAnchor::LT);
     
     if (this->rucksacks.size() > 0) {
-        float lbl_width, lbl_height;
-        float gxoff, gyoff;
+        float lbl_width, gxoff, gyoff;
         
-        this->badge_sum->feed_extent(0.0F, 0.0F, &lbl_width, &lbl_height);
+        this->badge_sum->feed_extent(0.0F, 0.0F, &lbl_width);
         
         gxoff = lbl_width + float(text_fontsize);
-        gyoff = float(title_fontsize) + lbl_height * 0.0F;
+        gyoff = float(title_fontsize);
 
         this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(text_fontsize));
 
@@ -281,9 +269,7 @@ bool WarGrey::AoC::RucksackReorganizationPlane::can_select(IMatter* m) {
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::move_rucksack_to_grid(Rucksack* rs) {
-    if (rs->id > 0) {
-        this->move_to_grid(rs, rs->id - 1, MatterAnchor::CB);
-    }
+    this->move_to_grid(rs, rs->id, MatterAnchor::CB);
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::on_task_start(RRStatus status) {
@@ -315,7 +301,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::load_item_list(const std::string
         std::string line;
 
         while (std::getline(datin, line)) {
-            this->rucksacks.push_back(new Rucksack(line, this->rucksacks.size() + 1));
+            this->rucksacks.push_back(new Rucksack(line, this->rucksacks.size()));
         }
 
         datin.close();

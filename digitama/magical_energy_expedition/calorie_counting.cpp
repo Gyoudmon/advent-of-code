@@ -24,7 +24,7 @@ static const char* topn_unknown_fmt = "前%d热量[%s]";
 
 static const float normal_scale_up = 1.6F;
 static const float top_scale_up = 2.0F;
-static const float elf_scale = 0.64F;
+static const float elf_size = 45.0F;
 
 static const int grid_column = 16;
 static const int micro_pace = 3;
@@ -39,7 +39,8 @@ void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
         this->top_count = this->elves.size();
     }
 
-    this->style = make_highlight_dimension_style(answer_fontsize, 6U, 0);
+    this->current_elf_idx = -1; // indicator of first run
+    this->style = make_highlight_dimension_style(answer_fontsize, 7U, 0);
 }
 
 void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
@@ -64,14 +65,14 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
 
         x0 = fl2fxi(width * 0.32F);
         xn = fl2fxi(width) - text_fontsize;
-        y0 = fl2fxi(height * 0.5F);
-        yn = fl2fxi(height) - text_fontsize;
+        y0 = fl2fxi(height * 0.42F);
+        yn = fl2fxi(height * 0.84F);
 
         for (auto elf : this->elves) {
             this->insert(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
+            elf->resize(elf_size);
             elf->set_fps(8);
             elf->play("lwalk");
-            elf->scale(elf_scale);
         }
     }
 }
@@ -101,7 +102,7 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
         
             this->feed_matter_location(this->sorted_total, &lbl_width, &yoff, MatterAnchor::RB);
             cwidth = lbl_width / float(top_elf_col);
-            cheight = cwidth + float(dim_fontsize);
+            cheight = (height - yoff) / 4.2F;
 
             for (int idx = 0; idx < this->dims.size(); idx ++) {
                 int c = idx % top_elf_col;
@@ -128,7 +129,7 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
             if (this->current_elf_idx < this->elves.size()) {
                 this->excite_elf(this->elves[this->current_elf_idx], normal_scale_up);
                 this->move_elf_to_grid(this->elves[this->current_elf_idx]);
-                this->info_board->set_text(std::to_string(this->elves[this->current_elf_idx]->calorie_total()), MatterAnchor::RT);
+                this->info_board->set_text(std::to_string(this->elves[this->current_elf_idx]->calorie_total()), MatterAnchor::RC);
                 this->population->set_text(puzzle_fmt, population_desc, ++ this->current_elf_idx);
                 
                 this->random_walk(this->current_elf_idx);
@@ -141,7 +142,7 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
             if (this->current_elf_idx < this->elves.size()) {
                 int self_cal = this->elves[this->current_elf_idx]->calorie_total();
 
-                this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RT);
+                this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RC);
                     
                 if (self_cal > this->top_calorie) {
                     this->top_calorie = self_cal;
@@ -173,7 +174,7 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
                 int self_cal = this->elves[this->current_elf_idx]->calorie_total();
                 int replaced_idx = vector_replace_sorted_maximum(this->top_calories, self_cal);
                 
-                this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RT);
+                this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RC);
 
                 if (replaced_idx >= 0) {
                     int replaced_elf_idx = this->top_elf_indices[replaced_idx];
@@ -208,7 +209,7 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
                     int top_cal_in_this_round = this->top_calories.back();
                     int self_cal = this->elves[this->current_elf_idx]->calorie_total();
 
-                    this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RT);
+                    this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RC);
 
                     if (top_cal_in_this_round < self_cal) {
                         int target_elf_idx = this->top_elf_indices.back();
@@ -234,7 +235,11 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
                 this->on_task_done();
             }
         }; break;
-        default: /* do nothing */;
+        default: {
+            if (this->current_elf_idx < 0) {
+                this->random_walk(0);
+            }
+        };
     }
 }
 
@@ -264,7 +269,7 @@ void WarGrey::AoC::CalorieCountingPlane::after_select(IMatter* m, bool yes_or_no
             Elfmon* maybe_elf = dynamic_cast<Elfmon*>(m);
 
             if (maybe_elf != nullptr) {
-                this->info_board->set_text(std::to_string(maybe_elf->calorie_total()), MatterAnchor::RT);
+                this->info_board->set_text(std::to_string(maybe_elf->calorie_total()), MatterAnchor::RC);
             }
         }
     }
@@ -275,9 +280,7 @@ bool WarGrey::AoC::CalorieCountingPlane::can_select(IMatter* m) {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::move_elf_to_grid(Elfmon* elf) {
-    if (elf->id > 0) {
-        this->move_to_grid(elf, elf->id - 1, MatterAnchor::CB);
-    }
+    this->move_to_grid(elf, elf->id, MatterAnchor::CB);
 }
 
 void WarGrey::AoC::CalorieCountingPlane::reflow_top_elves() {
@@ -313,7 +316,7 @@ void WarGrey::AoC::CalorieCountingPlane::excite_elf(Elfmon* elf, float scale) {
 
 void WarGrey::AoC::CalorieCountingPlane::calm_elf_down(Elfmon* elf) {
     elf->play("lwalk");
-    elf->scale_to(elf_scale);
+    elf->resize(elf_size);
     this->move_elf_to_grid(elf);
 }
 
@@ -329,7 +332,7 @@ void WarGrey::AoC::CalorieCountingPlane::on_task_start(CCStatus status) {
 
 void WarGrey::AoC::CalorieCountingPlane::on_task_done() {
     this->status = CCStatus::TaskDone;
-    this->info_board->set_text(MatterAnchor::RT, "");
+    this->info_board->set_text(MatterAnchor::RC, "");
 }
 
 void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx) {
@@ -360,7 +363,7 @@ void WarGrey::AoC::CalorieCountingPlane::load_calories(const std::string& pathna
                 elf = nullptr;
             } else {
                 if (elf == nullptr) {
-                    elf = new Elfmon(this->elves.size() + 1);
+                    elf = new Elfmon(this->elves.size());
                 }
 
                 elf->food_calories.push_back(std::stoi(line));
@@ -376,7 +379,7 @@ void WarGrey::AoC::CalorieCountingPlane::load_calories(const std::string& pathna
 }
 
 /*************************************************************************************************/
-WarGrey::AoC::Elfmon::Elfmon(int id) : ElfSheet(id - 1), id(id) {}
+WarGrey::AoC::Elfmon::Elfmon(int id) : ElfSheet(id), id(id) {}
 
 int WarGrey::AoC::Elfmon::calorie_total() {
     return vector_sum(this->food_calories);
