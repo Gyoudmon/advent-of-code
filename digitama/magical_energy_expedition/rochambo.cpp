@@ -187,7 +187,7 @@ void WarGrey::AoC::RochamboPlane::on_enter(IPlane* from) {
     this->on_task_done();
     
     this->tux->play("walk");
-    this->snack->set_fps(2);
+    this->set_supframe_rate(this->snack, 2);
     this->snack->play();
 }
 
