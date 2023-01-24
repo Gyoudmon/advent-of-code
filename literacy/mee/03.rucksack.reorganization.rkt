@@ -289,10 +289,10 @@ Python 可以通过@bold{自动序列装包/拆包}达到同样的目的，但�
 
 现在你应该不会再对 @litchar{in-} 打头的函数陌生了。譬如，前面的 @racket[in-lines] 函数的功能是
 @racketcommentfont{从文件中每次读取一行，并依次提供给循环使用}。这里不妨大胆猜猜看，这个 @racket[in-port] 函数的功能
-应该也是读取文件，但要按照它的第二个参数的要求来读。本任务中是要@racketcommentfont{一次读取三行}，每次读取之后返回
+应该也是读取文件，但要按照它的第一个参数的要求来读。本任务中是要@racketcommentfont{一次读取三行}，每次读取之后返回
 一个包含三个字符串的列表。
 
-实际上，@racket[in-lines] 就是当第二个参数是函数 @racket[read-line] 时的 @racket[in-port]。有点拗口，现在需要
+实际上，@racket[in-lines] 就是当第一个参数是函数 @racket[read-line] 时的 @racket[in-port]。有点拗口，现在需要
 记住的是，函数本身也是可以当作参数传递给其他函数的，只要那些函数被声明为可以接受函数类型的参数。这其实就是数学中的
 @bold{复合函数}概念，而我们一直在提的@bold{函数式编程}跟数学函数的关系相当密切。
 
