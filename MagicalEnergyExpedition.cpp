@@ -129,7 +129,7 @@ namespace {
                 }
             }
 
-            /* move the expedition team */ {
+            if (count % 4 == 0) { /* move the expedition team */
                 float dx = float(random_uniform(-1, 2));
                 float dy = float(random_uniform(-1, 1));
 
@@ -143,7 +143,7 @@ namespace {
         void on_enter(IPlane* from) override {
             this->tux->play("walk");
             this->tux->set_border_strategy(BorderStrategy::IGNORE);
-            this->tux->set_speed(4.0F, 0.0F);
+            this->tux->set_speed(2.0F, 0.0F);
             
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
                 if (idx < elf_on_boat_count) {
@@ -198,7 +198,7 @@ namespace {
 
     class MagicalEnergyExpeditionCosmos : public Cosmos {
     public:
-        MagicalEnergyExpeditionCosmos() : Cosmos(24) {
+        MagicalEnergyExpeditionCosmos() : Cosmos(60) {
             aoc_fonts_initialize();
             imgdb_setup(__ZONE__ "stone");
         }

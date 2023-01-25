@@ -187,8 +187,10 @@ void WarGrey::AoC::RochamboPlane::on_enter(IPlane* from) {
     this->on_task_done();
     
     this->tux->play("walk");
-    this->set_supframe_rate(this->snack, 2);
     this->snack->play();
+
+    this->set_matter_fps(this->tux, 10);
+    this->set_matter_fps(this->snack, 2);
 }
 
 void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
@@ -225,8 +227,10 @@ void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint
         }; break;
         default: {
             if (this->round_self == nullptr) {
-                this->l_play->switch_to_costume(random_uniform(0, 2));
-                this->r_play->switch_to_costume(random_uniform(0, 2));
+                if (count % 2 == 0) {
+                    this->l_play->switch_to_costume(random_uniform(0, 2));
+                    this->r_play->switch_to_costume(random_uniform(0, 2));
+                }
             }
         };
     }

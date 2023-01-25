@@ -54,7 +54,7 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     
     this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
     this->snack->scale(0.30F);
-    this->set_supframe_rate(this->snack, 2);
+    this->set_matter_fps(this->snack, 2);
     
     for (int idx = 0; idx < this->top_count; idx ++) {
         this->dims.push_back(this->insert(new Labellet(aoc_font::dimension, SALMON, " ")));
@@ -70,7 +70,7 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
 
         for (auto elf : this->elves) {
             this->insert(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
-            this->set_supframe_rate(elf, 8);
+            this->set_matter_fps(elf, 8);
             elf->resize(elf_size);
             elf->play("lwalk");
         }
@@ -237,7 +237,9 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
         }; break;
         default: {
             if (this->current_elf_idx < 0) {
-                this->random_walk(0);
+                if (count % 4 == 0) {
+                    this->random_walk(0);
+                }
             }
         };
     }

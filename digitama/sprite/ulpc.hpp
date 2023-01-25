@@ -22,5 +22,8 @@ namespace WarGrey::AoC {
     public:
         ElfSheet(const char* name);
         ElfSheet(int name_hint = 256);
+    
+    public:
+        int preferred_local_fps() override { return 10; }
     };
 }
