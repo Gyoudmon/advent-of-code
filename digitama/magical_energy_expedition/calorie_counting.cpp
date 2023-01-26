@@ -26,7 +26,7 @@ static const float normal_scale_up = 1.6F;
 static const float top_scale_up = 2.0F;
 static const float elf_size = 45.0F;
 
-static const int grid_column = 16;
+static const int grid_column = 32;
 static const int micro_pace = 3;
 
 /*************************************************************************************************/
@@ -44,6 +44,7 @@ void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
+    this->backdrop = this->insert(new GridAtlas("backdrop/deck.png"));
     this->logo = this->insert(new Sprite("logo.png"));
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, this->name()));
     this->info_board = this->insert(new Labellet(aoc_font::title, GRAY, ""));
@@ -63,10 +64,10 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     if (this->elves.size() > 0) {
         int x0, xn, y0, yn;
 
-        x0 = fl2fxi(width * 0.32F);
-        xn = fl2fxi(width) - text_fontsize;
-        y0 = fl2fxi(height * 0.42F);
-        yn = fl2fxi(height * 0.84F);
+        x0 = text_fontsize;
+        xn = fl2fxi(width) - x0;
+        y0 = fl2fxi(height * 0.75F);
+        yn = fl2fxi(height * 0.90F);
 
         for (auto elf : this->elves) {
             this->insert(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
@@ -85,30 +86,28 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
     this->move_to(this->top1_total, this->population, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->topn_total, this->top1_total, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->sorted_total, this->topn_total, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
+
+    this->backdrop->resize(width, height);
+    this->move_to(this->backdrop, 0.0F, height, MatterAnchor::LB);
     
     if (this->elves.size() > 0) {
-        float lbl_width, lbl_height;
-        float gxoff, gyoff;
-        
-        this->topn_total->feed_extent(0.0F, 0.0F, &lbl_width, &lbl_height);
-        
-        gxoff = lbl_width + float(text_fontsize);
-        gyoff = float(title_fontsize) + lbl_height * 1.0F;
+        float gxoff = float(text_fontsize);
+        float gyoff = height * 0.64F;
+
         this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(text_fontsize));
 
         /* reflow top elves labels */ {
-            float yoff, cwidth, cheight;
-            int top_elf_col = 3;
-        
-            this->feed_matter_location(this->sorted_total, &lbl_width, &yoff, MatterAnchor::RB);
-            cwidth = lbl_width / float(top_elf_col);
-            cheight = (height - yoff) / 4.2F;
+            int top_elf_col = 4;
+            float xoff = width * 0.5F;
+            float yoff = float(text_fontsize);
+            float cwidth = (width - xoff) / float(top_elf_col);
+            float cheight = (height * 0.64F - yoff) / 4.0F;
 
             for (int idx = 0; idx < this->dims.size(); idx ++) {
                 int c = idx % top_elf_col;
                 int r = idx / top_elf_col;
 
-                this->move_to(this->dims[idx], (c + 0.4F) * cwidth, (r + 1.0F) * cheight + yoff, MatterAnchor::CB);
+                this->move_to(this->dims[idx], (c + 0.4F) * cwidth + xoff, (r + 1.0F) * cheight + yoff, MatterAnchor::CB);
             }
         }
     }

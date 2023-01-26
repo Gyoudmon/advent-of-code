@@ -35,7 +35,7 @@ namespace {
             this->logo = this->insert(new Sprite("logo.png"));
             this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞能量水果"));
             this->sledge = this->insert(new Sprite("sledge.png"));
-            this->island = this->insert(new Sprite("island.png"));
+            this->island = this->insert(new GridAtlas("island.png"));
             this->boat = this->insert(new Sprite("boat.png"));
 
             for (int idx = 0; idx < 25; idx ++) {
@@ -186,7 +186,7 @@ namespace {
         Sprite* tux;
         ElfSheet* elves[santa_elf_type_count];
         Sprite* sledge;
-        Sprite* island;
+        GridAtlas* island;
         Sprite* boat;
         
     private:

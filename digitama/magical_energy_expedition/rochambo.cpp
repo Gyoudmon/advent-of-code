@@ -111,16 +111,18 @@ void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
 }
 
 void WarGrey::AoC::RochamboPlane::load(float width, float height) {
+    this->backdrop = this->insert(new GridAtlas("backdrop/beach.png"));
     this->logo = this->insert(new Sprite("logo.png"));
     this->titlet = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, this->name()));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, puzzle_fmt, population_desc, this->strategy.size()));
     this->guessed_score = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
     this->designed_score = this->insert(new Dimensionlet(this->style, "", designed_strategy_desc));
     this->random_score = this->insert(new Dimensionlet(this->style, "", random_strategy_desc));
+    this->tent = this->insert(new SpriteGridSheet("backdrop/tents.png", 1, 4));
     this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
-    this->tux = this->insert(new Sprite("sprite/tux"));
-
+    
     this->elves[0] = this->insert(new ElfSheet("dress"));
+    this->tux = this->insert(new Sprite("sprite/tux"));
     this->elves[1] = this->insert(new ElfSheet("male"));
     
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
@@ -141,6 +143,7 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->l_play = this->insert(new Sprite("sprite/rochambo"));
     this->r_play = this->insert(new Sprite("sprite/rochambo"));
 
+    this->tent->scale(0.80F);
     this->l_play->scale(+0.618F, 0.618F);
     this->r_play->scale(-0.618F, 0.618F);
 }
@@ -152,15 +155,19 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     this->move_to(this->designed_score, this->guessed_score, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->random_score, this->designed_score, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     
+    this->backdrop->resize(width, 0.0F);
+    this->move_to(this->backdrop, 0.0, height, MatterAnchor::LB);
+    
     this->round_x0 = width * 0.50F;
     this->round_y0 = height * 0.50F;
 
     this->race_x0 = width * 0.25F;
-    this->race_y0 = height * 0.80F;
+    this->race_y0 = height * 0.88F;
     this->race_distance = width * 0.5F;
     
-    this->move_to(this->snack, width * 0.75F, this->race_y0, MatterAnchor::LC);
-    this->move_to(this->tux, this->race_x0, this->race_y0, MatterAnchor::RC);
+    this->move_to(this->snack, this->race_x0 + this->race_distance, this->race_y0, MatterAnchor::LC);
+    this->move_to(this->tent, 0.0, height, MatterAnchor::LB);
+    this->move_to(this->tux, this->tent, 0.75F, 0.7F, MatterAnchor::CC);
     
     /* reflow scores */ {
         float xdist = float(text_fontsize);
@@ -228,8 +235,8 @@ void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint
         default: {
             if (this->round_self == nullptr) {
                 if (count % 2 == 0) {
-                    this->l_play->switch_to_costume(random_uniform(0, 2));
-                    this->r_play->switch_to_costume(random_uniform(0, 2));
+                    this->l_play->switch_to_random_costume();
+                    this->r_play->switch_to_random_costume();
                 }
             }
         };
@@ -283,8 +290,8 @@ void WarGrey::AoC::RochamboPlane::on_task_start(RPSStatus status) {
     this->elves[1]->scale_to(1.0F);
     
     this->move_to(this->tux, this->race_x0, this->race_y0, MatterAnchor::CC);
-    this->move_to(elves[0], this->tux, MatterAnchor::CT, MatterAnchor::CB);
-    this->move_to(elves[1], this->tux, MatterAnchor::CB, MatterAnchor::CT);
+    this->move_to(elves[0], this->tux, 0.5F, 0.3F, MatterAnchor::CB);
+    this->move_to(elves[1], this->tux, 0.5F, 0.7F, MatterAnchor::CT);
 
     this->move_to(this->l_play, this->snack, MatterAnchor::LT, MatterAnchor::LB);
     this->move_to(this->r_play, this->snack, MatterAnchor::RT, MatterAnchor::RB);

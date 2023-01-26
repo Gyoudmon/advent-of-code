@@ -68,6 +68,7 @@ namespace WarGrey::AoC {
     private: // 本游戏世界中的物体
         WarGrey::STEM::Sprite* logo;
         WarGrey::STEM::Labellet* title;
+        WarGrey::STEM::GridAtlas* backdrop;
         WarGrey::STEM::Labellet* population;
         WarGrey::STEM::Dimensionlet* top1_total;
         WarGrey::STEM::Dimensionlet* topn_total;
