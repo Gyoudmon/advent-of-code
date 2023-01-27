@@ -106,7 +106,7 @@ static const int r_outcome_points  [] = { outcome_score(RPSOutcome::Win), outcom
 
 /*************************************************************************************************/
 void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
-    this->load_strategy(digimon_path("mee/02.rps.dat"));
+    this->load_strategy(digimon_path("mee/02.rps.aoc"));
     this->style = make_highlight_dimension_style(answer_fontsize, 6U, 0);
 }
 

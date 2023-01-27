@@ -239,7 +239,7 @@ Python 可以通过@bold{自动序列装包/拆包}达到同样的目的，但�
               (code:comment "注意，函数 read-aoc-data 隐藏了读文件小循环")
               (define all-misplaced-items
                 (read-aoc-data
-                 #:from "mee/03.rr.dat"
+                 #:from "mee/03.rr.aoc"
                  #:for-each-do find-misplaced-item))
               (priority-sum all-misplaced-items)]
 
@@ -309,13 +309,13 @@ Python 可以通过@bold{自动序列装包/拆包}达到同样的目的，但�
 以下例子演示了如何借助 @racket[make-read-lines] 分别读取前三天任务的前三行输入数据。注意区分 @racket[read-line]
 和 @racket[(make-read-lines 1)] 的区别。
 
-@tamer-action[(with-aoc-data-from "mee/01.cc.dat" #:do
+@tamer-action[(with-aoc-data-from "mee/01.cc.aoc" #:do
                 read-line)
-              (with-aoc-data-from "mee/01.cc.dat" #:do
+              (with-aoc-data-from "mee/01.cc.aoc" #:do
                 (make-read-lines 1))
-              (with-aoc-data-from "mee/02.rps.dat" #:do
+              (with-aoc-data-from "mee/02.rps.aoc" #:do
                 (make-read-lines 2))
-              (with-aoc-data-from "mee/03.rr.dat" #:do
+              (with-aoc-data-from "mee/03.rr.aoc" #:do
                 (make-read-lines 3))]
 
 到这里，有关文件输入大循环的奥秘就都解开了。从现在开始，我们将不再关注文件输入大循环，而只关注@question{我们需要读取
@@ -367,7 +367,7 @@ Python 可以通过@bold{自动序列装包/拆包}达到同样的目的，但�
 
 @tamer-action[(define all-badge-items
                 (read-aoc-data
-                 #:from "mee/03.rr.dat"
+                 #:from "mee/03.rr.aoc"
                  #:with (make-read-lines 3)
                  #:for-each-do find-badge-item))
               (priority-sum all-badge-items)]

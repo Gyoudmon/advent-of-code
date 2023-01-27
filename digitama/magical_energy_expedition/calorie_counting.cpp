@@ -31,7 +31,7 @@ static const int micro_pace = 3;
 
 /*************************************************************************************************/
 void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
-    this->load_calories(digimon_path("mee/01.cc.dat"));
+    this->load_calories(digimon_path("mee/01.cc.aoc"));
     
     if (this->top_count <= 0) {
         this->top_count = 3;

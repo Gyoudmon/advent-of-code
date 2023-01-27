@@ -82,7 +82,7 @@
 接下来就可以通过传入清单文件来执行了：
 
 @tamer-action[#:requires ["../aoc.rkt"]
-              (with-aoc-data-from "mee/01.cc.dat" #:do
+              (with-aoc-data-from "mee/01.cc.aoc" #:do
                 find-maximum-calorie)]
 
 顺便说一遍，上面的函数定义采用了@bold{纯函数式}风格，虽然有两个@bold{变量}
@@ -155,14 +155,14 @@
 
 至此，任务完成：
 
-@tamer-action[(with-aoc-data-from "mee/01.cc.dat" #:do
+@tamer-action[(with-aoc-data-from "mee/01.cc.aoc" #:do
                 find-maximum-calories 3)]
 
 我们还可以对比一下这两个谜题在逻辑上的一致：
 
-@tamer-action[(with-aoc-data-from "mee/01.cc.dat" #:do
+@tamer-action[(with-aoc-data-from "mee/01.cc.aoc" #:do
                 find-maximum-calorie)
-              (with-aoc-data-from "mee/01.cc.dat" #:do
+              (with-aoc-data-from "mee/01.cc.aoc" #:do
                 find-maximum-calories 1)]
 
 不过，还是要谨记，比较两种算法的执行结果并不是严密地证明。

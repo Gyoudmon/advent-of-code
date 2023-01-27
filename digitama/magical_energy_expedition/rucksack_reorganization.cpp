@@ -141,7 +141,7 @@ WarGrey::AoC::RucksackReorganizationPlane::~RucksackReorganizationPlane() {
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float height) {
-    this->load_item_list(digimon_path("mee/03.rr.dat"));
+    this->load_item_list(digimon_path("mee/03.rr.aoc"));
 
     for (int idx = 0; idx < sizeof(this->badge_dicts) / sizeof(char*); idx ++) {
         // the `badge_dicts` is an array of 1-dim array, instead of a 2-dim array
