@@ -15,6 +15,8 @@ using namespace WarGrey::STEM;
 namespace {
     static const char* unknown_task_name = "冒\n险\n越\n来\n越\n深\n入\n了";
     static const int elf_on_boat_count = 0;
+    static const int advent_days = 25;
+    static const int bonus_count = 0;
 
     class StarFruitlet : public WarGrey::STEM::Sprite {
     public:
@@ -34,11 +36,11 @@ namespace {
         void load(float width, float height) override {
             this->logo = this->insert(new Sprite("logo.png"));
             this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞能量水果"));
-            this->sledge = this->insert(new Sprite("sledge.png"));
+            this->sledge = this->insert(new GridAtlas("sledge.png"));
             this->island = this->insert(new GridAtlas("island.png"));
             this->boat = this->insert(new Sprite("boat.png"));
 
-            for (int idx = 0; idx < 25; idx ++) {
+            for (int idx = 0; idx < advent_days; idx ++) {
                 const char* task_name = this->master->plane_name(idx + 1);
                 
                 this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
@@ -55,6 +57,12 @@ namespace {
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, GAINSBORO, "%s", vname.c_str())));
                     this->stars.back()->switch_to_costume("dark");
                 }
+            }
+
+            for (int idx = 0; idx < bonus_count; idx ++) {
+                this->bonuses.push_back(this->insert(new Sprite("sprite/coin")));
+                this->set_matter_fps(this->bonuses[idx], 15);
+                this->bonuses[idx]->play();
             }
 
             this->tux = this->insert(new Sprite("sprite/tux"));
@@ -76,7 +84,7 @@ namespace {
             this->move_to(this->sledge, width, 0.0F, MatterAnchor::RT);
             this->move_to(this->island, width * 0.5F, height * 0.5F, MatterAnchor::CC, 0.0F, float(title_fontsize));
             this->move_to(this->boat, this->island, MatterAnchor::LB, MatterAnchor::LB);
-
+            
             for (int idx = 0; idx < elf_on_boat_count; idx ++) {
                 if (idx == 0) {
                     this->move_to(this->elves[idx], this->boat, MatterAnchor::LB, MatterAnchor::RB);
@@ -183,9 +191,10 @@ namespace {
         Labellet* title;
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
+        std::vector<Sprite*> bonuses;
         Sprite* tux;
         ElfSheet* elves[santa_elf_type_count];
-        Sprite* sledge;
+        GridAtlas* sledge;
         GridAtlas* island;
         Sprite* boat;
         

@@ -18,6 +18,25 @@ namespace WarGrey::AoC {
         int id;
     };
 
+    class Backpack : public WarGrey::STEM::GridAtlas {
+    public:
+        Backpack();
+        ~Backpack() {}
+
+    public:
+        void construct(SDL_Renderer* renderer) override;
+
+    public:
+        void set_items(const std::string& items);
+
+    protected:
+        int get_atlas_tile_index(int map_idx) override;
+
+    private:
+        std::string items;
+        int tile_indices[DICT_SIZE] = {};
+    };
+
     /******************************************* 声明游戏状态 ******************************************/
     enum class RRStatus {
         FindMisplacedItems,
@@ -60,11 +79,13 @@ namespace WarGrey::AoC {
     private: // 本游戏世界中的物体
         WarGrey::STEM::Sprite* logo;
         WarGrey::STEM::Labellet* title;
+        WarGrey::STEM::GridAtlas* backdrop;
         WarGrey::STEM::Labellet* population;
         WarGrey::STEM::Labellet* info_board;
         WarGrey::STEM::Dimensionlet* misplaced_sum;
         WarGrey::STEM::Dimensionlet* badge_sum;
         std::vector<WarGrey::AoC::Rucksack*> rucksacks;
+        WarGrey::AoC::Backpack* backpack;
 
     private:
         WarGrey::AoC::RRStatus status;

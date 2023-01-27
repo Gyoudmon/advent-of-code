@@ -22,7 +22,8 @@ static const char* misplaced_desc = "错放物品优先级总和";
 static const char* badge_desc = "队徽物品优先级总和";
 
 static const float rucksack_size = 36.0F;
-static const int grid_column = 16;
+static const float rucksack_item_size = 32.0F;
+static const int grid_column = 30;
 
 static inline const char* random_rucksack_style(int hint) {
     return rucksack_styles[random_uniform(0, sizeof(rucksack_styles) / sizeof(char*) - 1)];
@@ -33,8 +34,9 @@ static inline const char* random_rucksack_gender(int hint) {
 }
 
 /*************************************************************************************************/
-static inline void dict_zero(char dict[]) {
-    memset(dict, 0, DICT_SIZE * sizeof(char));
+template<typename T>
+static inline void dict_zero(T dict[]) {
+    memset(dict, 0, DICT_SIZE * sizeof(T));
 }
 
 static int item_priority(char ch) {
@@ -153,12 +155,14 @@ void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float hei
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) {
+    this->backdrop = this->insert(new GridAtlas("backdrop/tent.png"));
     this->logo = this->insert(new Sprite("logo.png"));
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 3, this->name()));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, puzzle_fmt, population_desc, this->rucksacks.size()));
     this->info_board = this->insert(new Labellet(aoc_font::mono, GRAY, ""));
     this->misplaced_sum = this->insert(new Dimensionlet(this->style, "", misplaced_desc));
     this->badge_sum = this->insert(new Dimensionlet(this->style, "", badge_desc));
+    this->backpack = this->insert(new Backpack());
     
     for (auto rucksack : this->rucksacks) {
         this->insert(rucksack);
@@ -171,15 +175,18 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
     this->move_to(this->population, this->logo, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->misplaced_sum, this->population, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->badge_sum, this->misplaced_sum, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
-    this->move_to(this->info_board, this->badge_sum, MatterAnchor::LB, MatterAnchor::LT);
+    
+    this->backdrop->resize(width, 0.0F);
+    this->move_to(this->backdrop, 0.0F, height * 0.64F, MatterAnchor::LB);
+
+    this->move_to(this->backpack, this->backdrop, MatterAnchor::LT, MatterAnchor::LB, 0.0F, -2.0F);
+    this->move_to(this->info_board, this->backdrop, MatterAnchor::RT, MatterAnchor::RB, 0.0F, -2.0F);
     
     if (this->rucksacks.size() > 0) {
-        float lbl_width, gxoff, gyoff;
+        float gxoff, gyoff;
         
-        this->badge_sum->feed_extent(0.0F, 0.0F, &lbl_width);
-        
-        gxoff = lbl_width + float(text_fontsize);
-        gyoff = float(title_fontsize);
+        gxoff = float(text_fontsize);
+        gyoff = height * 0.56F;
 
         this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(text_fontsize));
 
@@ -278,7 +285,8 @@ void WarGrey::AoC::RucksackReorganizationPlane::on_task_start(RRStatus status) {
 
 void WarGrey::AoC::RucksackReorganizationPlane::on_task_done() {
     this->status = RRStatus::TaskDone;
-    this->info_board->set_text("");
+    this->info_board->set_text(MatterAnchor::RB, "");
+    this->backpack->set_items("");
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::display_items(Rucksack* self) {
@@ -288,7 +296,8 @@ void WarGrey::AoC::RucksackReorganizationPlane::display_items(Rucksack* self) {
     items.push_back('\n');
     items.append(self->items.substr(size / 2));
 
-    this->info_board->set_text(items);
+    this->info_board->set_text(items, MatterAnchor::RB);
+    this->backpack->set_items(self->items);
 }
 
 /*************************************************************************************************/
@@ -312,3 +321,44 @@ void WarGrey::AoC::RucksackReorganizationPlane::load_item_list(const std::string
 WarGrey::AoC::Rucksack::Rucksack(const std::string& items, int id)
     : Sprite("sprite/rucksack/%s/%s", random_rucksack_style(id), random_rucksack_gender(id))
     , items(items), id(id) {}
+
+WarGrey::AoC::Backpack::Backpack() : GridAtlas("spritesheet/items.png", 24, 21, 4, 4, true) {
+    this->camouflage(false);
+}
+
+void WarGrey::AoC::Backpack::construct(SDL_Renderer* renderer) {
+    this->create_map_grid(2, 26, rucksack_item_size, rucksack_item_size);
+}
+
+void WarGrey::AoC::Backpack::set_items(const std::string& items) {
+    if (this->items.compare(items) != 0) {
+        this->items = items;
+        dict_zero(this->tile_indices);
+
+        this->create_map_grid(2, this->items.size() / 2);
+
+        for (int idx = 0; idx < this->items.size(); idx ++) {
+            int prior = item_priority(this->items[idx]);
+
+            if (prior > 0) {
+                // WARNING: we are vertically selecting item icons
+                int r = prior % this->atlas_row;
+                int c = prior / this->atlas_row;
+
+                this->tile_indices[idx] = r * this->atlas_col + c;
+            }
+        }
+
+        this->notify_updated();
+    }
+}
+
+int WarGrey::AoC::Backpack::get_atlas_tile_index(int map_idx) {
+    int idx = -1;
+
+    if (this->tile_indices[map_idx] > 0) {
+        idx = this->tile_indices[map_idx];
+    }
+
+    return idx; 
+}

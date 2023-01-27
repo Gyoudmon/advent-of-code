@@ -118,7 +118,7 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->guessed_score = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
     this->designed_score = this->insert(new Dimensionlet(this->style, "", designed_strategy_desc));
     this->random_score = this->insert(new Dimensionlet(this->style, "", random_strategy_desc));
-    this->tent = this->insert(new SpriteGridSheet("backdrop/tents.png", 1, 4));
+    this->tent = this->insert(new SpriteGridSheet("spritesheet/tents.png", 1, 4));
     this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
     
     this->elves[0] = this->insert(new ElfSheet("dress"));
@@ -158,8 +158,8 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     this->backdrop->resize(width, 0.0F);
     this->move_to(this->backdrop, 0.0, height, MatterAnchor::LB);
     
-    this->round_x0 = width * 0.50F;
-    this->round_y0 = height * 0.50F;
+    this->round_x0 = width * 0.64F;
+    this->round_y0 = height * 0.36F;
 
     this->race_x0 = width * 0.25F;
     this->race_y0 = height * 0.88F;
