@@ -1,15 +1,21 @@
 #include <iostream>
 #include <fstream>
-#include <string>
 
 /*************************************************************************************************/
-void cat_by_line(std::istream& in) {
+void cat_by_line(std::istream& src) {
     std::string line;
-
-    while (std::getline(in, line)) {
-        std::cout << line << std::endl;
+    
+    while (true) {
+        std::istream& _ = std::getline(src, line);
+        
+        if (!_.fail()) {
+            std::cout << line << std::endl;
+        } else {
+            break;
+        }
     }
 }
+
 
 
 /*************************************************************************************************/
