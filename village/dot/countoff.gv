@@ -1,10 +1,13 @@
 digraph CountOff {
+    # label = "Counting Off";
+    bgcolor = transparent;
+    
     node [shape = rect, width = 1.618];
     
     init_counter [ label = "初始化计数器", color = forestgreen, fontcolor = forestgreen ];
     update_counter [ label = "更新计数器", color = forestgreen, fontcolor = forestgreen ];
 
-    start, end [ shape = box, style = rounded];
+    Start, End [ shape = box, style = rounded];
     EOF, blank [ shape = diamond, color = purple, fontcolor = purple];
 
     open_file [ color = royalblue, fontcolor = royalblue, label = "打开文件" ];
@@ -14,11 +17,11 @@ digraph CountOff {
     special [ color = red, fontcolor = crimson, label = "更新计数器" ];
     output [ shape = parallelogram, label = "输出结果", color = forestgreen, fontcolor = forestgreen ];
 
-    {    
-        start -> init_counter -> open_file -> EOF;
+    /* head */ {    
+        Start -> init_counter -> open_file -> EOF;
     }
 
-    {
+    /* body */ {
         EOF -> read_line [ label = "No" ];
         read_line -> blank;
         blank -> update_counter [ label = "Yes" ];
@@ -26,8 +29,8 @@ digraph CountOff {
         blank -> EOF [ label = "No" ];
     }
 
-    {
+    /* tail */ {
         EOF -> close_file [ label = "Yes" ];
-        close_file -> special -> output -> end ;
+        close_file -> special -> output -> End ;
     }
 }

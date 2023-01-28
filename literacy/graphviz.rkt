@@ -78,7 +78,7 @@
                                   (send dc set-brush brush)
                                   (send dc draw-arc ring-x ring-y ring-diameter ring-diameter radian0 radiann)
                                   
-                                  (define label (git-language-name datum))
+                                  (define label (language-name (git-language-name datum)))
                                   (define percentage (~% datum% #:precision '(= 2)))
                                   
                                   (define-values (lwidth _lh ldistance _ls) (send dc get-text-extent label legend-font #true))
@@ -148,7 +148,7 @@
           (define-values (locsource peak x0 xn)
             (for/fold ([src null] [all-peak 0] [x0 +inf.0] [xn 0])
                       ([lang-src (in-list datasource)])
-              (define lang (git-language-name lang-src))
+              (define lang-name (git-language-name lang-src))
               (define pen (make-pen #:color (language-rgba lang-src altcolors)))
               (define stats (git-language-content lang-src))
               (define-values (date0 daten)
@@ -162,7 +162,7 @@
                   (values (cons (cons (car stat) total++) LoCs)
                           total++
                           (max peak total++))))
-              (values (cons (vector lang pen (reverse LoCs) total) src)
+              (values (cons (vector lang-name pen (reverse LoCs) total) src)
                       (max all-peak peak)
                       (min x0 date0)
                       (max xn daten))))
@@ -302,6 +302,11 @@
                          (bitwise-and rgb #xFF)
                          1.0))]
           [else (make-color 0 0 0 1.0)])))
+
+(define language-name
+  (lambda [lang]
+    (define maybe-name-parts (regexp-match #px"(\\w+)\\s*[(]\\w+[)]" lang))
+    (if (not maybe-name-parts) lang (cadr maybe-name-parts))))
 
 (define ~month
   (lambda [m]
