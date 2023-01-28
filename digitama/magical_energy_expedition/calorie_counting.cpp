@@ -26,7 +26,7 @@ static const float normal_scale_up = 1.6F;
 static const float top_scale_up = 2.0F;
 static const float elf_size = 45.0F;
 
-static const int grid_column = 32;
+static const int grid_column = 38;
 static const int micro_pace = 3;
 
 /*************************************************************************************************/
@@ -66,8 +66,8 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
 
         x0 = text_fontsize;
         xn = fl2fxi(width) - x0;
-        y0 = fl2fxi(height * 0.75F);
-        yn = fl2fxi(height * 0.90F);
+        y0 = fl2fxi(height * 0.78F);
+        yn = fl2fxi(height * 0.95F);
 
         for (auto elf : this->elves) {
             this->insert(elf, float(random_uniform(x0, xn)), float(random_uniform(y0, yn)), MatterAnchor::CC);
@@ -92,7 +92,7 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
     
     if (this->elves.size() > 0) {
         float gxoff = float(text_fontsize);
-        float gyoff = height * 0.64F;
+        float gyoff = height * 0.76F;
 
         this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(text_fontsize));
 

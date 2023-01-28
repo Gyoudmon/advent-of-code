@@ -50,6 +50,14 @@
                      (racketvalfont name:rest) ~ desc:rest ...) ...)))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define idea
+  (lambda argv
+    (racketparenfont argv)))
+
+(define focus
+  (lambda argv
+    (racketcommentfont argv)))
+
 (define question
   (lambda argv
     (racketresultfont argv)))
