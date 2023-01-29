@@ -10,8 +10,10 @@ void find_maximum_calorie(std::istream& in) {
     int self_cal = 0;
 
     while (std::getline(in, line)) {
-        if (line.size() > 0) {
-            self_cal += std::stoi(line);
+        int cal = std::stoi(line);
+
+        if (cal > 0) {
+            self_cal += cal;
         } else {
             if (self_cal > max_cal) {
                 max_cal = self_cal;

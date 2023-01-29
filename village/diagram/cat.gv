@@ -1,0 +1,38 @@
+digraph CountOff {
+    # label = "Count Off";
+    bgcolor = transparent;
+
+    /* ghost nodes */
+    node [ shape = point, width = 0, height = 0 ];
+    break_to_end, loop_end, loop_return, return_loop, end [ style = invis ];
+
+    /* special nodes */
+    node [ shape = box, width = 1, height = 0.5 ];
+    Start, End [ style = rounded ];
+
+    /* conditional nodes */
+    node [ shape = diamond, width = 1.618, color = purple, fontcolor = purple ];    
+    loop_start [ label = "永真" ];
+    okay [ label = "Okay?" ];
+    break [ label = "break?" ];
+
+    /* IO nodes */
+    node [ shape = parallelogram, width = 1.618, color = forestgreen, fontcolor = forestgreen ];
+    read_line [ label = "读入一行" ];
+    display [ label = "输出该行" ];
+    
+    /* Edges */
+    Start -> loop_start [ arrowhead = none ];
+    { rank = same; loop_return -> loop_start; }
+    loop_start -> read_line [ label = "死循环" ];
+    read_line -> okay;
+    { rank = same; okay -> break [ label = "No"]; }
+    okay -> display [ label = "Yes" ];
+    display -> loop_end [ arrowhead = none ];
+    
+    { rank = same; return_loop -> loop_end [ arrowtail = none, dir = back ]; }
+    loop_return -> return_loop [ dir = back, arrowtail = none ];
+    
+    break -> end[ minlen = 3, arrowhead = none ];
+    { rank = same; End -> end [ dir = back, minlen = 3 ]; }
+}

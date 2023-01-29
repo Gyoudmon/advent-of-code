@@ -1,0 +1,22 @@
+digraph main {
+    bgcolor = transparent;
+    
+    node [shape = rect, width = 1.618];
+    
+    Start, End [ shape = box, style = rounded];
+
+    provide_file [ shape = diamond, color = forestgreen, fontcolor = forestgreen, label = "指定文件？" ];
+    
+    open_file [ color = royalblue, fontcolor = royalblue, label = "打开文件" ];
+    call_with_file_stream [ color = royalblue, fontcolor = royalblue, label = "处理文件输入流" ];
+    call_with_stdin_stream [ color = orange, fontcolor = orange, label = "处理标准输入流" ];
+    close_file [ color = royalblue, fontcolor = royalblue, label = "关闭文件" ];
+
+    Start -> provide_file;
+    
+    provide_file -> open_file [ label = "Yes" ];
+    open_file -> call_with_file_stream -> close_file -> End;
+
+    provide_file -> call_with_stdin_stream [ label = "No" ];
+    call_with_stdin_stream -> End;
+}
