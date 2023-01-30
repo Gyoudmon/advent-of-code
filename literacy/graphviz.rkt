@@ -7,8 +7,6 @@
 
 (require digimon/format)
 (require digimon/git)
-(require digimon/digitama/git/numstat)
-(require digimon/digitama/git/langstat)
 
 (require racket/date)
 (require racket/draw)
@@ -20,14 +18,15 @@
 (define deletion-color (make-style 'tt (list (make-color-property (list #xCB #x24 #x31)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define pie-chart
+(define git-size-ring-chart
   (let ([no-pen (make-pen #:style 'transparent)]
         [legend-pen (make-pen #:color (make-color #xbb #xbb #xbb))]
         [legend-brush (make-brush #:color (make-color #xFF #xFF #xFF 0.618))])
-    (lambda [#:radian0 [r0 0.0] #:bytes-fx [fx 0.5] #:bytes-fy [fy 0.5]
+    (lambda [#:radian0 [r0 0.0] #:bytes-fx [fx 0.5] #:bytes-fy [fy 0.618]
              #:legend-font [legend-font (make-font #:family 'modern #:weight 'bold #:size 9)]
              #:label-color [label-color "black"] #:%-color [%-color (make-color #x6a #x72 #x8f)] #:total-color [total-color (make-color 0 0 0 0.2)]
-             flradius datasource altcolors]
+             flradius langsizes altcolors]
+      (define sorted-sizes (sort #:key git-language-content (hash-values langsizes) >=))
       (define flwidth (* flradius 2.0))
       (define flheight (* flradius 2.0))
       
@@ -41,7 +40,7 @@
             (send dc set-font legend-font)
             (send dc set-pen no-pen)
       
-            (when (pair? datasource)
+            (when (pair? sorted-sizes)
               (define 1ch (send dc get-char-width))
               (define 1em (send dc get-char-height))
               (define lineheight (* 1em 1.2))
@@ -53,19 +52,19 @@
               (define hollow-off (/ (- ring-diameter hollow-diameter) 2))
               (define-values (ring-x ring-y) (values (+ dx (- flwidth ring-diameter)) (+ dy (* (- flheight ring-diameter) 0.5))))
               (define-values (hollow-x hollow-y) (values (+ ring-x hollow-off) (+ ring-y hollow-off)))
-              (define total (for/sum ([ds (in-list datasource)]) (git-language-content ds)))
+              (define total (for/sum ([ds (in-list sorted-sizes)]) (git-language-content ds)))
 
               (when (positive? total)
                 (define ring (make-object region% #false))
                 (define hollow (make-object region% #false))
-                (define nonfirst% (- 1.0 (/ (git-language-content (car datasource)) total)))
+                (define nonfirst% (- 1.0 (/ (git-language-content (car sorted-sizes)) total)))
                 (send ring set-rectangle dx dy flwidth flheight)
                 (send hollow set-ellipse hollow-x hollow-y hollow-diameter hollow-diameter)
                 (send ring subtract hollow)
                 (send dc set-clipping-region ring)
                 
                 (define-values (legend-label-width legend-%width legends)
-                  (let draw-ring ([rest datasource]
+                  (let draw-ring ([rest sorted-sizes]
                                   [radian0 (if (flonum? r0) r0 (* nonfirst% pi))]
                                   [max-lwidth 0]
                                   [max-pwidth 0]
@@ -90,7 +89,7 @@
                 (define legend-box-x (+ dx legend-center-off))
                 (define legend-box-y (+ dy legend-center-off))
                 (define legend-box-width (+ 1em legend-label-width 1ch legend-%width legend-center-off legend-center-off))
-                (define legend-box-height (+ legend-center-off (* lineheight (length datasource))))
+                (define legend-box-height (+ legend-center-off (* lineheight (length sorted-sizes))))
                 (define-values (legend-x0 legend-y0) (values (+ legend-box-x legend-center-off) (+ legend-box-y legend-center-off)))
                 (send dc set-pen legend-pen)
                 (send dc set-brush legend-brush)
@@ -124,7 +123,7 @@
               (set-brush saved-brush)))
           flwidth flheight))))
 
-(define git-loc-series
+(define git-loc-time-series
   (lambda [#:date0 [date-start #false] #:daten [date-end #false]
            #:line0 [line-start #false] #:linen [line-end #false]
            #:line-axis-count [axis-count #false] #:line-peak-ahead-factor [peak-factor 1000]
@@ -248,36 +247,6 @@
             (set-brush saved-brush)))
         flwidth flheight)))
 
-(define handbook-statistics
-  (lambda [#:gitstat-width [git-width #false] #:gitstat-radius [git-radius #false] #:recursive? [recursive? #true]
-           #:ignore [exclude-submodules null] #:filter [filter null] #:subgroups [subgroups git-default-subgroups]
-           #:altcolors [altcolors null] #:since [since #false] #:date-delta [date-delta (* 3600 24 31)]
-           #:lang-delta-only? [lang-delta-only? #false]]
-    (define all-files (git-list-tree #:recursive? recursive? #:ignore-submodule exclude-submodules #:filter filter))
-    (define all-numstats (git-numstat #:recursive? recursive? #:ignore-submodule exclude-submodules #:since since #:filter filter))
-    (define lang-files (git-files->langfiles all-files null subgroups))
-    (define lang-sizes (git-files->langsizes all-files null subgroups))
-    (define lang-stats (git-numstats->langstats all-numstats null subgroups))
-    
-    (define src-file (for/fold ([count 0]) ([lf (in-hash-values lang-files)]) (+ count (length (git-language-content lf)))))
-    (define-values (insertions deletions)
-      (if (not lang-delta-only?)
-          (git-numstats->additions+deletions* all-numstats)
-          (git-langstats->additions+deletions* lang-stats)))
-    
-    (define sorted-langfiles (sort (hash-values lang-sizes) >= #:key git-language-content))
-    (define langstats (for/list ([(id lang) (in-hash lang-stats)] #:when (hash-has-key? lang-sizes id)) lang))
-    
-    (nested (filebox (elem #:style file-color (~integer src-file) (subscript "files")
-                           ~ (elem #:style insertion-color (~integer insertions) (subscript "++"))
-                           ~ (elem #:style deletion-color (~integer deletions) (subscript (literal "--"))))
-                     (tabular #:sep (hspace 1) #:column-properties '(left right)
-                              (list (let* ([pie-radius (or git-radius 75)]
-                                           [series-height (* (or git-radius pie-radius) 2)]
-                                           [series-width (or git-width 380)])
-                                      (list (pie-chart #:bytes-fy 0.618 #:radian0 (* pi 0.5) pie-radius sorted-langfiles altcolors)
-                                            (git-loc-series series-width series-height langstats altcolors date-delta)))))))))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define (draw-x dc x-axis x-mark last-mark-endx mark-font x-start y-start date-fraction 1ex)
   (define x (+ x-start (* x-axis date-fraction)))
@@ -291,10 +260,10 @@
 
 (define language-rgba
   (lambda [lang altcolors]
-    (define maybe-color (or (assoc (git-language-name lang) altcolors) (git-language-color lang)))
+    (define maybe-color (or (assoc (language-name (git-language-name lang)) altcolors) (git-language-color lang)))
     
     (cond [(not maybe-color) (make-color 0 0 0 1.0)]
-          [(pair? maybe-color) (cdr maybe-color)]
+          [(pair? maybe-color) (symbol->string (cdr maybe-color))]
           [(keyword? maybe-color)
            (let ([rgb (string->number (keyword->string maybe-color) 16)])
              (make-color (bitwise-and (arithmetic-shift rgb -16) #xFF)
