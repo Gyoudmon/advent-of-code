@@ -1,0 +1,35 @@
+digraph UpdateMaxCalories {
+    # label = "Update Maximum Calories";
+    bgcolor = transparent;
+
+    /* special nodes */
+    node [ shape = box, width = 1, height = 0.5 ];
+    Start, End [ style = rounded ];
+
+    /* conditional nodes */
+    node [ shape = diamond, width = 1.618, color = purple, fontcolor = purple ]; 
+    loop_start [ label = "索引越界？" ];   
+    compare [ label = "当前元素更小？" ];
+    break [ label = "break?" ];
+
+    /* variable-related nodes */
+    node [ shape = rect, color = royalblue, fontcolor = royalblue ];
+    initialize [ label = "索引初始化" ];
+    update_index [ label = "索引递增" ];
+    update_max_calorie [ label = "更新当前元素" ];
+    
+    /* Edges */
+    Start -> initialize -> loop_start [ arrowhead = none ];
+    loop_start -> End [ label = "Yes" ];
+    loop_start -> compare [ label = "No" ];
+    
+    subgraph {
+        compare -> update_max_calorie [ label = "Yes"];
+        update_max_calorie -> break -> End;
+    }
+
+    subgraph {
+        compare -> update_index [ label = "No" ];
+        update_index -> loop_start;
+    }
+}

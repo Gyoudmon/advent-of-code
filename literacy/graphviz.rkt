@@ -2,20 +2,11 @@
 
 (provide (all-defined-out))
 
-(require (except-in scribble/core table))
-(require scribble/manual)
-
 (require digimon/format)
 (require digimon/git)
 
-(require racket/date)
 (require racket/draw)
 (require pict)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define file-color (make-style 'tt (list (make-color-property (list #x58 #x60 #x69)))))
-(define insertion-color (make-style 'tt (list (make-color-property (list #x28 #xA7 #x45)))))
-(define deletion-color (make-style 'tt (list (make-color-property (list #xCB #x24 #x31)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define git-size-ring-chart
@@ -260,7 +251,9 @@
 
 (define language-rgba
   (lambda [lang altcolors]
-    (define maybe-color (or (assoc (language-name (git-language-name lang)) altcolors) (git-language-color lang)))
+    (define maybe-color
+      (or (assoc (language-name (git-language-name lang)) altcolors)
+          (git-language-color lang)))
     
     (cond [(not maybe-color) (make-color 0 0 0 1.0)]
           [(pair? maybe-color) (symbol->string (cdr maybe-color))]

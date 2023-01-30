@@ -4,7 +4,7 @@ digraph cat {
 
     /* ghost nodes */
     node [ shape = point, width = 0, height = 0 ];
-    break_to_end, loop_body_end, loop_return, return_loop, end [ style = invis ];
+    loop_body_end, loop_return, return_loop, end [ style = invis ];
 
     /* special nodes */
     node [ shape = box, width = 1, height = 0.5 ];
@@ -33,6 +33,6 @@ digraph cat {
     { rank = same; return_loop -> loop_body_end [ arrowtail = none, dir = back ]; }
     loop_return -> return_loop [ dir = back, arrowtail = none ];
     
-    break -> end[ minlen = 3, arrowhead = none ];
+    break -> end [ minlen = 3, arrowhead = none ];
     { rank = same; End -> end [ dir = back, minlen = 3 ]; }
 }

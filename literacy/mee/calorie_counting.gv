@@ -23,7 +23,7 @@ digraph CalorieCounting {
     node [ shape = rect, color = royalblue, fontcolor = royalblue ];
     initialize [ label = "变量初始化" ];
     stoi [ label = "从该行提取整数" ];
-    update_counter [ label = "更新计数器" ];
+    update_counter [ label = "更新计数器", color = chocolate, fontcolor = chocolate ];
     update_calorie [ label = "更新精灵卡路里" ];
     update_max_calorie [ label = "更新最大卡路里" ];
     

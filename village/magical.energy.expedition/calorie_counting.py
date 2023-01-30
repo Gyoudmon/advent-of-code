@@ -3,6 +3,14 @@
 import sys
 import io
 
+###################################################################################################
+def update_max_calories(calories, cal):
+    for idx in range(0, len(calories)):
+        if calories[idx] < cal:
+            calories[idx] = cal
+            break
+
+###################################################################################################
 def find_maximum_calorie(src : io.TextIOWrapper):
     max_cal = 0
     self_cal = 0
@@ -25,6 +33,24 @@ def find_maximum_calorie(src : io.TextIOWrapper):
     print(max_cal)
 
 def find_maximum_calories(src, n):
+    calories = [0] * n
+    cal = 0
+
+    for line in src:
+        pure_cal = line.strip()
+
+        if pure_cal:
+            cal += int(pure_cal)
+        else:
+            update_max_calories(calories, cal)
+            cal = 0
+
+    if cal > 0:
+        update_max_calories(calories, cal)
+    
+    print(sum(calories))
+
+def find_maximum_calories_by_sorting(src, n):
     calories = []
     cal = 0
 
@@ -50,6 +76,7 @@ def find_maximum_calories(src, n):
 
     print(sum(calories[0:n]))
 
+###################################################################################################
 def main(argc, argv):
     if argc > 1:
         try:
@@ -60,7 +87,7 @@ def main(argc, argv):
     else:
         find_maximum_calorie(sys.stdin)
 
-    return 0
+    return 0            
 
 
 

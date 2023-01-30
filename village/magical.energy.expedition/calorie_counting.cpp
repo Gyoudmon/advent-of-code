@@ -4,6 +4,16 @@
 #include <vector>
 
 /*************************************************************************************************/
+static void update_max_calories(std::vector<int>& ls, int cal) {
+    for (int idx = 0; idx < ls.size(); idx ++) {
+        if (ls[idx] < cal) {
+            ls[idx] = cal;
+            break;
+        }
+    }
+}
+
+/*************************************************************************************************/
 void find_maximum_calorie(std::istream& in) {
     std::string line;
     int max_cal = 0;
@@ -31,6 +41,33 @@ void find_maximum_calorie(std::istream& in) {
 }
 
 void find_maximum_calories(std::istream& in, int n) {
+    std::string line;
+    std::vector<int> calories(n, 0);
+    int total = 0;
+    int cal = 0;
+
+    while (std::getline(in, line)) {
+        if (line.size() > 0) {
+            cal += std::stoi(line);
+        } else {
+            update_max_calories(calories, cal);
+            cal = 0;
+        }
+    }
+
+    // There is no blank line after the records of last elf
+    if (cal > 0) {
+        update_max_calories(calories, cal);
+    }
+
+    for (int i = 0; i < n; i ++) {
+        total += calories[i];
+    }
+
+    std::cout << total << std::endl;
+}
+
+void find_maximum_calories_by_sorting(std::istream& in, int n) {
     std::string line;
     std::vector<int> calories;
     int cal = 0;
