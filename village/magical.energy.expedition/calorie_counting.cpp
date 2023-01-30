@@ -10,10 +10,9 @@ void find_maximum_calorie(std::istream& in) {
     int self_cal = 0;
 
     while (std::getline(in, line)) {
-        int cal = std::stoi(line);
-
-        if (cal > 0) {
-            self_cal += cal;
+        if (line.size() > 0) {
+            // 空字符串会导致 `stoi` 抛出异常.
+            self_cal += std::stoi(line);
         } else {
             if (self_cal > max_cal) {
                 max_cal = self_cal;
@@ -23,7 +22,7 @@ void find_maximum_calorie(std::istream& in) {
         }
     }
 
-    // There is no blank line after the records of last elf
+    // 最后一条记录之后很可能没有空行
     if (self_cal > max_cal) {
         max_cal = self_cal;
     }

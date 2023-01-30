@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 
 import sys
+import io
 
-def find_maximum_calorie(src):
+def find_maximum_calorie(src : io.TextIOWrapper):
     max_cal = 0
     self_cal = 0
 
@@ -10,14 +11,18 @@ def find_maximum_calorie(src):
         pure_cal = line.strip()
 
         if len(pure_cal) > 0:
+            # 参数中的任何非数字字符都会导致 `int` 抛出异常
             self_cal += int(pure_cal)
         else:
             if self_cal > max_cal:
                 max_cal = self_cal
             self_cal = 0
 
-    # There is no blank line after the records of last elf
-    print(max(max_cal, self_cal))
+    # 最后一条记录后面很可能没有空行
+    if self_cal > max_cal:
+        max_cal = self_cal
+
+    print(max_cal)
 
 def find_maximum_calories(src, n):
     calories = []

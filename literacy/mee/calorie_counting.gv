@@ -1,0 +1,62 @@
+digraph CalorieCounting {
+    /* graph attributes */
+    bgcolor = transparent;
+
+    /* ghost nodes */
+    node [ shape = point, width = 0, height = 0 ];
+    read_yes, read_no [ style = invis ];
+
+    /* special nodes */
+    node [ shape = box, width = 1, height = 0.5 ];
+    Start, End [ style = rounded ];
+
+    /* conditional nodes */
+    node [ shape = diamond, width = 1.618, color = purple, fontcolor = purple ];    
+    read_okay [ label = "读行成功？" ];
+    blank [ label = "空行?" ];
+
+    /* IO nodes */
+    node [ shape = parallelogram, color = forestgreen, fontcolor = forestgreen ];
+    display [ label = "输出结果" ];
+    
+    /* variable-related nodes */
+    node [ shape = rect, color = royalblue, fontcolor = royalblue ];
+    initialize [ label = "变量初始化" ];
+    stoi [ label = "从该行提取整数" ];
+    update_counter [ label = "更新计数器" ];
+    update_calorie [ label = "更新精灵卡路里" ];
+    update_max_calorie [ label = "更新最大卡路里" ];
+    
+    /* error-prone nodes */
+    node [ color = red, fontcolor = crimson ];
+    update_for_the_final_round [ label = "按需更新变量" ];
+    reset_calorie [ label = "重置精灵卡路里" ];
+    
+    /* edges */
+    subgraph rssl {
+        read_yes -> blank;
+        
+        blank -> update_max_calorie [ label = "Yes" ];
+        update_max_calorie -> reset_calorie -> update_counter -> read_okay;
+        
+        blank -> stoi [ label = "No" ];
+        stoi -> update_calorie -> read_okay; 
+    }
+
+    subgraph final_round {
+        read_no -> update_for_the_final_round;
+        update_for_the_final_round -> display;
+    }
+
+    subgraph main {
+        Start -> initialize -> read_okay;
+        
+        subgraph align_the_main_loop_nodes {
+            rank= same;
+            read_yes -> read_okay [ dir = back, arrowtail = none, label = "Yes", minlen = 2 ];
+            read_okay -> read_no [ arrowhead = none, label = "No" ];
+        }
+
+        display -> End;
+    }
+}
