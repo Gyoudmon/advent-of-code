@@ -10,7 +10,7 @@ digraph UpdateMaxCalories {
     node [ shape = diamond, width = 1.618, color = purple, fontcolor = purple ]; 
     loop_start [ label = "索引越界？" ];   
     compare [ label = "当前元素更小？" ];
-    break [ label = "break?" ];
+    break [ label = "break" ];
 
     /* variable-related nodes */
     node [ shape = rect, color = royalblue, fontcolor = royalblue ];

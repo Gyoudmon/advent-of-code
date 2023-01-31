@@ -14,7 +14,7 @@ digraph cat {
     node [ shape = diamond, width = 1.618, color = purple, fontcolor = purple ];    
     loop_start [ label = "永真" ];
     okay [ label = "Okay?" ];
-    break [ label = "break?" ];
+    break [ label = "break" ];
 
     /* IO nodes */
     node [ shape = parallelogram, width = 1.618, color = forestgreen, fontcolor = forestgreen ];

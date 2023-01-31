@@ -49,7 +49,7 @@ static inline int round_score(RPSShape self_shape, RPSOutcome outcome) {
     return shape_score(self_shape) + outcome_score(outcome);
 }
 
-static inline RPSOutcome round_end(RPSShape opponent, RPSShape self) {
+static inline RPSOutcome round_outcome(RPSShape opponent, RPSShape self) {
     RPSOutcome end = RPSOutcome::_;
 
     if (opponent == self) {
@@ -88,7 +88,7 @@ int round_score_by_guessing(char op_ch, char sf_ch) {
     int score = 0;
 
     if ((op_shape != RPSShape::_) && (sf_shape != RPSShape::_)) {
-        score = round_score(sf_shape, round_end(op_shape, sf_shape));
+        score = round_score(sf_shape, round_outcome(op_shape, sf_shape));
     }
 
     return score;
@@ -96,6 +96,18 @@ int round_score_by_guessing(char op_ch, char sf_ch) {
 
 int round_score_by_design(char op_ch, char sf_ch) {
     RPSShape op_shape = char_to_shape(op_ch);
+    RPSOutcome outcome = char_to_outcome(sf_ch);
+    int score = 0;
+
+    if (op_shape != RPSShape::_) { // treat all invalid inputs as loses by design
+        score = round_score(smart_shape(op_shape, outcome), outcome);
+    }
+
+    return score;
+}
+
+int round_score_by_manual(char op_ch, char sf_ch) {
+    RPSShape op_shape = static_cast<RPSShape>(op_ch);
     RPSOutcome outcome = char_to_outcome(sf_ch);
     int score = 0;
 

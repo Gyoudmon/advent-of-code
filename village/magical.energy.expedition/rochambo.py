@@ -45,7 +45,7 @@ def outcome_score(outcome):
 def round_score(self_shape, outcome):
     return shape_score(self_shape) + outcome_score(outcome)
 
-def round_end(opponent, self):
+def round_outcome(opponent, self):
     if opponent is self:
         return RPSOutcome.Draw
     elif self is RPSShape.Rock:
@@ -94,7 +94,7 @@ def round_score_by_guessing(op_ch, sf_ch):
     score = 0
 
     if op_play and sf_play:
-        score = round_score(sf_play, round_end(op_play, sf_play))
+        score = round_score(sf_play, round_outcome(op_play, sf_play))
 
     return score
 
