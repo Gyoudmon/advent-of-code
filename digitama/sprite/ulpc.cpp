@@ -44,7 +44,7 @@ static inline const char* random_elf_name(int hint) {
 /*************************************************************************************************/
 WarGrey::AoC::SpriteULPCSheet::SpriteULPCSheet(const std::string& pathname) : SpriteGridSheet(pathname, 21, 13) {}
 
-const char* WarGrey::AoC::SpriteULPCSheet::costume_index_to_name(int idx) {
+const char* WarGrey::AoC::SpriteULPCSheet::costume_index_to_name(size_t idx) {
     return ulpc_moves[idx];
 }
 

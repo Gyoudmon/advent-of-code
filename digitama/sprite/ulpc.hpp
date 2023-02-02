@@ -15,7 +15,7 @@ namespace WarGrey::AoC {
         SpriteULPCSheet(const std::string& pathname);
 
     protected:
-        const char* costume_index_to_name(int idx) override;
+        const char* costume_index_to_name(size_t idx) override;
     };
 
     class ElfSheet : public WarGrey::AoC::SpriteULPCSheet {

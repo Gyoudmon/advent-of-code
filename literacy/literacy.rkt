@@ -45,19 +45,45 @@
                     [maxlength (apply max (map string-length (map syntax-e (syntax->list #'(name name:rest ...)))))])
        (syntax/loc stx
          (list (elem (hspace (- maxlength (string-length name)))
-                     (racketvalfont name) ~ desc ...)
+                     (racketvarfont name) ~ desc ...)
                (elem (linebreak) "; " (hspace (- maxlength (string-length name:rest)))
-                     (racketvalfont name:rest) ~ desc:rest ...) ...)))]))
+                     (racketvarfont name:rest) ~ desc:rest ...) ...)))]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(define story
+  (lambda argv
+    (inset-flow (racketplainfont argv))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; output, result
+(define variable
+  (lambda argv
+    (racketvarfont argv)))
+
+(define const
+  (lambda argv
+    (apply litchar argv)))
+
+(define id
+  (lambda argv
+    (racketidfont argv)))
+
 (define idea
   (lambda argv
-    (racketparenfont argv)))
+    (racketvalfont argv)))
 
 (define focus
   (lambda argv
+    (racketmetafont argv)))
+
+(define note
+  (lambda argv
     (racketcommentfont argv)))
+
+(define fallacy
+  (lambda argv
+    (racketerror argv)))
 
 (define question
   (lambda argv
-    (racketresultfont argv)))
+    (racketparenfont argv)))
