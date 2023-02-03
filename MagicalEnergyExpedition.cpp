@@ -4,7 +4,7 @@
 
 #include "digitama/big_bang/physics/random.hpp"
 #include "digitama/sprite/ulpc.hpp"
-#include "digitama/sprite/msoa.hpp"
+#include "digitama/sprite/agent.hpp"
 #include "digitama/aoc.hpp"
 
 #include <vector>
@@ -69,8 +69,7 @@ namespace {
             this->tux = this->insert(new Sprite("sprite/tux"));
             this->tux->wear("santa_hat");
 
-            this->link = this->insert(new OALinkmon());
-            this->link->play("Congratulate");
+            this->link = this->insert(new AgentLink());
             
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
                 this->elves[idx] = this->insert(new ElfSheet(idx));
@@ -157,6 +156,8 @@ namespace {
             this->tux->play("walk");
             this->tux->set_border_strategy(BorderStrategy::IGNORE);
             this->tux->set_speed(2.0F, 0.0F);
+
+            this->link->play("Greeting", 1);
             
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
                 if (idx < elf_on_boat_count) {
@@ -198,7 +199,7 @@ namespace {
         std::vector<Labellet*> names;
         std::vector<Sprite*> bonuses;
         Sprite* tux;
-        OALinkmon* link;
+        AgentLink* link;
         ElfSheet* elves[santa_elf_type_count];
         GridAtlas* sledge;
         GridAtlas* island;

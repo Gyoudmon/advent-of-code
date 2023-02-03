@@ -1,4 +1,4 @@
-#include "msoa.hpp"
+#include "agent.hpp"
 
 #include "../big_bang/physics/random.hpp"
 
@@ -1039,7 +1039,7 @@ static const std::vector<AgentFrames> CongratulateFrames = {
     { 100, { {  744,   93 /*  [30]( 1,  6) */ } }, { }, std::nullopt, std::nullopt },
     { 100, { {  868,   93 /*  [31]( 1,  7) */ } }, { }, std::nullopt, std::nullopt },
     { 100, { {  992,   93 /*  [32]( 1,  8) */ } }, { }, std::nullopt, std::nullopt },
-    { 100, { { 1116,   93 /*  [33]( 1,  9) */ } }, { }, std::nullopt, std::nullopt },
+    { 100, { { 1116,   93 /*  [33]( 1,  9) */ } }, { }, 22, std::nullopt },
     { 200, { { 1488,    0 /*  [12]( 0, 12) */ } }, { }, std::nullopt, std::nullopt }
 };
 
@@ -1466,32 +1466,105 @@ static const Agent the_agent_link = {
         "8", "9", "10", "11", "12", "13", "14",
         "15", "16", "17", "18", "19", "20", "21"
     }
-}; 
+};
+
+static std::string idles [] = {
+    "Idle1", "IdleTailWagA", "IdleTailWagB", "IdleTailWagC", "IdleTailWagD",
+    "DeepIdleA", "DeepIdleE", "IdleCleaning", "IdleBlink", "IdleLegLick",
+    "IdleTwitch", "IdleButterFly", "IdleStretch", "IdleScratch", "IdleYawn"
+};
+
+static std::map<int, std::pair<std::string, int>> the_frames;
+
+static int throw_dice_for_branching(std::vector<FrameBranch>& branches) {
+    int probability_boundary = 100;
+    int next_idx = -1;
+
+    for (int idx = 0; (probability_boundary >= 1) && (idx < branches.size()); idx ++) {
+        int dice = random_uniform(1, probability_boundary);
+
+        if (dice <= branches[idx].weight) {
+            next_idx = branches[idx].frame_idx;
+            break;
+        } else {
+            probability_boundary -= branches[idx].weight;
+        }
+    }
+
+    return next_idx;
+}
 
 /*************************************************************************************************/
-WarGrey::AoC::MSOfficeSpriteSheet::MSOfficeSpriteSheet(const std::string& pathname, int row, int col)
+WarGrey::AoC::AgentSpriteSheet::AgentSpriteSheet(const std::string& pathname, int row, int col)
     : SpriteGridSheet(pathname, row, col) {}
 
 /*************************************************************************************************/
-WarGrey::AoC::OALinkmon::OALinkmon()
-    : MSOfficeSpriteSheet(imgdb_build_path("spritesheet/agent/", "link", ".png"), 31, 24) {}
+WarGrey::AoC::AgentLink::AgentLink()
+    : AgentSpriteSheet(imgdb_build_path("spritesheet/agent/", "link", ".png"), 31, 24) {}
 
-int WarGrey::AoC::OALinkmon::submit_action_frames(std::vector<std::pair<int, int>>& frame_refs, const std::string& action) {
-    int start_idx = 0;
+int WarGrey::AoC::AgentLink::submit_action_frames(std::vector<std::pair<int, int>>& frame_refs, const std::string& action) {
+    int next_branch = -1;
     
     if (the_agent_link.frames.find(action) != the_agent_link.frames.end()) {
-        start_idx = this->update_action_frames(frame_refs, action);       
+        next_branch = this->push_action_frames(frame_refs, action, 0);       
     }
 
-    return start_idx;
+    return next_branch;
 }
 
-int WarGrey::AoC::OALinkmon::update_action_frames(std::vector<std::pair<int, int>>& frame_refs, const std::string& action) {
+int WarGrey::AoC::AgentLink::submit_idle_frames(std::vector<std::pair<int, int>>& frame_refs, int& times) {
+    static size_t idle_count = sizeof(idles) / sizeof(std::string);
+    int idx = random_uniform(0, idle_count - 1);
+
+    return this->push_action_frames(frame_refs, idles[idx], 0);
+}
+
+int WarGrey::AoC::AgentLink::update_action_frames(std::vector<std::pair<int, int>>& frame_refs, int next_branch) {
+    int branch_idx0 = 0;
+    std::string action = this->find_agent_frames_by_index(next_branch, &branch_idx0);
+
+    frame_refs.clear();
+    
+    if (action.empty()) {
+        next_branch = -1;
+    } else {
+        next_branch = this->push_action_frames(frame_refs, action, branch_idx0);
+    }
+
+    return next_branch;
+}
+
+const std::string& WarGrey::AoC::AgentLink::find_agent_frames_by_index(int frame_idx, int* agent_idx) {
+    if (the_frames.find(frame_idx) == the_frames.end()) {
+        for (auto animations : the_agent_link.frames) {
+            auto frames = animations.second;
+
+            for (int idx = 0; idx < frames.size(); idx ++) {
+                auto locations = frames[idx].images;
+            
+                if (locations.size() > 0) {
+                    if (this->grid_cell_index(locations[0].real(), locations[0].imag()) == frame_idx) {
+                        the_frames[frame_idx] = std::pair<std::string, int>(animations.first, idx);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    (*agent_idx) = the_frames[frame_idx].second;
+
+    return the_frames[frame_idx].first;
+}
+
+int WarGrey::AoC::AgentLink::push_action_frames(std::vector<std::pair<int, int>>& frame_refs, const std::string& action, int idx0) {
     auto frames = the_agent_link.frames.at(action);
     std::vector<int> indices;
     std::vector<int> exit_indices;
-
-    for (auto frame : frames) {
+    int next_branch = -1;
+    
+    for (int idx = idx0; idx < frames.size(); idx ++) {
+        auto frame = frames[idx];
         auto locations = frame.images;
             
         if (locations.size() > 0) {
@@ -1502,8 +1575,6 @@ int WarGrey::AoC::OALinkmon::update_action_frames(std::vector<std::pair<int, int
 
         exit_indices.push_back(frame.exit_branch.has_value() ? frame.exit_branch.value() : -1);
     }
-    
-    frame_refs.clear();
 
     for (int idx = 0; idx < frames.size(); idx ++) {
         auto frame = frames[idx];
@@ -1514,15 +1585,28 @@ int WarGrey::AoC::OALinkmon::update_action_frames(std::vector<std::pair<int, int
             int exit_idx = exit_indices[idx];
             auto exit_pos = std::find(indices.begin(), indices.end(), exit_idx);
 
-            if (exit_pos == indices.end()) {
-                frame_refs.push_back({ exit_idx, 0 });
-                break;
-            } else {
+            if (exit_pos != indices.end()) {
                 exit_indices[idx] = -1;
                 idx = std::distance(indices.begin(), exit_pos) - 1;
+            } else {
+                next_branch = exit_idx;
+                break;
+            }
+        } else {
+            auto branching = frame.branches;
+
+            if (branching.size() > 0) {
+                next_branch = throw_dice_for_branching(branching);
+                break;
             }
         }
     }
 
-    return 0;
+    printf("%s: %zu [ ", action.c_str(), frame_refs.size());
+    for (int idx = 0; idx < frame_refs.size(); idx ++) {
+        printf("%d ", frame_refs[idx].first);
+    }
+    printf("]\nnext: %d\n", next_branch);
+
+    return next_branch;
 }

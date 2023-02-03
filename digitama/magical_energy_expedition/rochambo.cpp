@@ -193,7 +193,6 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
 void WarGrey::AoC::RochamboPlane::on_enter(IPlane* from) {
     this->on_task_done();
     
-    this->tux->play("walk");
     this->snack->play();
 
     this->set_matter_fps(this->tux, 10);
@@ -298,6 +297,7 @@ void WarGrey::AoC::RochamboPlane::on_task_start(RPSStatus status) {
 
     this->elves[0]->play("rwalk");
     this->elves[1]->play("rwalk");
+    this->tux->play("walk");
 }
 
 void WarGrey::AoC::RochamboPlane::on_task_done() {
@@ -312,6 +312,8 @@ void WarGrey::AoC::RochamboPlane::on_task_done() {
     this->move_to(this->l_play, this->elves[0], MatterAnchor::CT, MatterAnchor::CB);
     this->move_to(this->r_play, this->elves[1], MatterAnchor::CT, MatterAnchor::CB);
     
+    this->tux->stop();
+    this->tux->switch_to_costume("idle-0");
     this->elves[0]->play("rslash");
     this->elves[1]->play("lslash");
     this->outcome_desc->set_text("");
