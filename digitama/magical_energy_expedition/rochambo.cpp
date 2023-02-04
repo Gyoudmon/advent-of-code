@@ -1,15 +1,5 @@
 #include "rochambo.hpp"
 
-#include "../aoc.hpp"
-
-#include "../big_bang/datum/path.hpp"
-#include "../big_bang/datum/flonum.hpp"
-
-#include "../big_bang/physics/random.hpp"
-
-#include <iostream>
-#include <fstream>
-
 using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
 
@@ -112,7 +102,6 @@ void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
 
 void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->backdrop = this->insert(new GridAtlas("backdrop/beach.png"));
-    this->logo = this->insert(new Sprite("logo.png"));
     this->titlet = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, this->name()));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, puzzle_fmt, population_desc, this->strategy.size()));
     this->guessed_score = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
@@ -125,6 +114,9 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->tux = this->insert(new Sprite("sprite/tux"));
     this->elves[1] = this->insert(new ElfSheet("male"));
     
+    this->agent = this->insert(new AgentLink());
+    this->agent->scale(-1.0F, 1.0F);
+
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
         this->play_scores[idx] = this->insert(new Labellet(aoc_font::text, PURPLE, rule_score_fmt, r_play_points[idx]));
         this->play_icons[idx] = this->insert(new Sprite("sprite/rochambo"));
@@ -149,8 +141,8 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
 }
 
 void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
-    this->move_to(this->titlet, this->logo, MatterAnchor::RC, MatterAnchor::LC);
-    this->move_to(this->population, this->logo, MatterAnchor::LB, MatterAnchor::LT);
+    this->move_to(this->titlet, this->agent, MatterAnchor::RB, MatterAnchor::LB);
+    this->move_to(this->population, this->agent, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->guessed_score, this->population, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->designed_score, this->guessed_score, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->random_score, this->designed_score, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
@@ -193,6 +185,7 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
 void WarGrey::AoC::RochamboPlane::on_enter(IPlane* from) {
     this->on_task_done();
     
+    this->agent->play("Greeting", 1);
     this->snack->play();
 
     this->set_matter_fps(this->tux, 10);
@@ -265,7 +258,8 @@ void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
                 this->round_self = nullptr;
                 this->on_task_done();
             }
-        } else if (m == this->logo) {
+        } else if (m == this->agent) {
+            this->agent->play("GoodBye", 1);
             this->status = RPSStatus::MissionDone;
         }
     } else {
@@ -278,6 +272,10 @@ void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
 
 bool WarGrey::AoC::RochamboPlane::can_select(IMatter* m) {
     return (this->status == RPSStatus::TaskDone);
+}
+
+bool WarGrey::AoC::RochamboPlane::has_mission_completed() {
+    return (this->status == RPSStatus::MissionDone) && (!this->agent->in_playing());
 }
 
 void WarGrey::AoC::RochamboPlane::on_task_start(RPSStatus status) {
@@ -298,6 +296,8 @@ void WarGrey::AoC::RochamboPlane::on_task_start(RPSStatus status) {
     this->elves[0]->play("rwalk");
     this->elves[1]->play("rwalk");
     this->tux->play("walk");
+
+    this->agent->play("Processing");
 }
 
 void WarGrey::AoC::RochamboPlane::on_task_done() {
@@ -312,6 +312,7 @@ void WarGrey::AoC::RochamboPlane::on_task_done() {
     this->move_to(this->l_play, this->elves[0], MatterAnchor::CT, MatterAnchor::CB);
     this->move_to(this->r_play, this->elves[1], MatterAnchor::CT, MatterAnchor::CB);
     
+    this->agent->stop(1);
     this->tux->stop();
     this->tux->switch_to_costume("idle-0");
     this->elves[0]->play("rslash");

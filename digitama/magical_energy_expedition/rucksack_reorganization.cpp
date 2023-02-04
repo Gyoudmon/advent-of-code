@@ -2,15 +2,6 @@
 
 #include "../aoc.hpp"
 
-#include "../big_bang/datum/path.hpp"
-#include "../big_bang/datum/flonum.hpp"
-
-#include "../big_bang/physics/random.hpp"
-
-#include <iostream>
-#include <fstream>
-#include <string>
-
 using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
 
@@ -156,13 +147,15 @@ void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float hei
 
 void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) {
     this->backdrop = this->insert(new GridAtlas("backdrop/tent.png"));
-    this->logo = this->insert(new Sprite("logo.png"));
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 3, this->name()));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, puzzle_fmt, population_desc, this->rucksacks.size()));
     this->info_board = this->insert(new Labellet(aoc_font::mono, GRAY, ""));
     this->misplaced_sum = this->insert(new Dimensionlet(this->style, "", misplaced_desc));
     this->badge_sum = this->insert(new Dimensionlet(this->style, "", badge_desc));
     this->backpack = this->insert(new Backpack());
+
+    this->agent = this->insert(new AgentLink());
+    this->agent->scale(-1.0F, 1.0F);
     
     for (auto rucksack : this->rucksacks) {
         this->insert(rucksack);
@@ -171,8 +164,8 @@ void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) 
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height) {
-    this->move_to(this->title, this->logo, MatterAnchor::RC, MatterAnchor::LC);
-    this->move_to(this->population, this->logo, MatterAnchor::LB, MatterAnchor::LT);
+    this->move_to(this->title, this->agent, MatterAnchor::RB, MatterAnchor::LB);
+    this->move_to(this->population, this->agent, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->misplaced_sum, this->population, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->badge_sum, this->misplaced_sum, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     
@@ -198,6 +191,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
 
 void WarGrey::AoC::RucksackReorganizationPlane::on_enter(IPlane* from) {
     this->on_task_done();
+    this->agent->play("Greeting", 1);
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
@@ -252,7 +246,8 @@ void WarGrey::AoC::RucksackReorganizationPlane::after_select(IMatter* m, bool ye
             this->current_rucksack_idx = 0;
             this->badge_item_priority_sum = 0;
             this->on_task_start(RRStatus::FindBadgeItems);
-        } else if (m == this->logo) {
+        } else if (m == this->agent) {
+            this->agent->play("GoodBye", 1);
             this->status = RRStatus::MissionDone;
         } else {
             Rucksack* self = dynamic_cast<Rucksack*>(m);
@@ -275,18 +270,24 @@ bool WarGrey::AoC::RucksackReorganizationPlane::can_select(IMatter* m) {
     return (this->status == RRStatus::TaskDone);
 }
 
+bool WarGrey::AoC::RucksackReorganizationPlane::has_mission_completed() {
+    return (this->status == RRStatus::MissionDone) && (!this->agent->in_playing());
+}
+
 void WarGrey::AoC::RucksackReorganizationPlane::move_rucksack_to_grid(Rucksack* rs) {
     this->move_to_grid(rs, rs->id, MatterAnchor::CB);
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::on_task_start(RRStatus status) {
     this->status = status;
+    this->agent->play("Processing");
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::on_task_done() {
     this->status = RRStatus::TaskDone;
     this->info_board->set_text(MatterAnchor::RB, "");
     this->backpack->set_items("");
+    this->agent->stop(1);
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::display_items(Rucksack* self) {

@@ -3,8 +3,6 @@
 #include "digitama/magical_energy_expedition/rucksack_reorganization.hpp"
 
 #include "digitama/big_bang/physics/random.hpp"
-#include "digitama/sprite/ulpc.hpp"
-#include "digitama/sprite/agent.hpp"
 #include "digitama/aoc.hpp"
 
 #include <vector>
@@ -29,18 +27,18 @@ namespace {
 
     class MagicalEnergyExpeditionPlane : public Plane {
     public:
-        MagicalEnergyExpeditionPlane(Cosmos* master)
-            : Plane("Magical Energy Expedition")
-            , master(master) {}
+        MagicalEnergyExpeditionPlane(Cosmos* master) : Plane("Magical Energy Expedition"), master(master) {}
 
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
-            this->logo = this->insert(new Sprite("logo.png"));
             this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞能量水果"));
             this->sledge = this->insert(new GridAtlas("sledge.png"));
             this->island = this->insert(new GridAtlas("island.png"));
             this->boat = this->insert(new Sprite("boat.png"));
 
+            this->agent = this->insert(new AgentLink());
+            this->agent->scale(-1.0F, 1.0F);
+            
             for (int idx = 0; idx < advent_days; idx ++) {
                 const char* task_name = this->master->plane_name(idx + 1);
                 
@@ -69,8 +67,6 @@ namespace {
             this->tux = this->insert(new Sprite("sprite/tux"));
             this->tux->wear("santa_hat");
 
-            this->link = this->insert(new AgentLink());
-            
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
                 this->elves[idx] = this->insert(new ElfSheet(idx));
                 if (idx < elf_on_boat_count) {
@@ -83,11 +79,9 @@ namespace {
         }
         
         void reflow(float width, float height) override {
-            this->move_to(this->title, this->logo, MatterAnchor::RC, MatterAnchor::LC);
+            this->move_to(this->title, this->agent, MatterAnchor::RB, MatterAnchor::LB);
             this->move_to(this->sledge, width, 0.0F, MatterAnchor::RT);
             this->move_to(this->island, width * 0.5F, height * 0.5F, MatterAnchor::CC, 0.0F, float(title_fontsize));
-            this->move_to(this->boat, this->island, MatterAnchor::LB, MatterAnchor::LB);
-            this->move_to(this->link, this->island, MatterAnchor::CT, MatterAnchor::CT);
             
             for (int idx = 0; idx < elf_on_boat_count; idx ++) {
                 if (idx == 0) {
@@ -107,7 +101,7 @@ namespace {
             
             for (int idx = 0; idx < this->stars.size(); idx ++) {
                 if (idx == 0) {
-                    this->move_to(this->stars[idx], this->logo, MatterAnchor::LB, MatterAnchor::LT);
+                    this->move_to(this->stars[idx], this->agent, MatterAnchor::LB, MatterAnchor::LT);
                 } else {
                     this->move_to(this->stars[idx], this->stars[idx - 1], MatterAnchor::RC, MatterAnchor::LC);
                 }
@@ -116,7 +110,7 @@ namespace {
             }
 
             if (this->stars.size() == 0) {
-                this->move_to(this->tux, this->title, MatterAnchor::LB, MatterAnchor::LT);
+                this->move_to(this->tux, this->agent, MatterAnchor::LB, MatterAnchor::LT);
             } else {
                 this->move_to(this->tux, this->stars[0], MatterAnchor::LB, MatterAnchor::LT);
             }
@@ -150,14 +144,23 @@ namespace {
                     this->move(this->elves[idx], dx, dy);
                 }
             }
+
+            if (this->target_plane > 0) {
+                if (!this->agent->in_playing()) {
+                    this->master->transfer_to_plane(this->target_plane);
+                    this->target_plane = 0;
+                }
+            }
         }
 
         void on_enter(IPlane* from) override {
+            this->agent->play("Greeting", 1);
+
             this->tux->play("walk");
             this->tux->set_border_strategy(BorderStrategy::IGNORE);
             this->tux->set_speed(2.0F, 0.0F);
 
-            this->link->play("Greeting", 1);
+            this->move_to(this->boat, this->island, MatterAnchor::LB, MatterAnchor::LB);
             
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
                 if (idx < elf_on_boat_count) {
@@ -186,20 +189,20 @@ namespace {
                     StarFruitlet* self = dynamic_cast<StarFruitlet*>(m);
 
                     if (self->day < this->master->plane_count()) {
-                        this->master->transfer_to_plane(self->day);
+                        this->target_plane = self->day;
+                        this->agent->play("Hide", 1);
                     }
                 }
             }
         }
 
     private:
-        WarGrey::STEM::Sprite* logo;
+        AgentLink* agent;
         Labellet* title;
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
         std::vector<Sprite*> bonuses;
         Sprite* tux;
-        AgentLink* link;
         ElfSheet* elves[santa_elf_type_count];
         GridAtlas* sledge;
         GridAtlas* island;
@@ -207,6 +210,7 @@ namespace {
         
     private:
         Cosmos* master;
+        int target_plane = 0;
     };
 
     /*************************************************************************************************/

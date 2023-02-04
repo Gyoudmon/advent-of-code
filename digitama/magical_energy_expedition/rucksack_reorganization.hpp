@@ -1,7 +1,7 @@
 #pragma once // 确保只被 include 一次
 
 #include "../big_bang/game.hpp"
-#include "../sprite/ulpc.hpp"
+#include "../aoc.hpp"
 
 #include <vector>
 
@@ -62,7 +62,7 @@ namespace WarGrey::AoC {
         void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
 
     public:
-        bool has_mission_completed() override { return this->status == RRStatus::MissionDone; }
+        bool has_mission_completed() override;
         void on_enter(WarGrey::STEM::IPlane* from) override;
 
     private:
@@ -77,7 +77,7 @@ namespace WarGrey::AoC {
         void load_item_list(const std::string& pathname);
 
     private: // 本游戏世界中的物体
-        WarGrey::STEM::Sprite* logo;
+        WarGrey::AoC::AgentLink* agent;
         WarGrey::STEM::Labellet* title;
         WarGrey::STEM::GridAtlas* backdrop;
         WarGrey::STEM::Labellet* population;

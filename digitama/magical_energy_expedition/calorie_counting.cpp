@@ -1,16 +1,6 @@
 #include "calorie_counting.hpp"
 
-#include "../aoc.hpp"
-
-#include "../big_bang/datum/path.hpp"
-#include "../big_bang/datum/flonum.hpp"
 #include "../big_bang/datum/vector.hpp"
-
-#include "../big_bang/physics/random.hpp"
-
-#include <iostream>
-#include <fstream>
-#include <string>
 
 using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
@@ -45,7 +35,6 @@ void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
 
 void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->backdrop = this->insert(new GridAtlas("backdrop/deck.png"));
-    this->logo = this->insert(new Sprite("logo.png"));
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, this->name()));
     this->info_board = this->insert(new Labellet(aoc_font::title, GRAY, ""));
     this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, unknown_fmt, population_desc));
@@ -56,6 +45,9 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
     this->snack->scale(0.30F);
     this->set_matter_fps(this->snack, 2);
+
+    this->agent = this->insert(new AgentLink());
+    this->agent->scale(-1.0F, 1.0F);
     
     for (int idx = 0; idx < this->top_count; idx ++) {
         this->dims.push_back(this->insert(new Labellet(aoc_font::dimension, SALMON, " ")));
@@ -79,14 +71,14 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
-    this->move_to(this->title, this->logo, MatterAnchor::RC, MatterAnchor::LC);
+    this->move_to(this->title, this->agent, MatterAnchor::RB, MatterAnchor::LB);
     this->move_to(this->snack, width, 0.0F, MatterAnchor::RT);
     this->move_to(this->info_board, this->snack, MatterAnchor::LC, MatterAnchor::RC);
-    this->move_to(this->population, this->logo, MatterAnchor::LB, MatterAnchor::LT);
+    this->move_to(this->population, this->agent, MatterAnchor::LB, MatterAnchor::LT);
     this->move_to(this->top1_total, this->population, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->topn_total, this->top1_total, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     this->move_to(this->sorted_total, this->topn_total, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
-
+    
     this->backdrop->resize(width, height);
     this->move_to(this->backdrop, 0.0F, height, MatterAnchor::LB);
     
@@ -99,7 +91,7 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
         /* reflow top elves labels */ {
             int top_elf_col = 4;
             float xoff = width * 0.5F;
-            float yoff = float(text_fontsize);
+            float yoff = float(text_fontsize) * 1.8F;
             float cwidth = (width - xoff) / float(top_elf_col);
             float cheight = (height * 0.64F - yoff) / 4.0F;
 
@@ -114,8 +106,9 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::on_enter(IPlane* from) {
-    this->on_task_done();
+    this->agent->play("Greeting", 1);
     this->snack->play();
+    this->on_task_done();
 }
 
 void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
@@ -264,7 +257,8 @@ void WarGrey::AoC::CalorieCountingPlane::after_select(IMatter* m, bool yes_or_no
             this->top_calories.clear();
             this->top_elf_indices.clear();
             this->on_task_start(CCStatus::FindMaximumCaloriesViaSorting);
-        } else if (m == this->logo) {
+        } else if (m == this->agent) {
+            this->agent->play("GoodBye", 1);
             this->status = CCStatus::MissionDone;
         } else {
             Elfmon* maybe_elf = dynamic_cast<Elfmon*>(m);
@@ -274,6 +268,10 @@ void WarGrey::AoC::CalorieCountingPlane::after_select(IMatter* m, bool yes_or_no
             }
         }
     }
+}
+
+bool WarGrey::AoC::CalorieCountingPlane::has_mission_completed() {
+    return (this->status == CCStatus::MissionDone) && (!this->agent->in_playing());
 }
 
 bool WarGrey::AoC::CalorieCountingPlane::can_select(IMatter* m) {
@@ -329,11 +327,13 @@ void WarGrey::AoC::CalorieCountingPlane::random_walk(int start_idx) {
 
 void WarGrey::AoC::CalorieCountingPlane::on_task_start(CCStatus status) {
     this->status = status;
+    this->agent->play("Processing");
 }
 
 void WarGrey::AoC::CalorieCountingPlane::on_task_done() {
     this->status = CCStatus::TaskDone;
     this->info_board->set_text(MatterAnchor::RC, "");
+    this->agent->stop(1);
 }
 
 void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx) {

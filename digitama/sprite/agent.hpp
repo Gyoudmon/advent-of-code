@@ -28,7 +28,7 @@ namespace WarGrey::AoC {
         int update_action_frames(std::vector<std::pair<int, int>>& frame_refs, int next_branch) override;
 
     private:
-        const std::string& find_agent_frames_by_index(int frame_idx, int* agent_idx);
+        int find_agent_frames_by_index(int frame_idx);
         int push_action_frames(std::vector<std::pair<int, int>>& frame_refs, const std::string& action, int idx0 = 0);
     };
 }

@@ -1,6 +1,16 @@
 #pragma once
 
 #include "big_bang/graphics/font.hpp"
+#include "big_bang/physics/random.hpp"
+
+#include "big_bang/datum/path.hpp"
+#include "big_bang/datum/flonum.hpp"
+
+#include "sprite/agent.hpp"
+#include "sprite/ulpc.hpp"
+
+#include <iostream>
+#include <fstream>
 
 namespace WarGrey::AoC {
     /* Constants */
@@ -10,7 +20,7 @@ namespace WarGrey::AoC {
     static const char* unknown_fmt = "%s: (未知)";
 
     /* Fonts */
-    static const int title_fontsize = 50;
+    static const int title_fontsize = 50; /* <-- already hit the ceiling */
     static const int answer_fontsize = 36;
     static const int text_fontsize = 32;
     static const int dim_fontsize = 24;

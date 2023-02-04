@@ -1471,15 +1471,16 @@ static const Agent the_agent_link = {
 static std::string idles [] = {
     "Idle1", "IdleTailWagA", "IdleTailWagB", "IdleTailWagC", "IdleTailWagD",
     "DeepIdleA", "DeepIdleE", "IdleCleaning", "IdleBlink", "IdleLegLick",
-    "IdleTwitch", "IdleButterFly", "IdleStretch", "IdleScratch", "IdleYawn"
+    "IdleTwitch", "IdleButterFly", "IdleStretch", "IdleScratch", "IdleYawn",
+    "RestPose"
 };
 
-static std::map<int, std::pair<std::string, int>> the_frames;
+static std::map<int, std::vector<std::pair<std::string, int>>> the_frames;
 
-static int throw_dice_for_branching(std::vector<FrameBranch>& branches) {
+static int throw_dice_for_branching(std::vector<FrameBranch>& branches, std::optional<int>& exit_branch) {
+    int next_idx = exit_branch.value_or(-1);
     int probability_boundary = 100;
-    int next_idx = -1;
-
+    
     for (int idx = 0; (probability_boundary >= 1) && (idx < branches.size()); idx ++) {
         int dice = random_uniform(1, probability_boundary);
 
@@ -1492,6 +1493,26 @@ static int throw_dice_for_branching(std::vector<FrameBranch>& branches) {
     }
 
     return next_idx;
+}
+
+static bool is_ending_frame(std::vector<FrameBranch>& branches, std::optional<int>& exit_branch) {
+    bool yes = false;
+    
+    if (branches.size() > 0) {
+        if (!exit_branch.has_value()) {
+            int probability = 0;
+
+            for (auto branch :  branches) {
+                probability += branch.weight;
+            }
+
+            yes = (probability >= 100);
+        } else {
+            yes = true;
+        }
+    }
+
+    return yes;
 }
 
 /*************************************************************************************************/
@@ -1520,22 +1541,25 @@ int WarGrey::AoC::AgentLink::submit_idle_frames(std::vector<std::pair<int, int>>
 }
 
 int WarGrey::AoC::AgentLink::update_action_frames(std::vector<std::pair<int, int>>& frame_refs, int next_branch) {
-    int branch_idx0 = 0;
-    std::string action = this->find_agent_frames_by_index(next_branch, &branch_idx0);
+    int selection_idx = this->find_agent_frames_by_index(next_branch);
 
     frame_refs.clear();
     
-    if (action.empty()) {
+    if (selection_idx < 0) {
         next_branch = -1;
     } else {
-        next_branch = this->push_action_frames(frame_refs, action, branch_idx0);
+        auto frame = the_frames[next_branch][selection_idx];
+
+        next_branch = this->push_action_frames(frame_refs, frame.first, frame.second);
     }
 
     return next_branch;
 }
 
-const std::string& WarGrey::AoC::AgentLink::find_agent_frames_by_index(int frame_idx, int* agent_idx) {
-    if (the_frames.find(frame_idx) == the_frames.end()) {
+int WarGrey::AoC::AgentLink::find_agent_frames_by_index(int frame_idx) {
+    int selection_idx = -1;
+
+    if (the_frames.find(frame_idx) == the_frames.end()) {    
         for (auto animations : the_agent_link.frames) {
             auto frames = animations.second;
 
@@ -1544,69 +1568,70 @@ const std::string& WarGrey::AoC::AgentLink::find_agent_frames_by_index(int frame
             
                 if (locations.size() > 0) {
                     if (this->grid_cell_index(locations[0].real(), locations[0].imag()) == frame_idx) {
-                        the_frames[frame_idx] = std::pair<std::string, int>(animations.first, idx);
-                        break;
+                        the_frames[frame_idx].push_back(std::pair<std::string, int>(animations.first, idx));
                     }
                 }
             }
         }
     }
 
-    (*agent_idx) = the_frames[frame_idx].second;
+    if ((the_frames.find(frame_idx) != the_frames.end()) && (the_frames[frame_idx].size() > 0)) {
+        selection_idx = random_uniform(0, the_frames[frame_idx].size() - 1);
+    }
 
-    return the_frames[frame_idx].first;
+    return selection_idx;
 }
 
 int WarGrey::AoC::AgentLink::push_action_frames(std::vector<std::pair<int, int>>& frame_refs, const std::string& action, int idx0) {
     auto frames = the_agent_link.frames.at(action);
-    std::vector<int> indices;
-    std::vector<int> exit_indices;
+    size_t frame_size = frames.size();
+    std::vector<int> indices(frame_size, -1);
+    std::vector<int> choices = { 0 };
     int next_branch = -1;
+
+    for (int idx = 0; idx < frame_size; idx ++) {
+        auto frame = frames[idx];
+        auto locations = frames[idx].images;
     
-    for (int idx = idx0; idx < frames.size(); idx ++) {
-        auto frame = frames[idx];
-        auto locations = frame.images;
-            
         if (locations.size() > 0) {
-            indices.push_back(this->grid_cell_index(locations[0].real(), locations[0].imag()));
-        } else {
-            indices.push_back(-1);
+            indices[idx] = this->grid_cell_index(locations[0].real(), locations[0].imag());
         }
 
-        exit_indices.push_back(frame.exit_branch.has_value() ? frame.exit_branch.value() : -1);
+        if (is_ending_frame(frame.branches, frame.exit_branch)) {
+            if (idx + 1 < frame_size) {
+                choices.push_back(idx + 1);
+            }
+        }
     }
 
-    for (int idx = 0; idx < frames.size(); idx ++) {
+    if ((idx0 == 0) && (choices.size() > 1)) {
+        idx0 = choices[random_uniform(0, choices.size() - 1)];
+    }
+
+    for (int idx = idx0; idx < frame_size; idx ++) {
         auto frame = frames[idx];
+        auto branching = frame.branches;
+        
+        if (indices[idx] >= 0) {
+            frame_refs.push_back({ indices[idx], frame.duration });
+        }
+        
+        if (branching.size() > 0) {
+            int branch_idx = throw_dice_for_branching(branching, frame.exit_branch);
 
-        frame_refs.push_back({ indices[idx], frame.duration });
-            
-        if (exit_indices[idx] >= 0) {
-            int exit_idx = exit_indices[idx];
-            auto exit_pos = std::find(indices.begin(), indices.end(), exit_idx);
+            if (branch_idx >= 0) {
+                auto branch_pos = std::find(indices.begin(), indices.end(), branch_idx);
 
-            if (exit_pos != indices.end()) {
-                exit_indices[idx] = -1;
-                idx = std::distance(indices.begin(), exit_pos) - 1;
-            } else {
-                next_branch = exit_idx;
-                break;
-            }
-        } else {
-            auto branching = frame.branches;
-
-            if (branching.size() > 0) {
-                next_branch = throw_dice_for_branching(branching);
-                break;
+                if (branch_pos != indices.end()) {
+                    idx = std::distance(indices.begin(), branch_pos) - 1;
+                    continue;
+                } else {
+                    next_branch = branch_idx;
+                    break;
+                }
             }
         }
     }
-
-    printf("%s: %zu [ ", action.c_str(), frame_refs.size());
-    for (int idx = 0; idx < frame_refs.size(); idx ++) {
-        printf("%d ", frame_refs[idx].first);
-    }
-    printf("]\nnext: %d\n", next_branch);
-
+    
     return next_branch;
 }
