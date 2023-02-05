@@ -1,6 +1,6 @@
-#lang scribble/manual
+#lang scribble/base
 
-@(require "literacy.rkt")
+@require{literacy.rkt}
 
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-root-story{魔法能量远征}
@@ -19,6 +19,3 @@
 @include-section[(submod "mee/01.calorie.counting.rkt" doc)]
 @include-section[(submod "mee/02.rock.paper.scissors.rkt" doc)]
 @include-section[(submod "mee/03.rucksack.reorganization.rkt" doc)]
-
-@;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-@handbook-reference[]

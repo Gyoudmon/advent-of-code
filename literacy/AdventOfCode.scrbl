@@ -18,5 +18,8 @@
 
 @include-section{magical.energy.expedition.scrbl}
 
+@texbook-appendix{先修知识}
+@include-section{appendix.scrbl}
+
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-appendix[#:index-section? #true #:numbered? #false]
