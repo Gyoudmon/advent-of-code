@@ -2,15 +2,16 @@
 
 @(require "../literacy.rkt")
 
-@(define-aoc-bib D3RR "Rucksack Reorganization" 3)
-
 @(define the-core-in-thinking
    @focus{如何将每一行杂乱无章的原始文本转化为对我们有用的数据和信息})
 
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-root-story{第三天：背包重组}
 
-故事原文见 @~cite[D3RR]。故事中的任务将按如下程序结构展开：
+@aoc-desc[3
+ #:keywords ["序列"]]
+
+故事中的任务将按如下程序结构展开：
 
 @handbook-chunk[<rucksack-reorganization:*>
                 (module advent racket/base

@@ -2,12 +2,13 @@
 
 @(require "../literacy.rkt")
 
-@(define-aoc-bib D2RPS "Rock Paper Scissors" 2)
-
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 @handbook-root-story{第二天：猜拳大赛}
 
-故事原文见 @~cite[D2RPS]。故事中的任务将按如下程序结构展开：
+@aoc-desc[2
+ #:keywords ["枚举类型"]]
+
+故事中的任务将按如下程序结构展开：
 
 @handbook-chunk[<rochambo:*>
                 (module advent racket/base

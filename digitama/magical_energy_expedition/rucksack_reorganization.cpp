@@ -293,7 +293,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::on_task_done() {
 void WarGrey::AoC::RucksackReorganizationPlane::display_items(Rucksack* self) {
     size_t size = self->items.size();
     std::string items = self->items.substr(0, size / 2);
-                
+    
     items.push_back('\n');
     items.append(self->items.substr(size / 2));
 

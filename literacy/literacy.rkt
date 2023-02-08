@@ -4,13 +4,14 @@
 (provide (all-from-out digimon/tamer))
 
 (require digimon/tamer)
-(require digimon/collection)
 (require digimon/syntax)
+(require digimon/collection)
 
-(require scribble/core)
 (require scribble/manual)
 
+(require (for-syntax racket/list))
 (require (for-syntax racket/symbol))
+(require (for-syntax syntax/parse))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Just in case for README.md
@@ -26,15 +27,22 @@
 (tamer-story-submodule-name 'advent)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(define-syntax (define-aoc-bib stx)
-  (syntax-case stx []
-    [(_ id title day)
+(define-syntax (aoc-desc stx)
+  (syntax-parse stx #:datum-literals []
+    [(_ day
+        (~alt (~once (~seq #:keywords [kw ...])))
+        ...)
      (syntax/loc stx
-       (define-bib id
-         #:title  (format "Day ~a: ~a" day title)
-         #:author "Eric Wastl"
-         #:date   2022
-         #:url    (format "https://adventofcode.com/2022/day/~a" day)))]))
+       (para (list (emph "故事源") ": "
+                   (url (string-append "https://adventofcode.com/2022/day/"
+                                       (number->string day))))
+             (linebreak)
+             (add-between #:splice? #true
+                          #:before-first (list (emph "关键字") ":" ~)
+                          (for/list ([key (in-list (list kw ...))])
+                            (racketkeywordfont (tech key)))
+                          (list "," ~))
+             (linebreak)))]))
 
 (define-syntax ($argv stx)
   (syntax-case stx []
@@ -49,41 +57,71 @@
                (elem (linebreak) "; " (hspace (- maxlength (string-length name:rest)))
                      (racketvarfont name:rest) ~ desc:rest ...) ...)))]))
 
+(define-syntax (aoc-defterm stx)
+  (syntax-parse stx #:datum-literals []
+    [(_ (~alt (~optional (~seq #:key key) #:defaults ([key #'#false]))
+              (~optional (~seq #:origin en (~optional abbr)) #:defaults ([en #'#false] [abbr #'#false])))
+        ...
+        zh)
+     #'(append (tamer-defterm zh #:key key)
+               (cond [(and en abbr) (list "(" (tamer-defterm abbr) "," ~ (tamer-defterm en) ")")]
+                     [(or en abbr) (list "(" (tamer-defterm (or en abbr)) ")")]
+                     [else null]))]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (define story
   (lambda argv
-    (inset-flow (racketplainfont argv))))
+    (inset-flow (apply racketplainfont (list* ~ ~ argv)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; output, result
+(define desc
+  (lambda argv
+    (apply racketmetafont argv)))
+
+(define name
+  (lambda [arg]
+    (tamer-deftech arg)))
+
+(define term-name
+  (lambda [arg]
+    (emph arg)))
+
 (define variable
   (lambda argv
-    (racketvarfont argv)))
+    (apply racketvarfont argv)))
 
-(define const
+(define sign
   (lambda argv
-    (apply litchar argv)))
+    (apply racketparenfont argv)))
 
 (define id
   (lambda argv
-    (racketidfont argv)))
+    (apply racketidfont argv)))
+
+(define form
+  (lambda argv
+    (apply racketkeywordfont argv)))
 
 (define idea
   (lambda argv
-    (racketvalfont argv)))
+    (apply racketoutput argv)))
 
 (define focus
   (lambda argv
-    (racketmetafont argv)))
+    (apply racketvalfont argv)))
+
+(define thus
+  (lambda argv
+    (apply racketresultfont argv)))
 
 (define note
   (lambda argv
-    (racketcommentfont argv)))
+    (apply racketcommentfont argv)))
 
 (define fallacy
   (lambda argv
-    (racketerror argv)))
+    (apply racketerror argv)))
 
 (define question
   (lambda argv
-    (racketparenfont argv)))
+    (apply racketparenfont argv)))

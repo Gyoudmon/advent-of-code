@@ -18,8 +18,18 @@
 
 @include-section{magical.energy.expedition.scrbl}
 
-@texbook-appendix{先修知识}
-@include-section{appendix.scrbl}
-
 @;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-@handbook-appendix[#:index-section? #true #:numbered? #false]
+@handbook-appendix[#:index-section? #true #:numbered? #false
+ (book-bib-entry #:date "2013" #:edition "1st"
+                 "RoR" "Realm of Racket: Learn to Program, One Game at a Time!"
+                 (list "Forrest Bice" "Rose DeMaio" "Spencer Florence" "Feng-Yun Mimi Lin" "Scott Lindeman"
+                       "Nicole Nussbaum" "Eric Peterson" "Ryan Plessner" "David Van Horn" "Matthias Felleisen"
+                       "Conrad Barski, MD")
+                 "No Starch Press")
+ (book-bib-entry #:date "2011" #:edition "1st"
+                 "LoL" "Land of Lisp: Learn to Program in Lisp, One Game at a Time!"
+                 "Conrad Barski, MD" "No Starch Press")
+ (book-bib-entry #:date "2009"
+                 "TCC" "冒号课堂：编程范式与OOP思想"
+                 (list "郑辉")
+                 "电子工业出版社")]

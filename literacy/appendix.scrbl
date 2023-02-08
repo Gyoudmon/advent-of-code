@@ -2,4 +2,4 @@
 
 @require{literacy.rkt}
 
-@handbook-appendix-story{Racket 语言基础}
+@handbook-appendix-story[#:style noncontent-style]{Racket 语言基础}
