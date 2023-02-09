@@ -1,5 +1,6 @@
 #include "rucksack_reorganization.hpp"
 
+#include "../big_bang/graphics/text.hpp"
 #include "../aoc.hpp"
 
 using namespace WarGrey::STEM;
@@ -14,6 +15,7 @@ static const char* badge_desc = "队徽物品优先级总和";
 
 static const float rucksack_size = 36.0F;
 static const float rucksack_item_size = 32.0F;
+static const float hash_scale = 1.5F;
 static const int grid_column = 30;
 
 static inline const char* random_rucksack_style(int hint) {
@@ -74,6 +76,13 @@ static int find_last_shared_item_prior(char dict0[], const char* items, size_t e
     }
 
     return last_shared_item_prior;
+}
+
+static inline int atlas_vertical_index(int prior, int row, int col) {
+    int r = prior % row;
+    int c = prior / row;
+
+    return r * col + c;
 }
 
 /*************************************************************************************************/
@@ -153,6 +162,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) 
     this->misplaced_sum = this->insert(new Dimensionlet(this->style, "", misplaced_desc));
     this->badge_sum = this->insert(new Dimensionlet(this->style, "", badge_desc));
     this->backpack = this->insert(new Backpack());
+    this->hashtable = this->insert(new HashTable());
 
     this->agent = this->insert(new AgentLink());
     this->agent->scale(-1.0F, 1.0F);
@@ -170,10 +180,11 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
     this->move_to(this->badge_sum, this->misplaced_sum, MatterAnchor::LB, MatterAnchor::LT, 0.0F, 1.0F);
     
     this->backdrop->resize(width, 0.0F);
-    this->move_to(this->backdrop, 0.0F, height * 0.64F, MatterAnchor::LB);
-
+    this->move_to(this->backdrop, 0.0F, height * 0.70F, MatterAnchor::LB);
+    
     this->move_to(this->backpack, this->backdrop, MatterAnchor::LT, MatterAnchor::LB, 0.0F, -2.0F);
     this->move_to(this->info_board, this->backdrop, MatterAnchor::RT, MatterAnchor::RB, 0.0F, -2.0F);
+    this->move_to(this->hashtable, this->misplaced_sum, MatterAnchor::RT, MatterAnchor::LT, float(title_fontsize));
     
     if (this->rucksacks.size() > 0) {
         float gxoff, gyoff;
@@ -249,6 +260,22 @@ void WarGrey::AoC::RucksackReorganizationPlane::after_select(IMatter* m, bool ye
         } else if (m == this->agent) {
             this->agent->play("GoodBye", 1);
             this->status = RRStatus::MissionDone;
+        } else if (m == this->backpack) {
+            if (this->backpack->item_count() > 0) {
+                if (this->status == RRStatus::TaskDone) {
+                    this->status = RRStatus::CreateHashTable;
+                    this->hashtable->clear();
+                } else if (this->status == RRStatus::CreateHashTable) {
+                    char item = this->backpack->compartment_popfront();
+
+                    if (item != '\0') {
+                        this->agent->play("GetArtsy", 1);
+                        this->hashtable->insert_item(item);
+                    } else {
+                        this->status = RRStatus::TaskDone;
+                    }
+                }
+            }
         } else {
             Rucksack* self = dynamic_cast<Rucksack*>(m);
 
@@ -267,7 +294,15 @@ void WarGrey::AoC::RucksackReorganizationPlane::after_select(IMatter* m, bool ye
 }
 
 bool WarGrey::AoC::RucksackReorganizationPlane::can_select(IMatter* m) {
-    return (this->status == RRStatus::TaskDone);
+    bool okay = false;
+
+    switch (this->status) {
+        case RRStatus::CreateHashTable: okay = (m == this->backpack); break;
+        case RRStatus::TaskDone: okay = true; break;
+        default: break;
+    }
+
+    return okay;
 }
 
 bool WarGrey::AoC::RucksackReorganizationPlane::has_mission_completed() {
@@ -286,19 +321,21 @@ void WarGrey::AoC::RucksackReorganizationPlane::on_task_start(RRStatus status) {
 void WarGrey::AoC::RucksackReorganizationPlane::on_task_done() {
     this->status = RRStatus::TaskDone;
     this->info_board->set_text(MatterAnchor::RB, "");
-    this->backpack->set_items("");
+    this->backpack->clear();
+    this->hashtable->clear();
     this->agent->stop(1);
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::display_items(Rucksack* self) {
     size_t size = self->items.size();
     std::string items = self->items.substr(0, size / 2);
-    
+
     items.push_back('\n');
     items.append(self->items.substr(size / 2));
 
     this->info_board->set_text(items, MatterAnchor::RB);
     this->backpack->set_items(self->items);
+    this->hashtable->insert_items(self->items);
 }
 
 /*************************************************************************************************/
@@ -307,7 +344,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::load_item_list(const std::string
     
     this->rucksacks.clear();
 
-    if (datin.is_open()) {    
+    if (datin.is_open()) {
         std::string line;
 
         while (std::getline(datin, line)) {
@@ -323,6 +360,7 @@ WarGrey::AoC::Rucksack::Rucksack(const std::string& items, int id)
     : Sprite("sprite/rucksack/%s/%s", random_rucksack_style(id), random_rucksack_gender(id))
     , items(items), id(id) {}
 
+/*************************************************************************************************/
 WarGrey::AoC::Backpack::Backpack() : GridAtlas("spritesheet/items.png", 24, 21, 4, 4, true) {
     this->camouflage(false);
 }
@@ -333,20 +371,16 @@ void WarGrey::AoC::Backpack::construct(SDL_Renderer* renderer) {
 
 void WarGrey::AoC::Backpack::set_items(const std::string& items) {
     if (this->items.compare(items) != 0) {
-        this->items = items;
-        dict_zero(this->tile_indices);
+        this->clear();
 
+        this->items = items;
         this->create_map_grid(2, this->items.size() / 2);
 
         for (int idx = 0; idx < this->items.size(); idx ++) {
             int prior = item_priority(this->items[idx]);
 
             if (prior > 0) {
-                // WARNING: we are vertically selecting item icons
-                int r = prior % this->atlas_row;
-                int c = prior / this->atlas_row;
-
-                this->tile_indices[idx] = r * this->atlas_col + c;
+                this->tile_indices[idx] = atlas_vertical_index(prior, this->atlas_row, this->atlas_col);
             }
         }
 
@@ -354,11 +388,95 @@ void WarGrey::AoC::Backpack::set_items(const std::string& items) {
     }
 }
 
+char WarGrey::AoC::Backpack::compartment_popfront() {
+    char item = '\0';
+
+    for (int idx = 0; idx < this->items.size() / 2; idx ++) {
+        if (this->tile_indices[idx] > 0) {
+            item = this->items[idx];
+            this->tile_indices[idx] = 0;
+            break;
+        }
+    }
+
+    return item;
+}
+
 int WarGrey::AoC::Backpack::get_atlas_tile_index(int map_idx) {
     int idx = -1;
 
     if (this->tile_indices[map_idx] > 0) {
         idx = this->tile_indices[map_idx];
+    }
+
+    return idx; 
+}
+
+void WarGrey::AoC::Backpack::clear() {
+    this->items.clear();
+    dict_zero(this->tile_indices);
+}
+
+/*************************************************************************************************/
+WarGrey::AoC::HashTable::HashTable() : GridAtlas("spritesheet/items.png", 24, 21, 4, 4, true) {}
+
+void WarGrey::AoC::HashTable::construct(SDL_Renderer* renderer) {
+    this->create_map_grid(2, 16, rucksack_item_size * hash_scale, rucksack_item_size * hash_scale);
+}
+
+void WarGrey::AoC::HashTable::draw(SDL_Renderer* renderer, float x, float y, float Width, float Height) {
+    GridAtlas::draw(renderer, x, y, Width, Height);
+    float xoff = (rucksack_item_size * hash_scale - float(text_fontsize) * 0.5F) * 0.5F;
+    float dx = Width / float(this->map_col);
+    float cx = x;
+    float cy = y + Height - Height / float(this->map_row);
+
+    for (auto it = this->dict.begin(); it != this->dict.end(); it ++) {    
+        game_draw_blended_text(aoc_font::mono, renderer, GRAY, cx + xoff, cy, std::to_string(it->second));
+        cx += dx;
+    }
+}
+
+
+void WarGrey::AoC::HashTable::insert_items(const std::string& items) {
+    this->clear();
+
+    for (int idx = 0; idx < items.size() / 2; idx ++) {
+        this->insert_item(items[idx], false);
+    }
+
+    this->notify_updated();
+}
+
+void WarGrey::AoC::HashTable::insert_item(char ch, bool update) {
+    this->insert_item(item_priority(ch), update);
+}
+
+void WarGrey::AoC::HashTable::insert_item(int prior, bool update) {
+    int atlas_idx = atlas_vertical_index(prior, this->atlas_row, this->atlas_col);
+
+    this->dict[atlas_idx] += 1;
+
+    if (update) {
+        this->notify_updated();
+    }
+}
+
+int WarGrey::AoC::HashTable::get_atlas_tile_index(int map_idx) {
+    int idx = -1;
+    int row = map_idx / this->map_col;
+    int col = map_idx % this->map_col;
+
+    if (row == 0) {
+        if (col < this->dict.size()) {
+            auto dit = this->dict.begin();
+
+            for (int c = 0; c < col; c ++) {
+                dit ++;
+            }
+
+            idx = dit->first;
+        }
     }
 
     return idx; 

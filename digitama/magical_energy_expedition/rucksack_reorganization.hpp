@@ -4,6 +4,7 @@
 #include "../aoc.hpp"
 
 #include <vector>
+#include <map>
 
 namespace WarGrey::AoC {
     /******************************************* 声明游戏精灵 ******************************************/
@@ -21,13 +22,15 @@ namespace WarGrey::AoC {
     class Backpack : public WarGrey::STEM::GridAtlas {
     public:
         Backpack();
-        ~Backpack() {}
 
     public:
         void construct(SDL_Renderer* renderer) override;
 
     public:
         void set_items(const std::string& items);
+        size_t item_count() { return this->items.size(); }
+        char compartment_popfront();
+        void clear();
 
     protected:
         int get_atlas_tile_index(int map_idx) override;
@@ -37,10 +40,32 @@ namespace WarGrey::AoC {
         int tile_indices[DICT_SIZE] = {};
     };
 
+    class HashTable : public WarGrey::STEM::GridAtlas {
+    public:
+        HashTable();
+
+    public:
+        void construct(SDL_Renderer* renderer) override;
+        void draw(SDL_Renderer* renderer, float x, float y, float Width, float Height) override;
+
+    public:
+        void insert_items(const std::string& items);
+        void insert_item(char ch, bool update = true);
+        void insert_item(int prior, bool update = true);
+        void clear() { this->dict.clear(); }
+
+    protected:
+        int get_atlas_tile_index(int map_idx) override;
+    
+    private:
+        std::map<int, int> dict;
+    };
+
     /******************************************* 声明游戏状态 ******************************************/
     enum class RRStatus {
         FindMisplacedItems,
         FindBadgeItems,
+        CreateHashTable,
         TaskDone,
         MissionDone,
     };
@@ -86,6 +111,7 @@ namespace WarGrey::AoC {
         WarGrey::STEM::Dimensionlet* badge_sum;
         std::vector<WarGrey::AoC::Rucksack*> rucksacks;
         WarGrey::AoC::Backpack* backpack;
+        WarGrey::AoC::HashTable* hashtable;
 
     private:
         WarGrey::AoC::RRStatus status;

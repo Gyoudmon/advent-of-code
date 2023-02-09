@@ -2,7 +2,6 @@
 #include "digitama/magical_energy_expedition/rochambo.hpp"
 #include "digitama/magical_energy_expedition/rucksack_reorganization.hpp"
 
-#include "digitama/big_bang/physics/random.hpp"
 #include "digitama/aoc.hpp"
 
 #include <vector>
@@ -81,7 +80,7 @@ namespace {
         void reflow(float width, float height) override {
             this->move_to(this->title, this->agent, MatterAnchor::RB, MatterAnchor::LB);
             this->move_to(this->sledge, width, 0.0F, MatterAnchor::RT);
-            this->move_to(this->island, width * 0.5F, height * 0.5F, MatterAnchor::CC, 0.0F, float(title_fontsize));
+            this->move_to(this->island, width * 0.5F, height, MatterAnchor::CB);
             
             for (int idx = 0; idx < elf_on_boat_count; idx ++) {
                 if (idx == 0) {
@@ -136,7 +135,7 @@ namespace {
             }
 
             if (count % 4 == 0) { /* move the expedition team */
-                float dx = float(random_uniform(-1, 2));
+                float dx = float(random_uniform(-1, 1));
                 float dy = float(random_uniform(-1, 1));
 
                 this->move(this->boat, dx, dy);
@@ -160,7 +159,7 @@ namespace {
             this->tux->set_border_strategy(BorderStrategy::IGNORE);
             this->tux->set_speed(2.0F, 0.0F);
 
-            this->move_to(this->boat, this->island, MatterAnchor::LB, MatterAnchor::LB);
+            this->move_to(this->boat, this->island, 0.1F, 0.9F, MatterAnchor::LB);
             
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
                 if (idx < elf_on_boat_count) {
