@@ -38,7 +38,7 @@
                                        (number->string day))))
              (linebreak)
              (add-between #:splice? #true
-                          #:before-first (list (emph "关键字") ":" ~)
+                          #:before-first (list (emph "关键词") ":" ~)
                           (for/list ([key (in-list (list kw ...))])
                             (racketkeywordfont (tech key)))
                           (list "," ~))
@@ -84,7 +84,7 @@
 
 (define term-name
   (lambda [arg]
-    (emph arg)))
+    (defterm arg)))
 
 (define variable
   (lambda argv
