@@ -162,7 +162,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) 
     this->misplaced_sum = this->insert(new Dimensionlet(this->style, "", misplaced_desc));
     this->badge_sum = this->insert(new Dimensionlet(this->style, "", badge_desc));
     this->backpack = this->insert(new Backpack());
-    this->hashtable = this->insert(new HashTable());
+    this->hashtable = this->insert(new PackHash());
 
     this->agent = this->insert(new AgentLink());
     this->agent->scale(-1.0F, 1.0F);
@@ -263,15 +263,17 @@ void WarGrey::AoC::RucksackReorganizationPlane::after_select(IMatter* m, bool ye
         } else if (m == this->backpack) {
             if (this->backpack->item_count() > 0) {
                 if (this->status == RRStatus::TaskDone) {
-                    this->status = RRStatus::CreateHashTable;
+                    this->status = RRStatus::CreatePackHash;
                     this->hashtable->clear();
-                } else if (this->status == RRStatus::CreateHashTable) {
+                    this->backpack->clear_dict();
+                } else if (this->status == RRStatus::CreatePackHash) {
                     char item = this->backpack->compartment_popfront();
 
                     if (item != '\0') {
                         this->agent->play("GetArtsy", 1);
                         this->hashtable->insert_item(item);
                     } else {
+                        this->backpack->compartment_lookup(this->hashtable);
                         this->status = RRStatus::TaskDone;
                     }
                 }
@@ -297,7 +299,7 @@ bool WarGrey::AoC::RucksackReorganizationPlane::can_select(IMatter* m) {
     bool okay = false;
 
     switch (this->status) {
-        case RRStatus::CreateHashTable: okay = (m == this->backpack); break;
+        case RRStatus::CreatePackHash: okay = (m == this->backpack); break;
         case RRStatus::TaskDone: okay = true; break;
         default: break;
     }
@@ -369,6 +371,17 @@ void WarGrey::AoC::Backpack::construct(SDL_Renderer* renderer) {
     this->create_map_grid(2, 26, rucksack_item_size, rucksack_item_size);
 }
 
+void WarGrey::AoC::Backpack::draw(SDL_Renderer* renderer, float x, float y, float Width, float Height) {
+    SDL_FRect region;
+    
+    GridAtlas::draw(renderer, x, y, Width, Height);
+
+    for (auto s_item : this->shared_indices) {
+        this->feed_map_tile_region(&region, s_item);
+        game_draw_rect(renderer, region.x + x, region.y + y, region.w, region.h, ROYALBLUE);
+    }
+}
+
 void WarGrey::AoC::Backpack::set_items(const std::string& items) {
     if (this->items.compare(items) != 0) {
         this->clear();
@@ -402,6 +415,24 @@ char WarGrey::AoC::Backpack::compartment_popfront() {
     return item;
 }
 
+void WarGrey::AoC::Backpack::compartment_lookup(PackHash* dict) {
+    if (dict != nullptr) {
+        int size = this->items.size();
+
+        for (int idx = size / 2; idx < size; idx ++) {
+            if (this->tile_indices[idx] > 0) {
+                if (dict->lookup(this->items[idx]) > 0) {
+                    this->shared_indices.push_back(idx);
+                }
+            }
+        }
+
+        if (!this->shared_indices.empty()) {
+            this->notify_updated();
+        }
+    }
+}
+
 int WarGrey::AoC::Backpack::get_atlas_tile_index(int map_idx) {
     int idx = -1;
 
@@ -413,18 +444,24 @@ int WarGrey::AoC::Backpack::get_atlas_tile_index(int map_idx) {
 }
 
 void WarGrey::AoC::Backpack::clear() {
+    this->clear_dict();
+    
     this->items.clear();
     dict_zero(this->tile_indices);
 }
 
-/*************************************************************************************************/
-WarGrey::AoC::HashTable::HashTable() : GridAtlas("spritesheet/items.png", 24, 21, 4, 4, true) {}
+void WarGrey::AoC::Backpack::clear_dict() {
+    this->shared_indices.clear();
+}
 
-void WarGrey::AoC::HashTable::construct(SDL_Renderer* renderer) {
+/*************************************************************************************************/
+WarGrey::AoC::PackHash::PackHash() : GridAtlas("spritesheet/items.png", 24, 21, 4, 4, true) {}
+
+void WarGrey::AoC::PackHash::construct(SDL_Renderer* renderer) {
     this->create_map_grid(2, 16, rucksack_item_size * hash_scale, rucksack_item_size * hash_scale);
 }
 
-void WarGrey::AoC::HashTable::draw(SDL_Renderer* renderer, float x, float y, float Width, float Height) {
+void WarGrey::AoC::PackHash::draw(SDL_Renderer* renderer, float x, float y, float Width, float Height) {
     GridAtlas::draw(renderer, x, y, Width, Height);
     float xoff = (rucksack_item_size * hash_scale - float(text_fontsize) * 0.5F) * 0.5F;
     float dx = Width / float(this->map_col);
@@ -437,8 +474,7 @@ void WarGrey::AoC::HashTable::draw(SDL_Renderer* renderer, float x, float y, flo
     }
 }
 
-
-void WarGrey::AoC::HashTable::insert_items(const std::string& items) {
+void WarGrey::AoC::PackHash::insert_items(const std::string& items) {
     this->clear();
 
     for (int idx = 0; idx < items.size() / 2; idx ++) {
@@ -448,11 +484,8 @@ void WarGrey::AoC::HashTable::insert_items(const std::string& items) {
     this->notify_updated();
 }
 
-void WarGrey::AoC::HashTable::insert_item(char ch, bool update) {
-    this->insert_item(item_priority(ch), update);
-}
-
-void WarGrey::AoC::HashTable::insert_item(int prior, bool update) {
+void WarGrey::AoC::PackHash::insert_item(char ch, bool update) {
+    int prior = item_priority(ch);
     int atlas_idx = atlas_vertical_index(prior, this->atlas_row, this->atlas_col);
 
     this->dict[atlas_idx] += 1;
@@ -462,7 +495,19 @@ void WarGrey::AoC::HashTable::insert_item(int prior, bool update) {
     }
 }
 
-int WarGrey::AoC::HashTable::get_atlas_tile_index(int map_idx) {
+int WarGrey::AoC::PackHash::lookup(char ch) {
+    int prior = item_priority(ch);
+    int atlas_idx = atlas_vertical_index(prior, this->atlas_row, this->atlas_col);
+    int val = 0;
+    
+    if (this->dict.find(atlas_idx) != this->dict.end()) {
+        val = this->dict[atlas_idx];
+    }
+
+    return val;
+}
+
+int WarGrey::AoC::PackHash::get_atlas_tile_index(int map_idx) {
     int idx = -1;
     int row = map_idx / this->map_col;
     int col = map_idx % this->map_col;

@@ -19,30 +19,9 @@ namespace WarGrey::AoC {
         int id;
     };
 
-    class Backpack : public WarGrey::STEM::GridAtlas {
+    class PackHash : public WarGrey::STEM::GridAtlas {
     public:
-        Backpack();
-
-    public:
-        void construct(SDL_Renderer* renderer) override;
-
-    public:
-        void set_items(const std::string& items);
-        size_t item_count() { return this->items.size(); }
-        char compartment_popfront();
-        void clear();
-
-    protected:
-        int get_atlas_tile_index(int map_idx) override;
-
-    private:
-        std::string items;
-        int tile_indices[DICT_SIZE] = {};
-    };
-
-    class HashTable : public WarGrey::STEM::GridAtlas {
-    public:
-        HashTable();
+        PackHash();
 
     public:
         void construct(SDL_Renderer* renderer) override;
@@ -51,7 +30,7 @@ namespace WarGrey::AoC {
     public:
         void insert_items(const std::string& items);
         void insert_item(char ch, bool update = true);
-        void insert_item(int prior, bool update = true);
+        int lookup(char ch);
         void clear() { this->dict.clear(); }
 
     protected:
@@ -61,11 +40,36 @@ namespace WarGrey::AoC {
         std::map<int, int> dict;
     };
 
+    class Backpack : public WarGrey::STEM::GridAtlas {
+    public:
+        Backpack();
+
+    public:
+        void construct(SDL_Renderer* renderer) override;
+        void draw(SDL_Renderer* renderer, float x, float y, float Width, float Height) override;
+
+    public:
+        void set_items(const std::string& items);
+        size_t item_count() { return this->items.size(); }
+        char compartment_popfront();
+        void compartment_lookup(WarGrey::AoC::PackHash* dict);
+        void clear();
+        void clear_dict();
+
+    protected:
+        int get_atlas_tile_index(int map_idx) override;
+
+    private:
+        std::string items;
+        int tile_indices[DICT_SIZE] = {};
+        std::vector<int> shared_indices;
+    };
+
     /******************************************* 声明游戏状态 ******************************************/
     enum class RRStatus {
         FindMisplacedItems,
         FindBadgeItems,
-        CreateHashTable,
+        CreatePackHash,
         TaskDone,
         MissionDone,
     };
@@ -111,7 +115,7 @@ namespace WarGrey::AoC {
         WarGrey::STEM::Dimensionlet* badge_sum;
         std::vector<WarGrey::AoC::Rucksack*> rucksacks;
         WarGrey::AoC::Backpack* backpack;
-        WarGrey::AoC::HashTable* hashtable;
+        WarGrey::AoC::PackHash* hashtable;
 
     private:
         WarGrey::AoC::RRStatus status;
