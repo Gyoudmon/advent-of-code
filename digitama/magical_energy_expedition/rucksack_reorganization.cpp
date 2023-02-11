@@ -18,11 +18,11 @@ static const float rucksack_item_size = 32.0F;
 static const float hash_scale = 1.5F;
 static const int grid_column = 30;
 
-static inline const char* random_rucksack_style(int hint) {
-    return rucksack_styles[random_uniform(0, sizeof(rucksack_styles) / sizeof(char*) - 1)];
+static inline const char* random_rucksack_style(size_t hint) {
+    return rucksack_styles[random_uniform(0, int(sizeof(rucksack_styles) / sizeof(char*) - 1))];
 }
 
-static inline const char* random_rucksack_gender(int hint) {
+static inline const char* random_rucksack_gender(size_t hint) {
     return (random_uniform(1, 100) % 2 == 0) ? "male" : "female";
 }
 
@@ -88,7 +88,7 @@ static inline int atlas_vertical_index(int prior, int row, int col) {
 /*************************************************************************************************/
 static int misplaced_item_priority(const std::string& item_list, char misplaced_dict1[], char misplaced_dict2[]) {
     const char* items = item_list.c_str();
-    int midpos = item_list.size() / 2;
+    int midpos = int(item_list.size()) / 2;
     int priority = 0;
 
     dict_zero(misplaced_dict1);
@@ -215,7 +215,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t 
                 this->display_items(self);
                 
                 this->misplaced_item_priority_sum += misplaced_item_priority(self->items, this->misplaced_dict1, this->misplaced_dict2);
-                this->misplaced_sum->set_value(this->misplaced_item_priority_sum);
+                this->misplaced_sum->set_value(float(this->misplaced_item_priority_sum));
 
                 this->current_rucksack_idx ++;
             } else {
@@ -223,8 +223,8 @@ void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t 
             }
         }; break;
         case RRStatus::FindBadgeItems: {
-            size_t n = sizeof(this->group_sizes) / sizeof(size_t);
-            int rest = this->rucksacks.size() - this->current_rucksack_idx;
+            int n = int(sizeof(this->group_sizes) / sizeof(size_t));
+            int rest = int(this->rucksacks.size()) - this->current_rucksack_idx;
 
             if (rest >= n) {
                 for (int idx = 0; idx < n; idx ++) {
@@ -236,7 +236,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t 
                 }
 
                 this->badge_item_priority_sum += badge_item_priority(this->badge_dicts, this->group_items, this->group_sizes, n);
-                this->badge_sum->set_value(this->badge_item_priority_sum);
+                this->badge_sum->set_value(float(this->badge_item_priority_sum));
                 
                 this->current_rucksack_idx += n;
             } else {
@@ -312,7 +312,7 @@ bool WarGrey::AoC::RucksackReorganizationPlane::has_mission_completed() {
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::move_rucksack_to_grid(Rucksack* rs) {
-    this->move_to_grid(rs, rs->id, MatterAnchor::CB);
+    this->move_to_grid(rs, int(rs->id), MatterAnchor::CB);
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::on_task_start(RRStatus status) {
@@ -358,7 +358,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::load_item_list(const std::string
 }
 
 /*************************************************************************************************/
-WarGrey::AoC::Rucksack::Rucksack(const std::string& items, int id)
+WarGrey::AoC::Rucksack::Rucksack(const std::string& items, size_t id)
     : Sprite("sprite/rucksack/%s/%s", random_rucksack_style(id), random_rucksack_gender(id))
     , items(items), id(id) {}
 
@@ -387,7 +387,7 @@ void WarGrey::AoC::Backpack::set_items(const std::string& items) {
         this->clear();
 
         this->items = items;
-        this->create_map_grid(2, this->items.size() / 2);
+        this->create_map_grid(2, int(this->items.size()) / 2);
 
         for (int idx = 0; idx < this->items.size(); idx ++) {
             int prior = item_priority(this->items[idx]);
@@ -417,7 +417,7 @@ char WarGrey::AoC::Backpack::compartment_popfront() {
 
 void WarGrey::AoC::Backpack::compartment_lookup(PackHash* dict) {
     if (dict != nullptr) {
-        int size = this->items.size();
+        int size = int(this->items.size());
 
         for (int idx = size / 2; idx < size; idx ++) {
             if (this->tile_indices[idx] > 0) {
@@ -433,7 +433,7 @@ void WarGrey::AoC::Backpack::compartment_lookup(PackHash* dict) {
     }
 }
 
-int WarGrey::AoC::Backpack::get_atlas_tile_index(int map_idx) {
+int WarGrey::AoC::Backpack::get_atlas_tile_index(size_t map_idx) {
     int idx = -1;
 
     if (this->tile_indices[map_idx] > 0) {
@@ -507,16 +507,16 @@ int WarGrey::AoC::PackHash::lookup(char ch) {
     return val;
 }
 
-int WarGrey::AoC::PackHash::get_atlas_tile_index(int map_idx) {
+int WarGrey::AoC::PackHash::get_atlas_tile_index(size_t map_idx) {
     int idx = -1;
-    int row = map_idx / this->map_col;
-    int col = map_idx % this->map_col;
+    size_t row = map_idx / this->map_col;
+    size_t col = map_idx % this->map_col;
 
     if (row == 0) {
         if (col < this->dict.size()) {
             auto dit = this->dict.begin();
 
-            for (int c = 0; c < col; c ++) {
+            for (size_t c = 0; c < col; c ++) {
                 dit ++;
             }
 

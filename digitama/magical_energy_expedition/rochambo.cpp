@@ -209,13 +209,13 @@ void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint
                 this->switch_play_costume(this->r_play, sf_play_g);
 
                 this->guessed_total_score += this->round_score(this->tux, op_play, sf_play_g, outcome_g);
-                this->guessed_score->set_value(this->guessed_total_score);
+                this->guessed_score->set_value(float(this->guessed_total_score));
 
                 this->designed_total_score += this->round_score(this->elves[0], op_play, sf_play_d, outcome_d);
-                this->designed_score->set_value(this->designed_total_score);
+                this->designed_score->set_value(float(this->designed_total_score));
 
                 this->random_total_score += this->round_score(this->elves[1], op_play, sf_play_r, outcome_r);
-                this->random_score->set_value(this->random_total_score);
+                this->random_score->set_value(float(this->random_total_score));
                 
                 this->current_round ++;
                 this->population->set_text(puzzle_fmt, population_desc, this->strategy.size() - this->current_round);

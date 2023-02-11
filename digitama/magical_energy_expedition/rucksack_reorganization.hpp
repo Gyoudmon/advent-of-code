@@ -12,11 +12,11 @@ namespace WarGrey::AoC {
 
     class Rucksack : public WarGrey::STEM::Sprite {
     public:
-        Rucksack(const std::string& items, int id);
+        Rucksack(const std::string& items, size_t id);
         
     public:
         std::string items;
-        int id;
+        size_t id;
     };
 
     class PackHash : public WarGrey::STEM::GridAtlas {
@@ -34,7 +34,7 @@ namespace WarGrey::AoC {
         void clear() { this->dict.clear(); }
 
     protected:
-        int get_atlas_tile_index(int map_idx) override;
+        int get_atlas_tile_index(size_t map_idx) override;
     
     private:
         std::map<int, int> dict;
@@ -57,7 +57,7 @@ namespace WarGrey::AoC {
         void clear_dict();
 
     protected:
-        int get_atlas_tile_index(int map_idx) override;
+        int get_atlas_tile_index(size_t map_idx) override;
 
     private:
         std::string items;

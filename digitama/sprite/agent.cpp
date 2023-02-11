@@ -1,8 +1,11 @@
 #include "agent.hpp"
 
+/** NOTE
+ * Stupid MSVC, `std::complex` doesn't like <int>  
+ */
+
 #include "../big_bang/physics/random.hpp"
 
-#include <complex>
 #include <vector>
 #include <optional>
 #include <map>
@@ -18,7 +21,7 @@ namespace {
 
     struct AgentFrames {
         int duration;
-        std::vector<std::complex<int>> images;
+        std::vector<std::pair<int, int>> images;
         std::vector<FrameBranch> branches;
         std::optional<int> exit_branch;
         std::optional<std::string> sound;
@@ -1534,7 +1537,7 @@ int WarGrey::AoC::AgentLink::submit_action_frames(std::vector<std::pair<int, int
 }
 
 int WarGrey::AoC::AgentLink::submit_idle_frames(std::vector<std::pair<int, int>>& frame_refs, int& times) {
-    static size_t idle_count = sizeof(idles) / sizeof(std::string);
+    static int idle_count = int(sizeof(idles) / sizeof(std::string));
     int idx = random_uniform(0, idle_count - 1);
 
     return this->push_action_frames(frame_refs, idles[idx], 0);
@@ -1567,7 +1570,7 @@ int WarGrey::AoC::AgentLink::find_agent_frames_by_index(int frame_idx) {
                 auto locations = frames[idx].images;
             
                 if (locations.size() > 0) {
-                    if (this->grid_cell_index(locations[0].real(), locations[0].imag()) == frame_idx) {
+                    if (this->grid_cell_index(locations[0].first, locations[0].second) == frame_idx) {
                         the_frames[frame_idx].push_back(std::pair<std::string, int>(animations.first, idx));
                     }
                 }
@@ -1576,7 +1579,7 @@ int WarGrey::AoC::AgentLink::find_agent_frames_by_index(int frame_idx) {
     }
 
     if ((the_frames.find(frame_idx) != the_frames.end()) && (the_frames[frame_idx].size() > 0)) {
-        selection_idx = random_uniform(0, the_frames[frame_idx].size() - 1);
+        selection_idx = random_uniform(0, int(the_frames[frame_idx].size()) - 1);
     }
 
     return selection_idx;
@@ -1594,7 +1597,7 @@ int WarGrey::AoC::AgentLink::push_action_frames(std::vector<std::pair<int, int>>
         auto locations = frames[idx].images;
     
         if (locations.size() > 0) {
-            indices[idx] = this->grid_cell_index(locations[0].real(), locations[0].imag());
+            indices[idx] = this->grid_cell_index(locations[0].first, locations[0].second);
         }
 
         if (is_ending_frame(frame.branches, frame.exit_branch)) {
@@ -1605,7 +1608,7 @@ int WarGrey::AoC::AgentLink::push_action_frames(std::vector<std::pair<int, int>>
     }
 
     if ((idx0 == 0) && (choices.size() > 1)) {
-        idx0 = choices[random_uniform(0, choices.size() - 1)];
+        idx0 = choices[random_uniform(0, int(choices.size()) - 1)];
     }
 
     for (int idx = idx0; idx < frame_size; idx ++) {
@@ -1623,7 +1626,7 @@ int WarGrey::AoC::AgentLink::push_action_frames(std::vector<std::pair<int, int>>
                 auto branch_pos = std::find(indices.begin(), indices.end(), branch_idx);
 
                 if (branch_pos != indices.end()) {
-                    idx = std::distance(indices.begin(), branch_pos) - 1;
+                    idx = int(std::distance(indices.begin(), branch_pos)) - 1;
                     continue;
                 } else {
                     next_branch = branch_idx;
