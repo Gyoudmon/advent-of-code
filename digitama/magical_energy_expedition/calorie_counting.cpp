@@ -8,7 +8,7 @@ using namespace WarGrey::AoC;
 /*************************************************************************************************/
 static const char* population_desc = "精灵伙伴数量";
 static const char* top1_desc = "个体食物最多";
-static const char* cmp_alg_desc = "比较法";
+static const char* cmp_alg_desc = "列表法";
 static const char* srt_alg_desc = "排序法";
 static const char* topn_unknown_fmt = "前%d热量[%s]";
 
