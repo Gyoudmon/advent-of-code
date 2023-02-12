@@ -2,17 +2,23 @@
 #include <stdlib.h>
 
 /*************************************************************************************************/
-void find_maximum_calories(FILE* in, int n) {
-    char* line = NULL;
-    size_t capacity = 0;
-    ssize_t read;
+static inline void backward_calories(long* calories, int n, int idx, long self_cal) {
+    for (int mi = n - 1; mi > idx; mi --) {
+        calories[mi] = calories[mi - 1];
+    }
 
+    calories[idx] = self_cal;
+}
+
+void find_maximum_calories(FILE* in, int n) {
+    char line[32];
+    
     /* `calloc` will do `bzero` */
     long* calories = (long *)calloc(n, sizeof(long));
     long self_cal = 0L;
     long total = 0L;
 
-    while ((read = getline(&line, &capacity, in)) != -1) {
+    while ((fgets(line, sizeof(line) - 1, in)) != NULL) {
         long cal = strtol(line, NULL, 10);
         
         if (cal > 0L) {
@@ -20,7 +26,7 @@ void find_maximum_calories(FILE* in, int n) {
         } else {
             for (int idx = 0; idx < n; idx ++) {
                 if (self_cal > calories[idx]) {
-                    calories[idx] = self_cal;
+                    backward_calories(calories, n, idx, self_cal);
                     break;
                 }
             }
@@ -32,7 +38,7 @@ void find_maximum_calories(FILE* in, int n) {
     /* There is no blank line after the records of last elf */
     for (int idx = 0; idx < n; idx++) {
         if (self_cal > calories[idx]) {
-            calories[idx] = self_cal;
+            backward_calories(calories, n, idx, self_cal);
             self_cal = 0;
         }
 
@@ -56,7 +62,13 @@ void find_maximum_calories(FILE* in, int n) {
 /*************************************************************************************************/
 int main(int argc, char* argv[]) {
     if (argc > 1) {
+#ifndef __windows__
         FILE* src = fopen(argv[1], "r");
+#else
+        FILE* src;
+        
+        fopen_s(&src, argv[1], "r");
+#endif
 
         if (src != NULL) {
             find_maximum_calories(src, 3);

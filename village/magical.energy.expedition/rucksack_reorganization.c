@@ -3,7 +3,7 @@
 #include <string.h>
 
 /*************************************************************************************************/
-static const unsigned int DICT_SIZE = 53;
+#define DICT_SIZE 53U
 
 static inline void dict_zero(char dict[]) {
     memset(dict, 0, DICT_SIZE * sizeof(char));
@@ -33,7 +33,7 @@ void feed_item_dict(char dict[], char* line, size_t endpos) {
 void feed_shared_item_dict(char dict[], char dict0[], char* line, size_t start, size_t endpos) {
     dict_zero(dict);
 
-    for (int idx = start; idx < endpos; idx ++) {
+    for (int idx = (int)(start); idx < (int)(endpos); idx ++) {
         int prior = item_priority(line[idx]);
 
         if (dict0[prior] != '\0') {
@@ -45,7 +45,7 @@ void feed_shared_item_dict(char dict[], char dict0[], char* line, size_t start, 
 int find_last_shared_item_prior(char dict0[], char* line, size_t start, size_t endpos) {
     int last_shared_item_prior = 0;
 
-    for (int idx = start; idx < endpos; idx ++) {
+    for (int idx = (int)start; idx < (int)endpos; idx ++) {
         int prior = item_priority(line[idx]);
 
         if (dict0[prior] != '\0') {
@@ -58,10 +58,8 @@ int find_last_shared_item_prior(char dict0[], char* line, size_t start, size_t e
 
 /*************************************************************************************************/
 void do_for_rucksack_organization(FILE* in, int n) {
-    char* line = NULL;
-    size_t capacity = 0;
-    ssize_t read;
-
+    char line[128];
+    
     char misplaced_dict1[DICT_SIZE];
     char misplaced_dict2[DICT_SIZE];
     char **badge_dicts = (char**)malloc((n - 1)* sizeof(char**));
@@ -73,8 +71,8 @@ void do_for_rucksack_organization(FILE* in, int n) {
         badge_dicts[idx] = (char*)calloc(DICT_SIZE, sizeof(char));
     }
 
-    while ((read = getline(&line, &capacity, in)) != -1) {
-        size_t endpos = read - 1;
+    while ((fgets(line, sizeof(line) - 1, in)) != NULL) {
+        size_t endpos = strlen(line) - 1;
         
         /* solve part one */ {
             size_t midpos = endpos / 2;
@@ -138,7 +136,13 @@ void do_for_rucksack_organization(FILE* in, int n) {
 /*************************************************************************************************/
 int main(int argc, char* argv[]) {
     if (argc > 1) {
+#ifndef __windows__
         FILE* src = fopen(argv[1], "r");
+#else
+        FILE* src;
+        
+        fopen_s(&src, argv[1], "r");
+#endif
 
         if (src != NULL) {
             do_for_rucksack_organization(src, 3);

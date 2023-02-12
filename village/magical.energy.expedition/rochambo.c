@@ -108,14 +108,12 @@ int round_score_by_design(char op_ch, char sf_ch) {
 
 /*************************************************************************************************/
 void simulate_with_strategy(FILE* in) {
-    char* line = NULL;
-    size_t capacity = 0;
-    ssize_t read;
+    char line[8];
 
     long guessed_total = 0;
     long designed_total = 0;
 
-    while ((read = getline(&line, &capacity, in)) != -1) {
+    while ((fgets(line, sizeof(line) - 1, in)) != NULL) {
         char op_ch = line[0];
         char sf_ch = line[2];
         
@@ -135,7 +133,13 @@ void simulate_with_strategy(FILE* in) {
 /*************************************************************************************************/
 int main(int argc, char* argv[]) {
     if (argc > 1) {
+#ifndef __windows__
         FILE* src = fopen(argv[1], "r");
+#else
+        FILE* src;
+        
+        fopen_s(&src, argv[1], "r");
+#endif
 
         if (src != NULL) {
             simulate_with_strategy(src);

@@ -163,13 +163,21 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
         }; break;
         case CCStatus::FindMaximumCalories: {
             if (this->current_elf_idx < this->elves.size()) {
+                int maybe_replaced_cal;
                 int self_cal = this->elves[this->current_elf_idx]->calorie_total();
-                int replaced_idx = vector_replace_sorted_maximum(this->top_calories, self_cal);
+                int replaced_idx = vector_replace_sorted_maximum(this->top_calories, self_cal, &maybe_replaced_cal);
                 
                 this->info_board->set_text(std::to_string(self_cal), MatterAnchor::RC);
 
                 if (replaced_idx >= 0) {
                     int replaced_elf_idx = this->top_elf_indices[replaced_idx];
+
+                    if (replaced_idx < this->top_count - 1) {
+                        for (int idx = this->top_count - 1; idx > replaced_idx + 1; idx --) {
+                            this->top_calories[idx] = this->top_calories[idx - 1];
+                        }
+                        this->top_calories[replaced_idx + 1] = maybe_replaced_cal; 
+                    }
 
                     if (replaced_elf_idx >= 0) {
                         this->calm_elf_down(this->elves[replaced_elf_idx]);

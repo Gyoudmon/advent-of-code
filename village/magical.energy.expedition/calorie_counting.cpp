@@ -7,6 +7,10 @@
 static void update_max_calories(std::vector<int>& ls, int cal) {
     for (int idx = 0; idx < ls.size(); idx ++) {
         if (ls[idx] < cal) {
+            for (int mi = int(ls.size()) - 1; mi > idx; mi --) {
+                ls[mi] = ls[mi - 1];
+            }
+
             ls[idx] = cal;
             break;
         }

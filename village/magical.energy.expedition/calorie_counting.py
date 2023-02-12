@@ -7,7 +7,9 @@ import io
 def update_max_calories(calories, cal):
     for idx in range(0, len(calories)):
         if calories[idx] < cal:
+            replaced_cal = calories[idx]
             calories[idx] = cal
+            update_max_calories(calories, replaced_cal)
             break
 
 ###################################################################################################
@@ -28,7 +30,7 @@ def find_maximum_calorie(src : io.TextIOWrapper):
 
     # 最后一条记录后面很可能没有空行
     if self_cal > max_cal:
-        max_cal = self_cal
+        max_cal = self_cal    
 
     print(max_cal)
 
