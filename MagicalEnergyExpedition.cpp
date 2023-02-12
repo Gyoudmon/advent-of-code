@@ -2,20 +2,25 @@
 #include "digitama/magical_energy_expedition/rochambo.hpp"
 #include "digitama/magical_energy_expedition/rucksack_reorganization.hpp"
 
+#include "digitama/plt/port.hpp"
+
 #include "digitama/aoc.hpp"
 
 #include <vector>
+#include <filesystem>
 
-using namespace WarGrey::AoC;
 using namespace WarGrey::STEM;
+using namespace WarGrey::AoC;
+using namespace WarGrey::PLT;
 
 /*************************************************************************************************/
 namespace {
+    static const char bonus_prefix = '#';
     static const char* unknown_task_name = "冒\n险\n越\n来\n越\n深\n入\n了";
     static const int elf_on_boat_count = 0;
     static const int advent_days = 25;
-    static const int bonus_count = 0;
 
+    /*********************************************************************************************/
     class StarFruitlet : public WarGrey::STEM::Sprite {
     public:
         StarFruitlet(int day) : Sprite("sprite/star"), day(day) {}
@@ -24,15 +29,41 @@ namespace {
         int day;
     };
 
+    class Coinlet : public WarGrey::STEM::Sprite {
+    public:
+        Coinlet(const char* name, int idx)
+            : Sprite("sprite/coin")
+            , name(name), idx(idx) {}
+
+    public:
+        int preferred_local_fps() override { return 15; }
+        
+    public:
+        std::string name;
+        int idx;
+    };
+
+    /*********************************************************************************************/
     class MagicalEnergyExpeditionPlane : public Plane {
     public:
-        MagicalEnergyExpeditionPlane(Cosmos* master) : Plane("Magical Energy Expedition"), master(master) {}
+        MagicalEnergyExpeditionPlane(Cosmos* master, const char* process_path) : Plane("Magical Energy Expedition"), master(master) {
+            aoc_fonts_initialize();
+            enter_digimon_zone(process_path);
+            imgdb_setup(digimon_zonedir().append("stone"));
+        }
+
+        virtual ~MagicalEnergyExpeditionPlane() {
+            imgdb_teardown();
+            aoc_fonts_destroy();
+        }
 
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
-            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞能量水果"));
+            int bonus_idx = 0;
+
             this->sledge = this->insert(new GridAtlas("sledge.png"));
             this->island = this->insert(new GridAtlas("island.png"));
+            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞能量水果"));
             this->boat = this->insert(new Sprite("boat.png"));
 
             this->agent = this->insert(new AgentLink());
@@ -41,26 +72,32 @@ namespace {
             for (int idx = 0; idx < advent_days; idx ++) {
                 const char* task_name = this->master->plane_name(idx + 1);
                 
-                this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
-                this->stars[idx]->scale(0.05F);
-
-                if (task_name != nullptr) {
-                    std::string vname = day_to_string(idx + 1) + "\n" + string_to_vertical_name(task_name);
-            
-                    this->names.push_back(this->insert(new Labellet(aoc_font::vertical, ROYALBLUE, "%s", vname.c_str())));
-                    this->stars.back()->switch_to_costume("bright");
-                } else {
+                if ((bonus_idx > 0) || (task_name == nullptr) || (task_name[0] == bonus_prefix)) {
                     std::string vname = day_to_string(idx + 1) + "\n" + unknown_task_name;
             
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, GAINSBORO, "%s", vname.c_str())));
+                    
+                    this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
+                    this->stars[idx]->scale(0.05F);
                     this->stars.back()->switch_to_costume("dark");
+                    
+                    if ((task_name != nullptr) && (task_name[0] == bonus_prefix)) {
+                        bonus_idx = idx + 1;
+                    }
+                } else {
+                    std::string vname = day_to_string(idx + 1) + "\n" + string_to_vertical_name(task_name);
+            
+                    this->names.push_back(this->insert(new Labellet(aoc_font::vertical, ROYALBLUE, "%s", vname.c_str())));
+                    
+                    this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
+                    this->stars[idx]->scale(0.05F);
+                    this->stars.back()->switch_to_costume("bright");
                 }
             }
 
-            for (int idx = 0; idx < bonus_count; idx ++) {
-                this->bonuses.push_back(this->insert(new Sprite("sprite/coin")));
-                this->set_matter_fps(this->bonuses[idx], 15);
-                this->bonuses[idx]->play();
+            for (int idx = bonus_idx; idx < this->master->plane_count(); idx ++) {
+                this->bonuses.push_back(this->insert(new Coinlet(this->master->plane_name(idx), idx)));
+                this->bonuses.back()->play_all();
             }
 
             this->tux = this->insert(new Sprite("sprite/tux"));
@@ -81,6 +118,8 @@ namespace {
             this->move_to(this->title, this->agent, MatterAnchor::RB, MatterAnchor::LB);
             this->move_to(this->sledge, width, 0.0F, MatterAnchor::RT);
             this->move_to(this->island, width * 0.5F, height, MatterAnchor::CB);
+
+            this->move_to(this->boat, this->island, 0.1F, 0.9F, MatterAnchor::LB);
             
             for (int idx = 0; idx < elf_on_boat_count; idx ++) {
                 if (idx == 0) {
@@ -113,6 +152,10 @@ namespace {
             } else {
                 this->move_to(this->tux, this->stars[0], MatterAnchor::LB, MatterAnchor::LT);
             }
+
+            if (this->bonuses.size() > 0) {
+                this->move_to(this->bonuses[0], this->boat, MatterAnchor::LT, MatterAnchor::LT);
+            }
         }
 
         void update(uint32_t count, uint32_t interval, uint32_t uptime) override {
@@ -142,6 +185,10 @@ namespace {
                 for (int idx = 0; idx < elf_on_boat_count; idx ++) {
                     this->move(this->elves[idx], dx, dy);
                 }
+
+                if (this->bonuses.size() > 0) {
+                    this->move(this->bonuses[0], dx, dy);
+                }
             }
 
             if (this->target_plane > 0) {
@@ -158,8 +205,6 @@ namespace {
             this->tux->play("walk");
             this->tux->set_border_strategy(BorderStrategy::IGNORE);
             this->tux->set_speed(2.0F, 0.0F);
-
-            this->move_to(this->boat, this->island, 0.1F, 0.9F, MatterAnchor::LB);
             
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
                 if (idx < elf_on_boat_count) {
@@ -173,6 +218,7 @@ namespace {
     public:
         bool can_select(WarGrey::STEM::IMatter* m) override {
             return (dynamic_cast<StarFruitlet*>(m) != nullptr)
+                    || (dynamic_cast<Coinlet*>(m) != nullptr)
                     || (m == this->tux);
         }
 
@@ -185,10 +231,16 @@ namespace {
                         this->tux->wear("santa_hat");
                     }
                 } else {
-                    StarFruitlet* self = dynamic_cast<StarFruitlet*>(m);
+                    StarFruitlet* star = dynamic_cast<StarFruitlet*>(m);
+                    Coinlet* coin = dynamic_cast<Coinlet*>(m);
 
-                    if (self->day < this->master->plane_count()) {
-                        this->target_plane = self->day;
+                    if (star != nullptr) {
+                        if (star->day < this->master->plane_count()) {
+                            this->target_plane = star->day;
+                            this->agent->play("Hide", 1);
+                        }
+                    } else if (coin != nullptr) {
+                        this->target_plane = coin->idx;
                         this->agent->play("Hide", 1);
                     }
                 }
@@ -217,25 +269,19 @@ namespace {
 
     class MagicalEnergyExpeditionCosmos : public Cosmos {
     public:
-        MagicalEnergyExpeditionCosmos() : Cosmos(60) {
-            aoc_fonts_initialize();
-            imgdb_setup(__ZONE__ "stone");
-        }
-
-        virtual ~MagicalEnergyExpeditionCosmos() {
-            imgdb_teardown();
-            aoc_fonts_destroy();
-        }
+        MagicalEnergyExpeditionCosmos() : Cosmos(60) {}
 
     public:  // 覆盖游戏基本方法
         void construct(int argc, char* argv[]) override {
             this->parse_cmdline_options(argc, argv);
-            this->set_window_size(1200, 1200);
+            this->set_window_size(1200, 0);
 
-            this->push_plane(new MagicalEnergyExpeditionPlane(this));
+            this->push_plane(new MagicalEnergyExpeditionPlane(this, argv[0]));
             this->push_plane(new CalorieCountingPlane(this->top_count));
             this->push_plane(new RochamboPlane());
             this->push_plane(new RucksackReorganizationPlane());
+
+            this->push_plane(new PortPlane());
         }
 
     protected:
