@@ -143,7 +143,7 @@ WarGrey::AoC::RucksackReorganizationPlane::~RucksackReorganizationPlane() {
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float height) {
-    this->load_item_list(digimon_path("mee/03.rr.aoc"));
+    this->load_item_list(digimon_path("mee/03_rr", aoc_ext));
 
     for (int idx = 0; idx < sizeof(this->badge_dicts) / sizeof(char*); idx ++) {
         // the `badge_dicts` is an array of 1-dim array, instead of a 2-dim array
@@ -157,7 +157,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float hei
 void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) {
     this->backdrop = this->insert(new GridAtlas("backdrop/tent.png"));
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 3, this->name()));
-    this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, puzzle_fmt, population_desc, this->rucksacks.size()));
+    this->population = this->insert(new Labellet(aoc_font::normal, GOLDENROD, puzzle_fmt, population_desc, this->rucksacks.size()));
     this->info_board = this->insert(new Labellet(aoc_font::mono, GRAY, ""));
     this->misplaced_sum = this->insert(new Dimensionlet(this->style, "", misplaced_desc));
     this->badge_sum = this->insert(new Dimensionlet(this->style, "", badge_desc));
@@ -189,10 +189,10 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
     if (this->rucksacks.size() > 0) {
         float gxoff, gyoff;
         
-        gxoff = float(text_fontsize);
+        gxoff = float(normal_fontsize);
         gyoff = height * 0.56F;
 
-        this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(text_fontsize));
+        this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(normal_fontsize));
 
         for (int idx = 0; idx < this->rucksacks.size(); idx ++) {
             this->move_rucksack_to_grid(this->rucksacks[idx]);
@@ -463,7 +463,7 @@ void WarGrey::AoC::PackHash::construct(SDL_Renderer* renderer) {
 
 void WarGrey::AoC::PackHash::draw(SDL_Renderer* renderer, float x, float y, float Width, float Height) {
     GridAtlas::draw(renderer, x, y, Width, Height);
-    float xoff = (rucksack_item_size * hash_scale - float(text_fontsize) * 0.5F) * 0.5F;
+    float xoff = (rucksack_item_size * hash_scale - float(normal_fontsize) * 0.5F) * 0.5F;
     float dx = Width / float(this->map_col);
     float cx = x;
     float cy = y + Height - Height / float(this->map_row);

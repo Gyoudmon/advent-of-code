@@ -96,14 +96,14 @@ static const int r_outcome_points  [] = { outcome_score(RPSOutcome::Win), outcom
 
 /*************************************************************************************************/
 void WarGrey::AoC::RochamboPlane::construct(float width, float height) {
-    this->load_strategy(digimon_path("mee/02.rps.aoc"));
+    this->load_strategy(digimon_path("mee/02_rps", aoc_ext));
     this->style = make_highlight_dimension_style(answer_fontsize, 6U, 0);
 }
 
 void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->backdrop = this->insert(new GridAtlas("backdrop/beach.png"));
     this->titlet = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 2, this->name()));
-    this->population = this->insert(new Labellet(aoc_font::text, GOLDENROD, puzzle_fmt, population_desc, this->strategy.size()));
+    this->population = this->insert(new Labellet(aoc_font::normal, GOLDENROD, puzzle_fmt, population_desc, this->strategy.size()));
     this->guessed_score = this->insert(new Dimensionlet(this->style, "", guessed_strategy_desc));
     this->designed_score = this->insert(new Dimensionlet(this->style, "", designed_strategy_desc));
     this->random_score = this->insert(new Dimensionlet(this->style, "", random_strategy_desc));
@@ -118,20 +118,20 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->agent->scale(-1.0F, 1.0F);
 
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
-        this->play_scores[idx] = this->insert(new Labellet(aoc_font::text, PURPLE, rule_score_fmt, r_play_points[idx]));
+        this->play_scores[idx] = this->insert(new Labellet(aoc_font::normal, PURPLE, rule_score_fmt, r_play_points[idx]));
         this->play_icons[idx] = this->insert(new Sprite("sprite/rochambo"));
         this->play_icons[idx]->switch_to_costume(r_play_names[idx]);
         this->play_icons[idx]->scale(0.36F);
     }
 
     for (int idx = 0; idx < sizeof(this->outcome_icons) / sizeof(Sprite*); idx ++) {
-        this->outcome_scores[idx] = this->insert(new Labellet(aoc_font::text, ROYALBLUE, rule_score_fmt, r_outcome_points[idx]));
+        this->outcome_scores[idx] = this->insert(new Labellet(aoc_font::normal, ROYALBLUE, rule_score_fmt, r_outcome_points[idx]));
         this->outcome_icons[idx] = this->insert(new ElfSheet("santa_claus"));
         this->outcome_icons[idx]->play(r_outcome_names[idx]);
         this->outcome_icons[idx]->scale(0.80F);
     }
 
-    this->outcome_desc = this->insert(new Labellet(aoc_font::text, FORESTGREEN, " "));
+    this->outcome_desc = this->insert(new Labellet(aoc_font::normal, FORESTGREEN, " "));
     this->l_play = this->insert(new Sprite("sprite/rochambo"));
     this->r_play = this->insert(new Sprite("sprite/rochambo"));
 
@@ -162,7 +162,7 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     this->move_to(this->tux, this->tent, 0.75F, 0.7F, MatterAnchor::CC);
     
     /* reflow scores */ {
-        float xdist = float(text_fontsize);
+        float xdist = float(normal_fontsize);
         IMatter* prev = nullptr;
 
         for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {

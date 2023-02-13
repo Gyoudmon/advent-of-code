@@ -126,10 +126,6 @@ void do_for_rucksack_organization(FILE* in, int n) {
         }
     
         free(badge_dicts);
-
-        if (line != NULL) {
-            free(line);
-        }
     }
 }
 

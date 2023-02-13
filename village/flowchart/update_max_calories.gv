@@ -16,6 +16,7 @@ digraph UpdateMaxCalories {
     node [ shape = rect, color = royalblue, fontcolor = royalblue ];
     initialize [ label = "索引初始化" ];
     update_index [ label = "索引递增" ];
+    shift_calories [ label = "当前元素后移", color = Crimson, fontcolor = Crimson];
     update_max_calorie [ label = "更新当前元素" ];
     
     /* Edges */
@@ -24,8 +25,8 @@ digraph UpdateMaxCalories {
     loop_start -> compare [ label = "No" ];
     
     subgraph {
-        compare -> update_max_calorie [ label = "Yes"];
-        update_max_calorie -> break -> End;
+        compare -> shift_calories [ label = "Yes"];
+        shift_calories -> update_max_calorie -> break -> End;
     }
 
     subgraph {

@@ -13,24 +13,25 @@
 #include <fstream>
 
 namespace WarGrey::AoC {
+    static const char* aoc_ext = ".aoc";
+    
     /* Constants */
     static const char* title0_fmt = "C++ 降临节: %s";
     static const char* title_fmt = "C++ 降临节: [第%d天] %s";
     static const char* puzzle_fmt = "%s: %d";
     static const char* unknown_fmt = "%s: (未知)";
-
+    
     /* Fonts */
-    static const int title_fontsize = 50; /* <-- already hit the ceiling */
-    static const int answer_fontsize = 36;
-    static const int text_fontsize = 32;
-    static const int dim_fontsize = 24;
-    static const int vertical_fontsize = 18;
+    static const int title_fontsize = 42; /* <-- already hit the ceiling */
+    static const int answer_fontsize = 28;
+    static const int normal_fontsize = 24;
+    static const int tiny_fontsize = 20;
 
     class aoc_font {
     public:
         static TTF_Font* title;
-        static TTF_Font* text;
-        static TTF_Font* dimension;
+        static TTF_Font* normal;
+        static TTF_Font* tiny;
         static TTF_Font* vertical;
         static TTF_Font* mono;
     };

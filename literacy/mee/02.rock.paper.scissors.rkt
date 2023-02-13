@@ -168,7 +168,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
 接下来就可以通过传入策略文件来模拟了：
 
 @tamer-action[#:requires ["../aoc.rkt"]
-              (with-aoc-data-from "mee/02.rps.aoc" #:do
+              (with-aoc-data-from "mee/02_rps.aoc" #:do
                 simulate-with-guessed-strategy)]
 
 那只精灵帮其他精灵搭完帐篷后又溜出来找你了，继续之前的规则解读：“右边那一列决定了
@@ -243,7 +243,7 @@ Y 指布，Z 指剪刀。考虑到每次都赢对手就太可疑了，这份策�
 
 至此，任务完成：
 
-@tamer-action[(with-aoc-data-from "mee/02.rps.aoc" #:do
+@tamer-action[(with-aoc-data-from "mee/02_rps.aoc" #:do
                 simulate-with-designed-strategy)]
 
 不过，貌似就本任务中的输入数据来说，这个机密策略还不如自己瞎猜的那个。

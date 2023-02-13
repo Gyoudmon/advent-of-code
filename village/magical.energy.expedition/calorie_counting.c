@@ -53,10 +53,6 @@ void find_maximum_calories(FILE* in, int n) {
 
     /* Don't forget to release the momery */
     free(calories);
-
-    if (line != NULL) {
-        free(line);
-    }
 }
 
 /*************************************************************************************************/

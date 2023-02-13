@@ -123,11 +123,6 @@ void simulate_with_strategy(FILE* in) {
 
     printf("%ld\n", guessed_total);
     printf("%ld\n", designed_total);
-
-    /* Don't forget to release the momery */
-    if (line != NULL) {
-        free(line);
-    }
 }
 
 /*************************************************************************************************/
