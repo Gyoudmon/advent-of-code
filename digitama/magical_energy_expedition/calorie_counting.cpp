@@ -16,7 +16,7 @@ static const float normal_scale_up = 1.6F;
 static const float top_scale_up = 2.0F;
 static const float elf_size = 45.0F;
 
-static const int grid_column = 38;
+static const int grid_column = 36;
 static const int micro_pace = 3;
 
 /*************************************************************************************************/
@@ -91,7 +91,7 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
         /* reflow top elves labels */ {
             int top_elf_col = 4;
             float xoff = width * 0.5F;
-            float yoff = float(normal_fontsize) * 1.8F;
+            float yoff = float(normal_fontsize) * 2.4F;
             float cwidth = (width - xoff) / float(top_elf_col);
             float cheight = (height * 0.64F - yoff) / 4.0F;
 
@@ -363,9 +363,9 @@ void WarGrey::AoC::CalorieCountingPlane::load_calories(const std::string& pathna
 
     this->elves.clear();
 
-    if (datin.is_open()) {    
+    if (datin) {
         std::string line;
-
+        
         while (std::getline(datin, line)) {
             if (line.size() == 0) {
                 this->elves.push_back(elf);

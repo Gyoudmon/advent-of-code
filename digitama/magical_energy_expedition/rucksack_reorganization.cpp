@@ -346,9 +346,9 @@ void WarGrey::AoC::RucksackReorganizationPlane::load_item_list(const std::string
     
     this->rucksacks.clear();
 
-    if (datin.is_open()) {
+    if (datin) {
         std::string line;
-
+    
         while (std::getline(datin, line)) {
             this->rucksacks.push_back(new Rucksack(line, this->rucksacks.size()));
         }

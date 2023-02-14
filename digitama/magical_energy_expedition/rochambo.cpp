@@ -167,9 +167,9 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
 
         for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
             if (prev == nullptr) {
-                this->move_to(this->play_scores[idx], width, 0.0F, MatterAnchor::RT);
+                this->move_to(this->play_scores[idx], width, 0.0F, MatterAnchor::RT, -8.0F, 8.0F);
             } else {
-                this->move_to(this->play_scores[idx], prev, MatterAnchor::LT, MatterAnchor::RT, -xdist);
+                this->move_to(this->play_scores[idx], prev, MatterAnchor::LC, MatterAnchor::RC, -xdist);
             }
             this->move_to(this->play_icons[idx], this->play_scores[idx], MatterAnchor::LC, MatterAnchor::RC);
             prev = this->play_icons[idx];
@@ -393,7 +393,7 @@ void WarGrey::AoC::RochamboPlane::load_strategy(const std::string& pathname) {
     this->guessed_final_score = 0;
     this->designed_final_score = 0;
     
-    if (datin.is_open()) {
+    if (datin) {
         std::string line;
         
         while (std::getline(datin, line)) {
@@ -413,8 +413,7 @@ void WarGrey::AoC::RochamboPlane::load_strategy(const std::string& pathname) {
             }
         }
 
+        this->distance_score = flmax(float(this->guessed_final_score), float(this->designed_final_score), 1.0F);
         datin.close();
     }
-
-    this->distance_score = flmax(float(this->guessed_final_score), float(this->designed_final_score), 1.0F);
 }
