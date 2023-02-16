@@ -164,7 +164,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) 
     this->backpack = this->insert(new Backpack());
     this->hashtable = this->insert(new PackHash());
 
-    this->agent = this->insert(new AgentLink());
+    this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
     
     for (auto rucksack : this->rucksacks) {

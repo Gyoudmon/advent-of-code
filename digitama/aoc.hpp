@@ -6,7 +6,6 @@
 #include "big_bang/datum/path.hpp"
 #include "big_bang/datum/flonum.hpp"
 
-#include "sprite/agent.hpp"
 #include "sprite/ulpc.hpp"
 
 #include <iostream>

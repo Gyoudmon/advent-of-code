@@ -1,0 +1,18 @@
+{
+    "configurations": [
+        {
+            "name": "Debug 魔法能量远征@macOS",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/compiled/native/x86_64-macosx/debug/MagicalEnergyExpedition",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "lldb",
+            "preLaunchTask": "魔法能量远征@macOS[Debug]"
+        }
+    ],
+    "version": "2.0.0"
+}

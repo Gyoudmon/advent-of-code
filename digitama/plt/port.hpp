@@ -48,7 +48,7 @@ namespace WarGrey::PLT {
         void on_task_done();
 
     private: // 本游戏世界中的物体
-        WarGrey::AoC::AgentLink* agent;
+        WarGrey::STEM::Linkmon* agent;
         WarGrey::STEM::Labellet* title;
         WarGrey::PLT::PortBackDrop* backdrop;
 

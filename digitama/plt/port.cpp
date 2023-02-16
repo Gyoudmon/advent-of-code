@@ -14,7 +14,7 @@ void WarGrey::PLT::PortPlane::load(float width, float height) {
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, this->name()));
     this->backdrop = this->insert(new PortBackDrop(4, 32, 32.0F));
     
-    this->agent = this->insert(new AgentLink());
+    this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
 }
 

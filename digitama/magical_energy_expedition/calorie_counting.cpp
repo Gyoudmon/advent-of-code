@@ -46,7 +46,7 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->snack->scale(0.30F);
     this->set_matter_fps(this->snack, 2);
 
-    this->agent = this->insert(new AgentLink());
+    this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
     
     for (int idx = 0; idx < this->top_count; idx ++) {

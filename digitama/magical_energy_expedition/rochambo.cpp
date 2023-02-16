@@ -114,7 +114,7 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->tux = this->insert(new Sprite("sprite/tux"));
     this->elves[1] = this->insert(new ElfSheet("male"));
     
-    this->agent = this->insert(new AgentLink());
+    this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
 
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {

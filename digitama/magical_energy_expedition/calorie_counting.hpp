@@ -66,7 +66,7 @@ namespace WarGrey::AoC {
         void load_calories(const std::string& pathname);
 
     private: // 本游戏世界中的物体
-        WarGrey::AoC::AgentLink* agent;
+        WarGrey::STEM::Linkmon* agent;
         WarGrey::STEM::Labellet* title;
         WarGrey::STEM::GridAtlas* backdrop;
         WarGrey::STEM::Labellet* population;

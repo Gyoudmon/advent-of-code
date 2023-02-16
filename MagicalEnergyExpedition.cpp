@@ -66,7 +66,7 @@ namespace {
             this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞能量水果"));
             this->boat = this->insert(new Sprite("boat.png"));
 
-            this->agent = this->insert(new AgentLink());
+            this->agent = this->insert(new Linkmon());
             this->agent->scale(-1.0F, 1.0F);
             
             for (int idx = 0; idx < advent_days; idx ++) {
@@ -248,7 +248,7 @@ namespace {
         }
 
     private:
-        AgentLink* agent;
+        Linkmon* agent;
         Labellet* title;
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
