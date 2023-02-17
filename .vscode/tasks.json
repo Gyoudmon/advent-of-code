@@ -5,6 +5,7 @@
             "detail": "构建和运行 C++降灵节：魔法能量远征",
             "command": "raco",
             "type": "cppbuild",
+            "problemMatcher": ["$gcc"],
             "args": [
                 "wisemon",
                 "-d",
@@ -28,10 +29,11 @@
         },
 
         {
-            "label": "魔法能量远征@macOS[Debug]",
-            "detail": "构建和运行 C++降灵节：魔法能量远征",
-            "command": "raco",
             "type": "cppbuild",
+            "label": "魔法能量远征@macOS[Debug]",
+            "detail": "构建和调试 C++降灵节：魔法能量远征",
+            "command": "raco",
+            "problemMatcher": ["$gcc"],
             "args": [
                 "wisemon",
                 "-dv",

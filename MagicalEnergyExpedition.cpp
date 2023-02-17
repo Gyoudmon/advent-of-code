@@ -46,16 +46,7 @@ namespace {
     /*********************************************************************************************/
     class MagicalEnergyExpeditionPlane : public Plane {
     public:
-        MagicalEnergyExpeditionPlane(Cosmos* master, const char* process_path) : Plane("Magical Energy Expedition"), master(master) {
-            aoc_fonts_initialize();
-            enter_digimon_zone(process_path);
-            imgdb_setup(digimon_zonedir().append("stone"));
-        }
-
-        virtual ~MagicalEnergyExpeditionPlane() {
-            imgdb_teardown();
-            aoc_fonts_destroy();
-        }
+        MagicalEnergyExpeditionPlane(Cosmos* master) : Plane("Magical Energy Expedition"), master(master) {}
 
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
@@ -269,14 +260,23 @@ namespace {
 
     class MagicalEnergyExpeditionCosmos : public Cosmos {
     public:
-        MagicalEnergyExpeditionCosmos() : Cosmos(60) {}
+        MagicalEnergyExpeditionCosmos(const char* process_path) : Cosmos(60) {
+            aoc_fonts_initialize();
+            enter_digimon_zone(process_path);
+            imgdb_setup(digimon_zonedir().append("stone"));
+        }
+
+        virtual ~MagicalEnergyExpeditionCosmos() {
+            imgdb_teardown();
+            aoc_fonts_destroy();
+        }
 
     public:  // 覆盖游戏基本方法
         void construct(int argc, char* argv[]) override {
             this->parse_cmdline_options(argc, argv);
             this->set_window_size(1200, 0);
 
-            this->push_plane(new MagicalEnergyExpeditionPlane(this, argv[0]));
+            this->push_plane(new MagicalEnergyExpeditionPlane(this));
             this->push_plane(new CalorieCountingPlane(this->top_count));
             this->push_plane(new RochamboPlane());
             this->push_plane(new RucksackReorganizationPlane());
@@ -322,7 +322,7 @@ namespace {
 
 /*************************************************************************************************/
 int main(int argc, char* args[]) {
-    MagicalEnergyExpeditionCosmos universe;
+    MagicalEnergyExpeditionCosmos universe(args[argc]);
 
     universe.construct(argc, args);
     universe.big_bang();

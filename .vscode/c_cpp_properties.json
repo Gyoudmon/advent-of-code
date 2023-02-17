@@ -8,7 +8,9 @@
             "defines": [
                 "__macosx__",
                 "__lambda__=",
-                "__ffi__="
+                "__ffi__=",
+                "DECLSPEC=",
+                "SDLCALL="
             ],
             "macFrameworkPath": [
                 "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
