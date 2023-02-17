@@ -111,7 +111,7 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
     
     this->elves[0] = this->insert(new ElfSheet("dress"));
-    this->tux = this->insert(new Sprite("sprite/tux"));
+    this->tux = this->insert(new Tuxmon());
     this->elves[1] = this->insert(new ElfSheet("male"));
     
     this->agent = this->insert(new Linkmon());

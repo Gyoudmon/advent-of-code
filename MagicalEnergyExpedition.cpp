@@ -29,20 +29,6 @@ namespace {
         int day;
     };
 
-    class Coinlet : public WarGrey::STEM::Sprite {
-    public:
-        Coinlet(const char* name, int idx)
-            : Sprite("sprite/coin")
-            , name(name), idx(idx) {}
-
-    public:
-        int preferred_local_fps() override { return 15; }
-        
-    public:
-        std::string name;
-        int idx;
-    };
-
     /*********************************************************************************************/
     class MagicalEnergyExpeditionPlane : public Plane {
     public:
@@ -88,10 +74,9 @@ namespace {
 
             for (int idx = bonus_idx; idx < this->master->plane_count(); idx ++) {
                 this->bonuses.push_back(this->insert(new Coinlet(this->master->plane_name(idx), idx)));
-                this->bonuses.back()->play_all();
             }
 
-            this->tux = this->insert(new Sprite("sprite/tux"));
+            this->tux = this->insert(new Tuxmon());
             this->tux->wear("santa_hat");
 
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
