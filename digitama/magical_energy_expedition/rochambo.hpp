@@ -46,9 +46,8 @@ namespace WarGrey::AoC {
         bool can_select(WarGrey::STEM::IMatter* m) override;
         void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
 
-    public:
-        bool has_mission_completed() override;
-        void on_enter(IPlane* from) override;
+    protected:
+        void on_mission_start() override;
 
     private:
         void on_task_start(WarGrey::AoC::RPSStatus status);
@@ -72,7 +71,7 @@ namespace WarGrey::AoC {
         WarGrey::STEM::Dimensionlet* designed_score;
         WarGrey::STEM::Dimensionlet* random_score;
         WarGrey::STEM::Labellet* outcome_desc;
-        WarGrey::STEM::Sprite* tux;
+        WarGrey::STEM::Tuxmon* tux;
         WarGrey::STEM::SpriteGridSheet* snack;
         WarGrey::STEM::Sprite* l_play;
         WarGrey::STEM::Sprite* r_play;

@@ -200,9 +200,8 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
     }
 }
 
-void WarGrey::AoC::RucksackReorganizationPlane::on_enter(IPlane* from) {
+void WarGrey::AoC::RucksackReorganizationPlane::on_mission_start() {
     this->on_task_done();
-    this->agent->play("Greeting", 1);
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
@@ -257,25 +256,12 @@ void WarGrey::AoC::RucksackReorganizationPlane::after_select(IMatter* m, bool ye
             this->current_rucksack_idx = 0;
             this->badge_item_priority_sum = 0;
             this->on_task_start(RRStatus::FindBadgeItems);
-        } else if (m == this->agent) {
-            this->agent->play("GoodBye", 1);
-            this->status = RRStatus::MissionDone;
         } else if (m == this->backpack) {
             if (this->backpack->item_count() > 0) {
                 if (this->status == RRStatus::TaskDone) {
                     this->status = RRStatus::CreatePackHash;
                     this->hashtable->clear();
                     this->backpack->clear_dict();
-                } else if (this->status == RRStatus::CreatePackHash) {
-                    char item = this->backpack->compartment_popfront();
-
-                    if (item != '\0') {
-                        this->agent->play("GetArtsy", 1);
-                        this->hashtable->insert_item(item);
-                    } else {
-                        this->backpack->compartment_lookup(this->hashtable);
-                        this->status = RRStatus::TaskDone;
-                    }
                 }
             }
         } else {
@@ -295,6 +281,22 @@ void WarGrey::AoC::RucksackReorganizationPlane::after_select(IMatter* m, bool ye
     }
 }
 
+void WarGrey::AoC::RucksackReorganizationPlane::on_tap_selected(IMatter* m, float local_x, float local_y) {
+    if (m == this->backpack) {
+        if (this->status == RRStatus::CreatePackHash) {
+            char item = this->backpack->compartment_popfront();
+
+            if (item != '\0') {
+                this->agent->play("GetArtsy", 1);
+                this->hashtable->insert_item(item);
+            } else {
+                this->backpack->compartment_lookup(this->hashtable);
+                this->status = RRStatus::TaskDone;
+            }
+        }
+    }
+}
+
 bool WarGrey::AoC::RucksackReorganizationPlane::can_select(IMatter* m) {
     bool okay = false;
 
@@ -305,10 +307,6 @@ bool WarGrey::AoC::RucksackReorganizationPlane::can_select(IMatter* m) {
     }
 
     return okay;
-}
-
-bool WarGrey::AoC::RucksackReorganizationPlane::has_mission_completed() {
-    return (this->status == RRStatus::MissionDone) && (!this->agent->in_playing());
 }
 
 void WarGrey::AoC::RucksackReorganizationPlane::move_rucksack_to_grid(Rucksack* rs) {
@@ -368,6 +366,7 @@ WarGrey::AoC::Backpack::Backpack() : GridAtlas("spritesheet/items.png", 24, 21, 
 }
 
 void WarGrey::AoC::Backpack::construct(SDL_Renderer* renderer) {
+    GridAtlas::construct(renderer);
     this->create_map_grid(2, 26, rucksack_item_size, rucksack_item_size);
 }
 
@@ -458,6 +457,7 @@ void WarGrey::AoC::Backpack::clear_dict() {
 WarGrey::AoC::PackHash::PackHash() : GridAtlas("spritesheet/items.png", 24, 21, 4, 4, true) {}
 
 void WarGrey::AoC::PackHash::construct(SDL_Renderer* renderer) {
+    GridAtlas::construct(renderer);
     this->create_map_grid(2, 16, rucksack_item_size * hash_scale, rucksack_item_size * hash_scale);
 }
 

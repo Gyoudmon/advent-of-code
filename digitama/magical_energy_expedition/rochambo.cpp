@@ -116,6 +116,7 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     
     this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
+    this->set_sentry_sprite(this->agent, "Greeting", "GoodBye");
 
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
         this->play_scores[idx] = this->insert(new Labellet(aoc_font::normal, PURPLE, rule_score_fmt, r_play_points[idx]));
@@ -182,10 +183,9 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     }
 }
 
-void WarGrey::AoC::RochamboPlane::on_enter(IPlane* from) {
+void WarGrey::AoC::RochamboPlane::on_mission_start() {
     this->on_task_done();
     
-    this->agent->play("Greeting", 1);
     this->snack->play();
 
     this->set_matter_fps(this->tux, 10);
@@ -258,9 +258,6 @@ void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
                 this->round_self = nullptr;
                 this->on_task_done();
             }
-        } else if (m == this->agent) {
-            this->agent->play("GoodBye", 1);
-            this->status = RPSStatus::MissionDone;
         }
     } else {
         if ((m == this->elves[0]) || (m == this->elves[1])) {
@@ -272,10 +269,6 @@ void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
 
 bool WarGrey::AoC::RochamboPlane::can_select(IMatter* m) {
     return (this->status == RPSStatus::TaskDone);
-}
-
-bool WarGrey::AoC::RochamboPlane::has_mission_completed() {
-    return (this->status == RPSStatus::MissionDone) && (!this->agent->in_playing());
 }
 
 void WarGrey::AoC::RochamboPlane::on_task_start(RPSStatus status) {

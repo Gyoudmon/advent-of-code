@@ -2,9 +2,10 @@
 #include "digitama/magical_energy_expedition/rochambo.hpp"
 #include "digitama/magical_energy_expedition/rucksack_reorganization.hpp"
 
-#include "digitama/plt/port.hpp"
-
 #include "digitama/aoc.hpp"
+#include "digitama/pltmos/stream.hpp"
+
+#include "digitama/big_bang/datum/string.hpp"
 
 #include <vector>
 #include <filesystem>
@@ -15,7 +16,6 @@ using namespace WarGrey::PLT;
 
 /*************************************************************************************************/
 namespace {
-    static const char bonus_prefix = '#';
     static const char* unknown_task_name = "冒\n险\n越\n来\n越\n深\n入\n了";
     static const int elf_on_boat_count = 0;
     static const int advent_days = 25;
@@ -39,8 +39,8 @@ namespace {
             int bonus_idx = 0;
 
             this->sledge = this->insert(new GridAtlas("sledge.png"));
-            this->island = this->insert(new GridAtlas("island.png"));
-            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "圣诞能量水果"));
+            this->splash = this->insert(new GridAtlas("splash.png"));
+            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "魔法能量远征"));
             this->boat = this->insert(new Sprite("boat.png"));
 
             this->agent = this->insert(new Linkmon());
@@ -48,9 +48,10 @@ namespace {
             
             for (int idx = 0; idx < advent_days; idx ++) {
                 const char* task_name = this->master->plane_name(idx + 1);
+                bool is_plt_name = is_plt_plane_name(task_name);
                 
-                if ((bonus_idx > 0) || (task_name == nullptr) || (task_name[0] == bonus_prefix)) {
-                    std::string vname = day_to_string(idx + 1) + "\n" + unknown_task_name;
+                if ((bonus_idx > 0) || (task_name == nullptr) || is_plt_name) {
+                    std::string vname = make_nstring("%02d\n%s", idx + 1, unknown_task_name);
             
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, GAINSBORO, "%s", vname.c_str())));
                     
@@ -58,11 +59,11 @@ namespace {
                     this->stars[idx]->scale(0.05F);
                     this->stars.back()->switch_to_costume("dark");
                     
-                    if ((task_name != nullptr) && (task_name[0] == bonus_prefix)) {
+                    if (is_plt_name) {
                         bonus_idx = idx + 1;
                     }
                 } else {
-                    std::string vname = day_to_string(idx + 1) + "\n" + string_to_vertical_name(task_name);
+                    std::string vname = make_nstring("%02d\n%s", idx + 1, string_add_between(task_name).c_str());
             
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, ROYALBLUE, "%s", vname.c_str())));
                     
@@ -87,15 +88,15 @@ namespace {
             }
 
             this->sledge->scale(0.80F);
-            this->island->scale(1.80F);
+            this->splash->scale(1.80F);
         }
         
         void reflow(float width, float height) override {
             this->move_to(this->title, this->agent, MatterAnchor::RB, MatterAnchor::LB);
             this->move_to(this->sledge, width, 0.0F, MatterAnchor::RT);
-            this->move_to(this->island, width * 0.5F, height, MatterAnchor::CB);
+            this->move_to(this->splash, width * 0.5F, height, MatterAnchor::CB);
 
-            this->move_to(this->boat, this->island, 0.1F, 0.9F, MatterAnchor::LB);
+            this->move_to(this->boat, this->splash, 0.1F, 0.9F, MatterAnchor::LB);
             
             for (int idx = 0; idx < elf_on_boat_count; idx ++) {
                 if (idx == 0) {
@@ -228,11 +229,11 @@ namespace {
         Labellet* title;
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
-        std::vector<Sprite*> bonuses;
-        Sprite* tux;
+        std::vector<Coinlet*> bonuses;
+        Tuxmon* tux;
         ElfSheet* elves[santa_elf_type_count];
         GridAtlas* sledge;
-        GridAtlas* island;
+        GridAtlas* splash;
         Sprite* boat;
         
     private:
@@ -247,12 +248,14 @@ namespace {
     public:
         MagicalEnergyExpeditionCosmos(const char* process_path) : Cosmos(60) {
             aoc_fonts_initialize();
+            plt_fonts_initialize();
             enter_digimon_zone(process_path);
             imgdb_setup(digimon_zonedir().append("stone"));
         }
 
         virtual ~MagicalEnergyExpeditionCosmos() {
             imgdb_teardown();
+            plt_fonts_destroy();
             aoc_fonts_destroy();
         }
 
@@ -266,7 +269,7 @@ namespace {
             this->push_plane(new RochamboPlane());
             this->push_plane(new RucksackReorganizationPlane());
 
-            this->push_plane(new PortPlane());
+            this->push_plane(new StreamPlane());
         }
 
     protected:

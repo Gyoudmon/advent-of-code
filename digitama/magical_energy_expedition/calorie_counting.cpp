@@ -36,21 +36,23 @@ void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
 void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->backdrop = this->insert(new GridAtlas("backdrop/deck.png"));
     this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, this->name()));
-    this->info_board = this->insert(new Labellet(aoc_font::title, GRAY, ""));
+    this->info_board = this->insert(new Labellet(aoc_font::large, GRAY, ""));
     this->population = this->insert(new Labellet(aoc_font::normal, GOLDENROD, unknown_fmt, population_desc));
     this->top1_total = this->insert(new Dimensionlet(this->style, "cal", top1_desc));
     this->topn_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, cmp_alg_desc));
     this->sorted_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, srt_alg_desc));
     
     this->snack = this->insert(new SpriteGridSheet("spritesheet/snacks.png", 3, 4, 2, 2));
-    this->snack->scale(0.30F);
+    this->snack->scale(0.32F);
     this->set_matter_fps(this->snack, 2);
 
     this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
+
+    this->set_sentry_sprite(this->agent, "Greeting", "GoodBye");
     
     for (int idx = 0; idx < this->top_count; idx ++) {
-        this->dims.push_back(this->insert(new Labellet(aoc_font::tiny, SALMON, " ")));
+        this->dims.push_back(this->insert(new Labellet(aoc_font::math, SALMON, " ")));
     }
     
     if (this->elves.size() > 0) {
@@ -103,12 +105,6 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
             }
         }
     }
-}
-
-void WarGrey::AoC::CalorieCountingPlane::on_enter(IPlane* from) {
-    this->agent->play("Greeting", 1);
-    this->snack->play();
-    this->on_task_done();
 }
 
 void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
@@ -265,9 +261,6 @@ void WarGrey::AoC::CalorieCountingPlane::after_select(IMatter* m, bool yes_or_no
             this->top_calories.clear();
             this->top_elf_indices.clear();
             this->on_task_start(CCStatus::FindMaximumCaloriesViaSorting);
-        } else if (m == this->agent) {
-            this->agent->play("GoodBye", 1);
-            this->status = CCStatus::MissionDone;
         } else {
             Elfmon* maybe_elf = dynamic_cast<Elfmon*>(m);
 
@@ -276,10 +269,6 @@ void WarGrey::AoC::CalorieCountingPlane::after_select(IMatter* m, bool yes_or_no
             }
         }
     }
-}
-
-bool WarGrey::AoC::CalorieCountingPlane::has_mission_completed() {
-    return (this->status == CCStatus::MissionDone) && (!this->agent->in_playing());
 }
 
 bool WarGrey::AoC::CalorieCountingPlane::can_select(IMatter* m) {
@@ -331,6 +320,11 @@ void WarGrey::AoC::CalorieCountingPlane::random_walk(int start_idx) {
     for (int idx = start_idx; idx < this->elves.size(); idx ++) {
         this->move(this->elves[idx], float(random_uniform(-micro_pace, micro_pace)), float(random_uniform(-micro_pace, micro_pace)));
     }
+}
+
+void WarGrey::AoC::CalorieCountingPlane::on_mission_start() {
+    this->on_task_done();
+    this->snack->play();
 }
 
 void WarGrey::AoC::CalorieCountingPlane::on_task_start(CCStatus status) {

@@ -4,7 +4,6 @@
 #include "big_bang/physics/random.hpp"
 
 #include "big_bang/datum/path.hpp"
-#include "big_bang/datum/flonum.hpp"
 
 #include "sprite/ulpc.hpp"
 
@@ -29,15 +28,14 @@ namespace WarGrey::AoC {
     class aoc_font {
     public:
         static TTF_Font* title;
+        static TTF_Font* large;
         static TTF_Font* normal;
         static TTF_Font* tiny;
+        static TTF_Font* math;
         static TTF_Font* vertical;
         static TTF_Font* mono;
     };
 
     void aoc_fonts_initialize();
     void aoc_fonts_destroy();
-
-    std::string day_to_string(int day);
-    std::string string_to_vertical_name(const char* s);
 }

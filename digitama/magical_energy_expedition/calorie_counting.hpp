@@ -25,8 +25,7 @@ namespace WarGrey::AoC {
         FindMaximumCalorie,
         FindMaximumCalories,
         FindMaximumCaloriesViaSorting,
-        TaskDone,
-        MissionDone,
+        TaskDone
     };
     
     /******************************************* 声明游戏世界 ******************************************/
@@ -45,9 +44,8 @@ namespace WarGrey::AoC {
         bool can_select(WarGrey::STEM::IMatter* m) override;
         void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
 
-    public:
-        bool has_mission_completed() override;
-        void on_enter(WarGrey::STEM::IPlane* from) override;
+    protected:
+        void on_mission_start() override;
 
     private:
         void on_task_start(WarGrey::AoC::CCStatus status);
