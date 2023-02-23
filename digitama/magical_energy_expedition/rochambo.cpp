@@ -116,7 +116,7 @@ void WarGrey::AoC::RochamboPlane::load(float width, float height) {
     
     this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
-    this->set_sentry_sprite(this->agent, "Greeting", "GoodBye");
+    this->set_sentry_sprite(this->agent);
 
     for (int idx = 0; idx < sizeof(this->play_icons) / sizeof(Sprite*); idx ++) {
         this->play_scores[idx] = this->insert(new Labellet(aoc_font::normal, PURPLE, rule_score_fmt, r_play_points[idx]));

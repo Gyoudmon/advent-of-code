@@ -49,7 +49,7 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
 
-    this->set_sentry_sprite(this->agent, "Greeting", "GoodBye");
+    this->set_sentry_sprite(this->agent);
     
     for (int idx = 0; idx < this->top_count; idx ++) {
         this->dims.push_back(this->insert(new Labellet(aoc_font::math, SALMON, " ")));

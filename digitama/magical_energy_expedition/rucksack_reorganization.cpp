@@ -166,6 +166,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) 
 
     this->agent = this->insert(new Linkmon());
     this->agent->scale(-1.0F, 1.0F);
+    this->set_sentry_sprite(this->agent);
     
     for (auto rucksack : this->rucksacks) {
         this->insert(rucksack);

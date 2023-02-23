@@ -87,6 +87,9 @@ namespace {
                 }
             }
 
+            this->tooltip = this->insert(make_label_as_tooltip(aoc_font::normal));
+            this->set_tooltip_matter(this->tooltip);
+
             this->sledge->scale(0.80F);
             this->splash->scale(1.80F);
         }
@@ -224,9 +227,23 @@ namespace {
             }
         }
 
+    protected:
+        bool update_tooltip(IMatter* m, float local_x, float local_y) override {
+            bool updated = false;
+            auto coin = dynamic_cast<Coinlet*>(m);
+
+            if (coin != nullptr) {
+                this->tooltip->set_text(" %s ", coin->name.c_str());
+                updated = true;
+            }
+
+            return updated;
+        }
+
     private:
         Linkmon* agent;
         Labellet* title;
+        Labellet* tooltip;
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
         std::vector<Coinlet*> bonuses;
