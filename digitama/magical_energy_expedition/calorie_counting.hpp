@@ -45,7 +45,7 @@ namespace WarGrey::AoC {
         void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
 
     protected:
-        void on_mission_start() override;
+        void on_mission_start(float width, float height) override;
 
     private:
         void on_task_start(WarGrey::AoC::CCStatus status);

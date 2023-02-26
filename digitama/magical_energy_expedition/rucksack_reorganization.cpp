@@ -201,7 +201,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
     }
 }
 
-void WarGrey::AoC::RucksackReorganizationPlane::on_mission_start() {
+void WarGrey::AoC::RucksackReorganizationPlane::on_mission_start(float width, float height) {
     this->on_task_done();
 }
 

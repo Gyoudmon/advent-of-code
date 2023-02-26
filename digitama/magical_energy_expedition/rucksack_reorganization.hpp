@@ -90,7 +90,7 @@ namespace WarGrey::AoC {
         void after_select(WarGrey::STEM::IMatter* m, bool yes_or_no) override;
 
     protected:
-        void on_mission_start() override;
+        void on_mission_start(float width, float height) override;
         void on_tap_selected(WarGrey::STEM::IMatter* m, float local_x, float local_y) override;
 
     private:

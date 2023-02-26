@@ -322,7 +322,7 @@ void WarGrey::AoC::CalorieCountingPlane::random_walk(int start_idx) {
     }
 }
 
-void WarGrey::AoC::CalorieCountingPlane::on_mission_start() {
+void WarGrey::AoC::CalorieCountingPlane::on_mission_start(float width, float height) {
     this->on_task_done();
     this->snack->play();
 }

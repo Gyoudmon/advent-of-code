@@ -183,7 +183,7 @@ void WarGrey::AoC::RochamboPlane::reflow(float width, float height) {
     }
 }
 
-void WarGrey::AoC::RochamboPlane::on_mission_start() {
+void WarGrey::AoC::RochamboPlane::on_mission_start(float width, float height) {
     this->on_task_done();
     
     this->snack->play();
