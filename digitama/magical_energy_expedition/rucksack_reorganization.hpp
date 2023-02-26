@@ -34,7 +34,7 @@ namespace WarGrey::AoC {
         void clear() { this->dict.clear(); }
 
     protected:
-        int get_atlas_tile_index(size_t map_idx) override;
+        int get_atlas_tile_index(size_t map_idx, int& xoff, int& yoff) override;
     
     private:
         std::map<int, int> dict;
@@ -57,7 +57,7 @@ namespace WarGrey::AoC {
         void clear_dict();
 
     protected:
-        int get_atlas_tile_index(size_t map_idx) override;
+        int get_atlas_tile_index(size_t map_idx, int& xoff, int& yoff) override;
 
     private:
         std::string items;

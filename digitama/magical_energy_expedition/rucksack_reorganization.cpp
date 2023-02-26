@@ -433,7 +433,7 @@ void WarGrey::AoC::Backpack::compartment_lookup(PackHash* dict) {
     }
 }
 
-int WarGrey::AoC::Backpack::get_atlas_tile_index(size_t map_idx) {
+int WarGrey::AoC::Backpack::get_atlas_tile_index(size_t map_idx, int& xoff, int& yoff) {
     int idx = -1;
 
     if (this->tile_indices[map_idx] > 0) {
@@ -508,7 +508,7 @@ int WarGrey::AoC::PackHash::lookup(char ch) {
     return val;
 }
 
-int WarGrey::AoC::PackHash::get_atlas_tile_index(size_t map_idx) {
+int WarGrey::AoC::PackHash::get_atlas_tile_index(size_t map_idx, int& xoff, int& yoff) {
     int idx = -1;
     size_t row = map_idx / this->map_col;
     size_t col = map_idx % this->map_col;

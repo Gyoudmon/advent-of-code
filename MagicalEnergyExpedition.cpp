@@ -87,7 +87,7 @@ namespace {
                 }
             }
 
-            this->tooltip = this->insert(make_label_as_tooltip(aoc_font::normal));
+            this->tooltip = this->insert(make_label_for_tooltip(aoc_font::normal));
             this->set_tooltip_matter(this->tooltip);
 
             this->sledge->scale(0.80F);
@@ -184,7 +184,7 @@ namespace {
 
             this->tux->play("walk");
             this->tux->set_border_strategy(BorderStrategy::IGNORE);
-            this->tux->set_speed(2.0F, 0.0F);
+            this->tux->set_velocity(2.0F, 0.0F);
             
             for (int idx = 0; idx < santa_elf_type_count; idx ++) {
                 if (idx < elf_on_boat_count) {
