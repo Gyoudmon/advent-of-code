@@ -16,14 +16,29 @@ using namespace WarGrey::PLT;
 
 /*************************************************************************************************/
 namespace {
+#ifndef __windows__
     static const char* unknown_task_name = "冒\n险\n越\n来\n越\n深\n入\n了";
+    static const char* task_name_fmt = "%02d\n%s";
+#else
+    static const char* unknown_task_name = "冒险越来越深入了";
+    static const char* task_name_fmt = "%02d %s";
+#endif
+
     static const int elf_on_boat_count = 0;
     static const int advent_days = 25;
 
     /*********************************************************************************************/
     class StarFruitlet : public WarGrey::STEM::Sprite {
     public:
+#ifndef __windows__
         StarFruitlet(int day) : Sprite("sprite/star"), day(day) {}
+#else
+        StarFruitlet(const std::string& name, int day)
+            : Sprite("sprite/star"), name(name), day(day) {}
+
+    public:
+        std::string name;
+#endif
         
     public:
         int day;
@@ -51,11 +66,15 @@ namespace {
                 bool is_plt_name = is_plt_plane_name(task_name);
                 
                 if ((bonus_idx > 0) || (task_name == nullptr) || is_plt_name) {
-                    std::string vname = make_nstring("%02d\n%s", idx + 1, unknown_task_name);
+                    std::string vname = make_nstring(task_name_fmt, idx + 1, unknown_task_name);
             
+#ifndef __windows__
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, GAINSBORO, "%s", vname.c_str())));
-                    
                     this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
+#else
+                    this->stars.push_back(this->insert(new StarFruitlet(vname, idx + 1)));
+#endif
+
                     this->stars[idx]->scale(0.05F);
                     this->stars.back()->switch_to_costume("dark");
                     
@@ -63,11 +82,17 @@ namespace {
                         bonus_idx = idx + 1;
                     }
                 } else {
-                    std::string vname = make_nstring("%02d\n%s", idx + 1, string_add_between(task_name).c_str());
-            
+#ifndef __windows__
+                    std::string vname = make_nstring(task_name_fmt, idx + 1, string_add_between(task_name).c_str());
+
                     this->names.push_back(this->insert(new Labellet(aoc_font::vertical, ROYALBLUE, "%s", vname.c_str())));
-                    
                     this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
+#else
+                    std::string vname = make_nstring(task_name_fmt, idx + 1, task_name);
+
+                    this->stars.push_back(this->insert(new StarFruitlet(vname, idx + 1)));
+#endif
+
                     this->stars[idx]->scale(0.05F);
                     this->stars.back()->switch_to_costume("bright");
                 }
@@ -124,7 +149,9 @@ namespace {
                     this->move_to(this->stars[idx], this->stars[idx - 1], MatterAnchor::RC, MatterAnchor::LC);
                 }
 
+#ifndef __windows__
                 this->move_to(this->names[idx], this->stars[idx], MatterAnchor::CB, MatterAnchor::CT);
+#endif
             }
 
             if (this->stars.size() == 0) {
@@ -230,9 +257,13 @@ namespace {
     protected:
         bool update_tooltip(IMatter* m, float local_x, float local_y) override {
             bool updated = false;
+            auto star = dynamic_cast<StarFruitlet*>(m);
             auto coin = dynamic_cast<Coinlet*>(m);
 
-            if (coin != nullptr) {
+            if (star != nullptr) {
+                this->tooltip->set_text(" %s ", star->name.c_str());
+                updated = true;
+            } else if (coin != nullptr) {
                 this->tooltip->set_text(" %s ", coin->name.c_str());
                 updated = true;
             }
