@@ -257,13 +257,17 @@ namespace {
     protected:
         bool update_tooltip(IMatter* m, float local_x, float local_y) override {
             bool updated = false;
-            auto star = dynamic_cast<StarFruitlet*>(m);
             auto coin = dynamic_cast<Coinlet*>(m);
+
+#ifdef __windows__
+            auto star = dynamic_cast<StarFruitlet*>(m);
 
             if (star != nullptr) {
                 this->tooltip->set_text(" %s ", star->name.c_str());
                 updated = true;
-            } else if (coin != nullptr) {
+            } else
+#endif
+            if (coin != nullptr) {
                 this->tooltip->set_text(" %s ", coin->name.c_str());
                 updated = true;
             }
