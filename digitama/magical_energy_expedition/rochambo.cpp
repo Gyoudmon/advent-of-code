@@ -243,6 +243,7 @@ void WarGrey::AoC::RochamboPlane::after_select(IMatter* m, bool yes_or_no) {
             this->designed_total_score = 0;
             this->random_total_score = 0;
             this->on_task_start(RPSStatus::SimulateTheTournament);
+            this->no_selected();
         } else if ((m == this->elves[0]) || (m == this->elves[1])) {
             if (this->round_self == nullptr) {
                 if (m == this->elves[0]) {

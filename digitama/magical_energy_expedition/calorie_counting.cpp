@@ -19,6 +19,9 @@ static const float elf_size = 45.0F;
 static const int grid_column = 36;
 static const int micro_pace = 3;
 
+static const float moving_duration_when_exciting = 0.2F;
+static const float moving_duration_when_calming_down = 1.5F;
+
 /*************************************************************************************************/
 void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
     this->load_calories(digimon_path("mee/01_cc", aoc_ext));
@@ -136,7 +139,9 @@ void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interva
                     this->top_calorie = self_cal;
                     this->top1_total->set_value(float(self_cal));
                     this->excite_elf(this->elves[this->current_elf_idx], top_scale_up);
-                    this->move_to(this->elves[this->current_elf_idx], this->top1_total, MatterAnchor::RB, MatterAnchor::LB);
+                    this->glide_to(moving_duration_when_exciting,
+                        this->elves[this->current_elf_idx], this->top1_total,
+                        MatterAnchor::RB, MatterAnchor::LB);
                     
                     if (this->prev_top_elf_id >= 0) {
                         this->calm_elf_down(this->elves[this->prev_top_elf_id]);
@@ -268,6 +273,8 @@ void WarGrey::AoC::CalorieCountingPlane::after_select(IMatter* m, bool yes_or_no
                 this->info_board->set_text(std::to_string(maybe_elf->calorie_total()), MatterAnchor::RC);
             }
         }
+
+        this->no_selected();
     }
 }
 
@@ -276,7 +283,7 @@ bool WarGrey::AoC::CalorieCountingPlane::can_select(IMatter* m) {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::move_elf_to_grid(Elfmon* elf) {
-    this->move_to_grid(elf, elf->id, MatterAnchor::CB);
+    this->glide_to_grid(moving_duration_when_calming_down, elf, elf->id, MatterAnchor::CB);
 }
 
 void WarGrey::AoC::CalorieCountingPlane::reflow_top_elves() {
@@ -284,8 +291,10 @@ void WarGrey::AoC::CalorieCountingPlane::reflow_top_elves() {
         int top_elf_idx = this->top_elf_indices[idx];
 
         if (top_elf_idx >= 0) {
-            this->move_to(this->elves[top_elf_idx], this->dims[idx], MatterAnchor::CT, MatterAnchor::CB);
             this->dims[idx]->set_text("%d", this->elves[top_elf_idx]->calorie_total());
+            this->glide_to(moving_duration_when_exciting,
+                this->elves[top_elf_idx], this->dims[idx],
+                MatterAnchor::CT, MatterAnchor::CB);
         } else {
             break;
         }

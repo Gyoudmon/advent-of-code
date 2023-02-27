@@ -223,33 +223,25 @@ namespace {
         }
 
     public:
-        bool can_select(WarGrey::STEM::IMatter* m) override {
-            return (dynamic_cast<StarFruitlet*>(m) != nullptr)
-                    || (dynamic_cast<Coinlet*>(m) != nullptr)
-                    || (m == this->tux);
-        }
-
-        void after_select(IMatter* m, bool yes_or_no) override {
-            if (yes_or_no) {
-                if (m == this->tux) {
-                    if (this->tux->is_wearing()) {
-                        this->tux->take_off();
-                    } else {
-                        this->tux->wear("santa_hat");
-                    }
+        void on_tap(IMatter* m, float x, float y) override {
+            if (m == this->tux) {
+                if (this->tux->is_wearing()) {
+                    this->tux->take_off();
                 } else {
-                    StarFruitlet* star = dynamic_cast<StarFruitlet*>(m);
-                    Coinlet* coin = dynamic_cast<Coinlet*>(m);
-
-                    if (star != nullptr) {
-                        if (star->day < this->master->plane_count()) {
-                            this->target_plane = star->day;
-                            this->agent->play("Hide", 1);
-                        }
-                    } else if (coin != nullptr) {
-                        this->target_plane = coin->idx;
+                    this->tux->wear("santa_hat");
+                }
+            } else {
+                StarFruitlet* star = dynamic_cast<StarFruitlet*>(m);
+                Coinlet* coin = dynamic_cast<Coinlet*>(m);
+                
+                if (star != nullptr) {
+                    if (star->day < this->master->plane_count()) {
+                        this->target_plane = star->day;
                         this->agent->play("Hide", 1);
                     }
+                } else if (coin != nullptr) {
+                    this->target_plane = coin->idx;
+                    this->agent->play("Hide", 1);
                 }
             }
         }
