@@ -16,7 +16,6 @@ namespace WarGrey::AoC {
 
     protected:
         void on_heading_changed(float theta_rad, float vx, float vy) override;
-        void on_motion_stopped() override;
 
     protected:
         const char* costume_index_to_name(size_t idx) override;

@@ -59,10 +59,6 @@ void WarGrey::AoC::SpriteULPCSheet::on_heading_changed(float theta_rad, float vx
     }
 }
 
-void WarGrey::AoC::SpriteULPCSheet::on_motion_stopped() {
-    this->play("lwalk");
-}
-
 const char* WarGrey::AoC::SpriteULPCSheet::costume_index_to_name(size_t idx) {
     return ulpc_moves[idx];
 }

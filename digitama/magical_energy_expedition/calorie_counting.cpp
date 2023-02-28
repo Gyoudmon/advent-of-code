@@ -316,12 +316,10 @@ void WarGrey::AoC::CalorieCountingPlane::calm_top_elves_down() {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::excite_elf(Elfmon* elf, float scale) {
-    elf->play("dspellcast");
     elf->scale(scale);
 }
 
 void WarGrey::AoC::CalorieCountingPlane::calm_elf_down(Elfmon* elf) {
-    elf->play("lwalk");
     elf->resize(elf_size);
     this->move_elf_to_grid(elf);
 }
@@ -360,10 +358,20 @@ void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx
     this->elves[target_idx] = self;
 }
 
-void WarGrey::AoC::CalorieCountingPlane::on_glide_start(IMatter* m, float sec, float x, float y, float xspd, float yspd) {
-}
+void WarGrey::AoC::CalorieCountingPlane::on_glide_complete(IMatter* m, float x, float y) {
+    auto elf = dynamic_cast<Elfmon*>(m);
 
-void WarGrey::AoC::CalorieCountingPlane::on_glide_complete(IMatter* m, float sec, float x, float y, float xspd, float yspd) {
+    if (elf != nullptr) {
+        float width, height;
+
+        elf->feed_extent(x, y, &width, &height);
+
+        if (width > elf_size) {
+            elf->play("dspellcast");
+        } else {
+            elf->play("lwalk");
+        }
+    }
 }
 
 /*************************************************************************************************/
