@@ -223,6 +223,10 @@ namespace {
         }
 
     public:
+        bool can_select(IMatter* m) override {
+            return dynamic_cast<ElfSheet*>(m) != nullptr;
+        }
+
         void on_tap(IMatter* m, float x, float y) override {
             if (m == this->tux) {
                 if (this->tux->is_wearing()) {
@@ -233,6 +237,7 @@ namespace {
             } else {
                 StarFruitlet* star = dynamic_cast<StarFruitlet*>(m);
                 Coinlet* coin = dynamic_cast<Coinlet*>(m);
+                ElfSheet* elf = dynamic_cast<ElfSheet*>(m);
                 
                 if (star != nullptr) {
                     if (star->day < this->master->plane_count()) {
@@ -242,7 +247,21 @@ namespace {
                 } else if (coin != nullptr) {
                     this->target_plane = coin->idx;
                     this->agent->play("Hide", 1);
+                } else if (elf != nullptr) {
+                    this->glide_to_random_location(4.0F, elf);
+                    this->set_selected(elf);
                 }
+            }
+        }
+
+        void on_tap_selected(IMatter* m, float x, float y) override {
+            ElfSheet* elf = dynamic_cast<ElfSheet*>(m);
+            
+            if (elf != nullptr) {
+                this->glide(1.0F, elf, 32.0F, 0.0F);
+                this->glide(1.0F, elf, 0.0F, -32.0F);
+                this->glide(1.0F, elf, -32.0F, 0.0F);
+                this->glide(1.0F, elf, 0.0F, 32.0F);
             }
         }
 

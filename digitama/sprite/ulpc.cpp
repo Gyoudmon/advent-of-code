@@ -1,5 +1,6 @@
 #include "ulpc.hpp"
 
+#include "../big_bang/physics/mathematics.hpp"
 #include "../big_bang/physics/random.hpp"
 
 using namespace WarGrey::STEM;
@@ -43,6 +44,24 @@ static inline const char* random_elf_name(int hint) {
 
 /*************************************************************************************************/
 WarGrey::AoC::SpriteULPCSheet::SpriteULPCSheet(const std::string& pathname) : SpriteGridSheet(pathname, 21, 13) {}
+
+void WarGrey::AoC::SpriteULPCSheet::on_heading_changed(float theta_rad, float vx, float vy) {
+    float theta = flabs(theta_rad);
+
+    if (theta < q_pi_f) {
+        this->play("rwalk");
+    } else if (theta > q_pi_f * 3.0F) {
+        this->play("lwalk");
+    } else if (theta_rad >= 0.0F) {
+        this->play("dwalk");
+    } else {
+        this->play("uwalk");
+    }
+}
+
+void WarGrey::AoC::SpriteULPCSheet::on_motion_stopped() {
+    this->play("lwalk");
+}
 
 const char* WarGrey::AoC::SpriteULPCSheet::costume_index_to_name(size_t idx) {
     return ulpc_moves[idx];

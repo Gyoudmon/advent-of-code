@@ -283,6 +283,7 @@ bool WarGrey::AoC::CalorieCountingPlane::can_select(IMatter* m) {
 }
 
 void WarGrey::AoC::CalorieCountingPlane::move_elf_to_grid(Elfmon* elf) {
+    elf->motion_stop();
     this->glide_to_grid(moving_duration_when_calming_down, elf, elf->id, MatterAnchor::CB);
 }
 
@@ -357,6 +358,12 @@ void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx
 
     this->elves[self_idx] = target;
     this->elves[target_idx] = self;
+}
+
+void WarGrey::AoC::CalorieCountingPlane::on_glide_start(IMatter* m, float sec, float x, float y, float xspd, float yspd) {
+}
+
+void WarGrey::AoC::CalorieCountingPlane::on_glide_complete(IMatter* m, float sec, float x, float y, float xspd, float yspd) {
 }
 
 /*************************************************************************************************/
