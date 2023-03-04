@@ -10,12 +10,16 @@
 namespace WarGrey::AoC {
     static const size_t santa_elf_type_count = 5;
     
-    class SpriteULPCSheet : public WarGrey::STEM::SpriteGridSheet {
+    class SpriteULPCSheet : public WarGrey::STEM::SpriteGridSheet, protected WarGrey::STEM::I4WayMotion {
     public:
         SpriteULPCSheet(const std::string& pathname);
 
     protected:
         void on_heading_changed(float theta_rad, float vx, float vy) override;
+        void on_nward(float theta_rad, float vx, float vy) override;
+        void on_eward(float theta_rad, float vx, float vy) override;
+        void on_sward(float theta_rad, float vx, float vy) override;
+        void on_wward(float theta_rad, float vx, float vy) override;
 
     protected:
         const char* costume_index_to_name(size_t idx) override;

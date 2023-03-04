@@ -4,10 +4,10 @@
 /*************************************************************************************************/
 void cat_by_line(std::istream& src) {
     std::string line;
-    
+
     while (true) {
         std::istream& _ = std::getline(src, line);
-        
+
         if (!_.fail()) {
             std::cout << line << std::endl;
         } else {

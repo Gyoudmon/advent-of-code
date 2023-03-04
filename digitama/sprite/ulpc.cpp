@@ -46,17 +46,23 @@ static inline const char* random_elf_name(int hint) {
 WarGrey::AoC::SpriteULPCSheet::SpriteULPCSheet(const std::string& pathname) : SpriteGridSheet(pathname, 21, 13) {}
 
 void WarGrey::AoC::SpriteULPCSheet::on_heading_changed(float theta_rad, float vx, float vy) {
-    float theta = flabs(theta_rad);
+    I4WayMotion::dispatch_heading_event(theta_rad, vx, vy);
+}
 
-    if (theta < q_pi_f) {
-        this->play("rwalk");
-    } else if (theta > q_pi_f * 3.0F) {
-        this->play("lwalk");
-    } else if (theta_rad >= 0.0F) {
-        this->play("dwalk");
-    } else {
-        this->play("uwalk");
-    }
+void WarGrey::AoC::SpriteULPCSheet::on_eward(float theta_rad, float vx, float vy) {
+    this->play("rwalk");
+}
+
+void WarGrey::AoC::SpriteULPCSheet::on_wward(float theta_rad, float vx, float vy) {
+    this->play("lwalk");
+}
+
+void WarGrey::AoC::SpriteULPCSheet::on_sward(float theta_rad, float vx, float vy) {
+    this->play("dwalk");
+}
+
+void WarGrey::AoC::SpriteULPCSheet::on_nward(float theta_rad, float vx, float vy) {
+    this->play("uwalk");
 }
 
 const char* WarGrey::AoC::SpriteULPCSheet::costume_index_to_name(size_t idx) {
