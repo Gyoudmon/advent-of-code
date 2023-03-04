@@ -4,6 +4,7 @@
 #include "big_bang/physics/random.hpp"
 
 #include "big_bang/datum/path.hpp"
+#include "big_bang/bang.hpp"
 
 #include "sprite/ulpc.hpp"
 
@@ -20,22 +21,5 @@ namespace WarGrey::AoC {
     static const char* unknown_fmt = "%s: (未知)";
     
     /* Fonts */
-    static const int title_fontsize = 42; /* <-- already hit the ceiling */
-    static const int answer_fontsize = 28;
-    static const int normal_fontsize = 24;
-    static const int tiny_fontsize = 20;
-
-    class aoc_font {
-    public:
-        static TTF_Font* title;
-        static TTF_Font* large;
-        static TTF_Font* normal;
-        static TTF_Font* tiny;
-        static TTF_Font* math;
-        static TTF_Font* vertical;
-        static TTF_Font* mono;
-    };
-
-    void aoc_fonts_initialize();
-    void aoc_fonts_destroy();
+    static const int answer_fontsize = WarGrey::STEM::bang_fontsize::x_large;
 }

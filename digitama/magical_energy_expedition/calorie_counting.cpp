@@ -38,9 +38,9 @@ void WarGrey::AoC::CalorieCountingPlane::construct(float width, float height) {
 
 void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->backdrop = this->insert(new GridAtlas("backdrop/deck.png"));
-    this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 1, this->name()));
-    this->info_board = this->insert(new Labellet(aoc_font::large, GRAY, ""));
-    this->population = this->insert(new Labellet(aoc_font::normal, GOLDENROD, unknown_fmt, population_desc));
+    this->title = this->insert(new Labellet(bang_font::title, BLACK, title_fmt, 1, this->name()));
+    this->info_board = this->insert(new Labellet(bang_font::huge, GRAY, ""));
+    this->population = this->insert(new Labellet(bang_font::normal, GOLDENROD, unknown_fmt, population_desc));
     this->top1_total = this->insert(new Dimensionlet(this->style, "cal", top1_desc));
     this->topn_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, cmp_alg_desc));
     this->sorted_total = this->insert(new Dimensionlet(this->style, "cal", topn_unknown_fmt, this->top_count, srt_alg_desc));
@@ -55,13 +55,13 @@ void WarGrey::AoC::CalorieCountingPlane::load(float width, float height) {
     this->set_sentry_sprite(this->agent);
     
     for (int idx = 0; idx < this->top_count; idx ++) {
-        this->dims.push_back(this->insert(new Labellet(aoc_font::math, SALMON, " ")));
+        this->dims.push_back(this->insert(new Labellet(bang_font::math, SALMON, " ")));
     }
     
     if (this->elves.size() > 0) {
         int x0, xn, y0, yn;
 
-        x0 = normal_fontsize;
+        x0 = bang_fontsize::medium;
         xn = fl2fxi(width) - x0;
         y0 = fl2fxi(height * 0.78F);
         yn = fl2fxi(height * 0.95F);
@@ -88,15 +88,15 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
     this->move_to(this->backdrop, 0.0F, height, MatterAnchor::LB);
     
     if (this->elves.size() > 0) {
-        float gxoff = float(normal_fontsize);
+        float gxoff = float(bang_fontsize::medium);
         float gyoff = height * 0.76F;
 
-        this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(normal_fontsize));
+        this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(bang_fontsize::medium));
 
         /* reflow top elves labels */ {
             int top_elf_col = 4;
             float xoff = width * 0.5F;
-            float yoff = float(normal_fontsize) * 2.4F;
+            float yoff = float(bang_fontsize::medium) * 2.4F;
             float cwidth = (width - xoff) / float(top_elf_col);
             float cheight = (height * 0.64F - yoff) / 4.0F;
 

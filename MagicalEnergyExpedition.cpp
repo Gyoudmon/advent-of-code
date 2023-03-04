@@ -55,7 +55,7 @@ namespace {
 
             this->sledge = this->insert(new GridAtlas("sledge.png"));
             this->splash = this->insert(new GridAtlas("splash.png"));
-            this->title = this->insert(new Labellet(aoc_font::title, BLACK, title0_fmt, "魔法能量远征"));
+            this->title = this->insert(new Labellet(bang_font::title, BLACK, title0_fmt, "魔法能量远征"));
             this->boat = this->insert(new Sprite("boat.png"));
 
             this->agent = this->insert(new Linkmon());
@@ -69,7 +69,7 @@ namespace {
                     std::string vname = make_nstring(task_name_fmt, idx + 1, unknown_task_name);
             
 #ifndef __windows__
-                    this->names.push_back(this->insert(new Labellet(aoc_font::vertical, GAINSBORO, "%s", vname.c_str())));
+                    this->names.push_back(this->insert(new Labellet(bang_font::normal, GAINSBORO, "%s", vname.c_str())));
                     this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
 #else
                     this->stars.push_back(this->insert(new StarFruitlet(vname, idx + 1)));
@@ -85,7 +85,7 @@ namespace {
 #ifndef __windows__
                     std::string vname = make_nstring(task_name_fmt, idx + 1, string_add_between(task_name).c_str());
 
-                    this->names.push_back(this->insert(new Labellet(aoc_font::vertical, ROYALBLUE, "%s", vname.c_str())));
+                    this->names.push_back(this->insert(new Labellet(bang_font::normal, ROYALBLUE, "%s", vname.c_str())));
                     this->stars.push_back(this->insert(new StarFruitlet(idx + 1)));
 #else
                     std::string vname = make_nstring(task_name_fmt, idx + 1, task_name);
@@ -112,7 +112,7 @@ namespace {
                 }
             }
 
-            this->tooltip = this->insert(make_label_for_tooltip(aoc_font::normal));
+            this->tooltip = this->insert(make_label_for_tooltip(bang_font::tooltip));
             this->set_tooltip_matter(this->tooltip);
 
             this->sledge->scale(0.80F);
@@ -310,16 +310,14 @@ namespace {
     class MagicalEnergyExpeditionCosmos : public Cosmos {
     public:
         MagicalEnergyExpeditionCosmos(const char* process_path) : Cosmos(60) {
-            aoc_fonts_initialize();
-            plt_fonts_initialize();
+            bang_fonts_initialize();
             enter_digimon_zone(process_path);
             imgdb_setup(digimon_zonedir().append("stone"));
         }
 
         virtual ~MagicalEnergyExpeditionCosmos() {
             imgdb_teardown();
-            plt_fonts_destroy();
-            aoc_fonts_destroy();
+            bang_fonts_destroy();
         }
 
     public:  // 覆盖游戏基本方法

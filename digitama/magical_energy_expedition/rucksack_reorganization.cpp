@@ -156,9 +156,9 @@ void WarGrey::AoC::RucksackReorganizationPlane::construct(float width, float hei
 
 void WarGrey::AoC::RucksackReorganizationPlane::load(float width, float height) {
     this->backdrop = this->insert(new GridAtlas("backdrop/tent.png"));
-    this->title = this->insert(new Labellet(aoc_font::title, BLACK, title_fmt, 3, this->name()));
-    this->population = this->insert(new Labellet(aoc_font::normal, GOLDENROD, puzzle_fmt, population_desc, this->rucksacks.size()));
-    this->info_board = this->insert(new Labellet(aoc_font::mono, GRAY, ""));
+    this->title = this->insert(new Labellet(bang_font::title, BLACK, title_fmt, 3, this->name()));
+    this->population = this->insert(new Labellet(bang_font::normal, GOLDENROD, puzzle_fmt, population_desc, this->rucksacks.size()));
+    this->info_board = this->insert(new Labellet(bang_font::mono, GRAY, ""));
     this->misplaced_sum = this->insert(new Dimensionlet(this->style, "", misplaced_desc));
     this->badge_sum = this->insert(new Dimensionlet(this->style, "", badge_desc));
     this->backpack = this->insert(new Backpack());
@@ -185,15 +185,15 @@ void WarGrey::AoC::RucksackReorganizationPlane::reflow(float width, float height
     
     this->move_to(this->backpack, this->backdrop, MatterAnchor::LT, MatterAnchor::LB, 0.0F, -2.0F);
     this->move_to(this->info_board, this->backdrop, MatterAnchor::RT, MatterAnchor::RB, 0.0F, -2.0F);
-    this->move_to(this->hashtable, this->misplaced_sum, MatterAnchor::RT, MatterAnchor::LT, float(title_fontsize));
+    this->move_to(this->hashtable, this->misplaced_sum, MatterAnchor::RT, MatterAnchor::LT, float(bang_fontsize::xx_large));
     
     if (this->rucksacks.size() > 0) {
         float gxoff, gyoff;
         
-        gxoff = float(normal_fontsize);
+        gxoff = float(bang_fontsize::medium);
         gyoff = height * 0.56F;
 
-        this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(normal_fontsize));
+        this->create_grid(grid_column, gxoff, gyoff, width - gxoff - float(bang_fontsize::medium));
 
         for (int idx = 0; idx < this->rucksacks.size(); idx ++) {
             this->move_rucksack_to_grid(this->rucksacks[idx]);
@@ -464,13 +464,13 @@ void WarGrey::AoC::PackHash::construct(SDL_Renderer* renderer) {
 
 void WarGrey::AoC::PackHash::draw(SDL_Renderer* renderer, float x, float y, float Width, float Height) {
     GridAtlas::draw(renderer, x, y, Width, Height);
-    float xoff = (rucksack_item_size * hash_scale - float(normal_fontsize) * 0.5F) * 0.5F;
+    float xoff = (rucksack_item_size * hash_scale - float(bang_fontsize::medium) * 0.5F) * 0.5F;
     float dx = Width / float(this->map_col);
     float cx = x;
     float cy = y + Height - Height / float(this->map_row);
 
     for (auto it = this->dict.begin(); it != this->dict.end(); it ++) {    
-        game_draw_blended_text(aoc_font::mono, renderer, GRAY, cx + xoff, cy, std::to_string(it->second));
+        game_draw_blended_text(bang_font::mono, renderer, GRAY, cx + xoff, cy, std::to_string(it->second));
         cx += dx;
     }
 }
