@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../big_bang/matter/sprite/sheet.hpp"
+#include "../big_bang/physics/motion/map2d.hpp"
 
 /* For the Universe LPC Spritesheet Generator */
 /* https://sanderfrenken.github.io/Universal-LPC-Spritesheet-Character-Generator/index.html */
@@ -15,7 +16,7 @@ namespace WarGrey::AoC {
         SpriteULPCSheet(const std::string& pathname);
 
     protected:
-        void on_heading_changed(float theta_rad, float vx, float vy) override;
+        void on_heading_changed(float theta_rad, float vx, float vy, float prev_vr) override;
         void on_nward(float theta_rad, float vx, float vy) override;
         void on_eward(float theta_rad, float vx, float vy) override;
         void on_sward(float theta_rad, float vx, float vy) override;

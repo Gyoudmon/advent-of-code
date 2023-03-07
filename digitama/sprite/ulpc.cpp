@@ -45,8 +45,8 @@ static inline const char* random_elf_name(int hint) {
 /*************************************************************************************************/
 WarGrey::AoC::SpriteULPCSheet::SpriteULPCSheet(const std::string& pathname) : SpriteGridSheet(pathname, 21, 13) {}
 
-void WarGrey::AoC::SpriteULPCSheet::on_heading_changed(float theta_rad, float vx, float vy) {
-    I4WayMotion::dispatch_heading_event(theta_rad, vx, vy);
+void WarGrey::AoC::SpriteULPCSheet::on_heading_changed(float theta_rad, float vx, float vy, float prev_vr) {
+    I4WayMotion::dispatch_heading_event(theta_rad, vx, vy, prev_vr);
 }
 
 void WarGrey::AoC::SpriteULPCSheet::on_eward(float theta_rad, float vx, float vy) {

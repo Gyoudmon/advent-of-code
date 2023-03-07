@@ -21,5 +21,5 @@ namespace WarGrey::AoC {
     static const char* unknown_fmt = "%s: (未知)";
     
     /* Fonts */
-    static const int answer_fontsize = WarGrey::STEM::bang_fontsize::x_large;
+    static const int answer_fontsize = WarGrey::STEM::generic_font_size(WarGrey::STEM::FontSize::x_large);
 }
