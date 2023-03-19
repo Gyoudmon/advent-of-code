@@ -265,7 +265,7 @@ namespace {
         }
 
     protected:
-        bool update_tooltip(IMatter* m, float local_x, float local_y) override {
+        bool update_tooltip(IMatter* m, float local_x, float local_y, float global_x, float global_y) override {
             bool updated = false;
             auto coin = dynamic_cast<Coinlet*>(m);
 
