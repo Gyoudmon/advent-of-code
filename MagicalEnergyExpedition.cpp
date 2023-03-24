@@ -165,7 +165,7 @@ namespace {
             }
         }
 
-        void update(uint32_t count, uint32_t interval, uint32_t uptime) override {
+        void update(uint64_t count, uint32_t interval, uint64_t uptime) override {
             if (this->stars.size() > 0) {
                 float tux_lx, tux_rx, stars_rx;
 
@@ -332,7 +332,7 @@ namespace {
         }
 
     protected:
-        void update(uint32_t count, uint32_t interval, uint32_t uptime) override {
+        void update(uint64_t count, uint32_t interval, uint64_t uptime) override {
             if (this->has_current_mission_completed()) {
                 this->transfer_to_plane(0);
             }

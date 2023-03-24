@@ -40,7 +40,7 @@ namespace WarGrey::AoC {
         void construct(float width, float height) override;
         void load(float width, float height) override;
         void reflow(float width, float height) override;
-        void update(uint32_t count, uint32_t interval, uint32_t uptime) override;
+        void update(uint64_t count, uint32_t interval, uint64_t uptime) override;
 
     public:
         bool can_select(WarGrey::STEM::IMatter* m) override;

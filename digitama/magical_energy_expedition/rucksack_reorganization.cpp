@@ -205,7 +205,7 @@ void WarGrey::AoC::RucksackReorganizationPlane::on_mission_start(float width, fl
     this->on_task_done();
 }
 
-void WarGrey::AoC::RucksackReorganizationPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
+void WarGrey::AoC::RucksackReorganizationPlane::update(uint64_t count, uint32_t interval, uint64_t uptime) {
     switch (this->status) {
         case RRStatus::FindMisplacedItems: {
             if (this->current_rucksack_idx < this->rucksacks.size()) {

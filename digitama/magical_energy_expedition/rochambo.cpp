@@ -212,7 +212,7 @@ void WarGrey::AoC::RochamboPlane::on_mission_start(float width, float height) {
     this->set_matter_fps(this->snack, 2);
 }
 
-void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
+void WarGrey::AoC::RochamboPlane::update(uint64_t count, uint32_t interval, uint64_t uptime) {
     switch (this->status) {
         case RPSStatus::SimulateTheTournament: {
             if (this->tux->motion_stopped()) {
