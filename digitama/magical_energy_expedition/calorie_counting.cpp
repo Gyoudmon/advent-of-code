@@ -360,7 +360,7 @@ void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx
     this->elves[target_idx] = self;
 }
 
-void WarGrey::AoC::CalorieCountingPlane::on_motion_complete(IMatter* m, float x, float y, float xspd, float yspd) {
+void WarGrey::AoC::CalorieCountingPlane::on_motion_complete(IMatter* m, float x, float y, double xspd, double yspd) {
     auto elf = dynamic_cast<Elfmon*>(m);
 
     if (elf != nullptr) {

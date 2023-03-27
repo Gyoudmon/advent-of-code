@@ -48,8 +48,8 @@ namespace WarGrey::AoC {
 
     protected:
         void on_mission_start(float width, float height) override;
-        void on_motion_step(WarGrey::STEM::IMatter* m, float x, float y, float xspd, float yspd) override;
-        void on_motion_complete(WarGrey::STEM::IMatter* m, float x, float y, float xspd, float yspd) override;
+        void on_motion_step(WarGrey::STEM::IMatter* m, float x, float y, double xspd, double yspd, float percentage) override;
+        void on_motion_complete(WarGrey::STEM::IMatter* m, float x, float y, double xspd, double yspd) override;
 
     private:
         void on_task_start(WarGrey::AoC::RPSStatus status);
