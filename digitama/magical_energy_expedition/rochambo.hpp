@@ -40,7 +40,7 @@ namespace WarGrey::AoC {
         void construct(float width, float height) override;
         void load(float width, float height) override;
         void reflow(float width, float height) override;
-        void update(uint32_t count, uint32_t interval, uint32_t uptime) override;
+        void update(uint64_t count, uint32_t interval, uint64_t uptime) override;
 
     public:
         bool can_select(WarGrey::STEM::IMatter* m) override;
@@ -48,8 +48,8 @@ namespace WarGrey::AoC {
 
     protected:
         void on_mission_start(float width, float height) override;
-        void on_motion_step(WarGrey::STEM::IMatter* m, float x, float y, float xspd, float yspd) override;
-        void on_motion_complete(WarGrey::STEM::IMatter* m, float x, float y, float xspd, float yspd) override;
+        void on_motion_step(WarGrey::STEM::IMatter* m, float x, float y, double xspd, double yspd, double percentage) override;
+        void on_motion_complete(WarGrey::STEM::IMatter* m, float x, float y, double xspd, double yspd) override;
 
     private:
         void on_task_start(WarGrey::AoC::RPSStatus status);

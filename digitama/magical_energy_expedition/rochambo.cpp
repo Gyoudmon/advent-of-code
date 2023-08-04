@@ -212,7 +212,7 @@ void WarGrey::AoC::RochamboPlane::on_mission_start(float width, float height) {
     this->set_matter_fps(this->snack, 2);
 }
 
-void WarGrey::AoC::RochamboPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
+void WarGrey::AoC::RochamboPlane::update(uint64_t count, uint32_t interval, uint64_t uptime) {
     switch (this->status) {
         case RPSStatus::SimulateTheTournament: {
             if (this->tux->motion_stopped()) {
@@ -325,7 +325,7 @@ void WarGrey::AoC::RochamboPlane::on_task_done() {
     this->outcome_desc->set_text("");
 }
 
-void WarGrey::AoC::RochamboPlane::on_motion_step(IMatter* m, float x, float y, float xspd, float yspd) {
+void WarGrey::AoC::RochamboPlane::on_motion_step(IMatter* m, float x, float y, double xspd, double yspd, double percentage) {
     if (yspd <= 0.0F) {
         if (this->elves[0] == m) {
             this->move_to(this->l_play, m, MatterAnchor::CT, MatterAnchor::CB);
@@ -335,7 +335,7 @@ void WarGrey::AoC::RochamboPlane::on_motion_step(IMatter* m, float x, float y, f
     }
 }
 
-void WarGrey::AoC::RochamboPlane::on_motion_complete(IMatter* m, float x, float y, float xspd, float yspd) {
+void WarGrey::AoC::RochamboPlane::on_motion_complete(IMatter* m, float x, float y, double xspd, double yspd) {
     if (m == this->elves[0]) {
         this->elves[0]->play((yspd > 0.0F) ? "rwalk" : "rslash");
     } else if (m == this->elves[1]) {

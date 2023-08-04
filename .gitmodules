@@ -1,6 +1,3 @@
 [submodule "digitama/big_bang"]
 	path = digitama/big_bang
 	url = https://github.com/Gyoudmon/big-bang.cpp.git
-[submodule "digitama/pltmos"]
-	path = digitama/pltmos
-	url = https://github.com/Gyoudmon/pltmos.git

@@ -3,16 +3,15 @@
 #include "digitama/magical_energy_expedition/rucksack_reorganization.hpp"
 
 #include "digitama/aoc.hpp"
-#include "digitama/pltmos/stream.hpp"
 
 #include "digitama/big_bang/datum/string.hpp"
+#include "digitama/big_bang/datum/path.hpp"
 
 #include <vector>
 #include <filesystem>
 
 using namespace WarGrey::STEM;
 using namespace WarGrey::AoC;
-using namespace WarGrey::PLT;
 
 /*************************************************************************************************/
 namespace {
@@ -51,8 +50,6 @@ namespace {
 
     public:  // 覆盖游戏基本方法
         void load(float width, float height) override {
-            int bonus_idx = 0;
-
             this->sledge = this->insert(new GridAtlas("sledge.png"));
             this->splash = this->insert(new GridAtlas("splash.png"));
             this->title = this->insert(new Labellet(GameFont::Title(), BLACK, title0_fmt, "魔法能量远征"));
@@ -63,9 +60,8 @@ namespace {
             
             for (int idx = 0; idx < advent_days; idx ++) {
                 const char* task_name = this->master->plane_name(idx + 1);
-                bool is_plt_name = is_plt_plane_name(task_name);
                 
-                if ((bonus_idx > 0) || (task_name == nullptr) || is_plt_name) {
+                if (task_name == nullptr) {
                     std::string vname = make_nstring(task_name_fmt, idx + 1, unknown_task_name);
             
 #ifndef __windows__
@@ -77,10 +73,6 @@ namespace {
 
                     this->stars[idx]->scale(0.05F);
                     this->stars.back()->switch_to_costume("dark");
-                    
-                    if (is_plt_name) {
-                        bonus_idx = idx + 1;
-                    }
                 } else {
 #ifndef __windows__
                     std::string vname = make_nstring(task_name_fmt, idx + 1, string_add_between(task_name).c_str());
@@ -96,10 +88,6 @@ namespace {
                     this->stars[idx]->scale(0.05F);
                     this->stars.back()->switch_to_costume("bright");
                 }
-            }
-
-            for (int idx = bonus_idx; idx < this->master->plane_count(); idx ++) {
-                this->bonuses.push_back(this->insert(new Coinlet(this->master->plane_name(idx), idx)));
             }
 
             this->tux = this->insert(new Tuxmon());
@@ -159,13 +147,9 @@ namespace {
             } else {
                 this->move_to(this->tux, this->stars[0], MatterAnchor::LB, MatterAnchor::LT);
             }
-
-            if (this->bonuses.size() > 0) {
-                this->move_to(this->bonuses[0], this->boat, MatterAnchor::LT, MatterAnchor::LT);
-            }
         }
 
-        void update(uint32_t count, uint32_t interval, uint32_t uptime) override {
+        void update(uint64_t count, uint32_t interval, uint64_t uptime) override {
             if (this->stars.size() > 0) {
                 float tux_lx, tux_rx, stars_rx;
 
@@ -191,10 +175,6 @@ namespace {
                 this->move(this->boat, dx, dy);
                 for (int idx = 0; idx < elf_on_boat_count; idx ++) {
                     this->move(this->elves[idx], dx, dy);
-                }
-
-                if (this->bonuses.size() > 0) {
-                    this->move(this->bonuses[0], dx, dy);
                 }
             }
 
@@ -235,7 +215,6 @@ namespace {
                 }
             } else {
                 StarFruitlet* star = dynamic_cast<StarFruitlet*>(m);
-                Coinlet* coin = dynamic_cast<Coinlet*>(m);
                 ElfSheet* elf = dynamic_cast<ElfSheet*>(m);
                 
                 if (star != nullptr) {
@@ -243,9 +222,6 @@ namespace {
                         this->target_plane = star->day;
                         this->agent->play("Hide", 1);
                     }
-                } else if (coin != nullptr) {
-                    this->target_plane = coin->idx;
-                    this->agent->play("Hide", 1);
                 } else if (elf != nullptr) {
                     this->glide_to_random_location(4.0F, elf);
                     this->set_selected(elf);
@@ -267,20 +243,15 @@ namespace {
     protected:
         bool update_tooltip(IMatter* m, float local_x, float local_y, float global_x, float global_y) override {
             bool updated = false;
-            auto coin = dynamic_cast<Coinlet*>(m);
-
+            
 #ifdef __windows__
             auto star = dynamic_cast<StarFruitlet*>(m);
 
             if (star != nullptr) {
                 this->tooltip->set_text(" %s ", star->name.c_str());
                 updated = true;
-            } else
-#endif
-            if (coin != nullptr) {
-                this->tooltip->set_text(" %s ", coin->name.c_str());
-                updated = true;
             }
+#endif
 
             return updated;
         }
@@ -291,7 +262,6 @@ namespace {
         Labellet* tooltip;
         std::vector<Sprite*> stars;
         std::vector<Labellet*> names;
-        std::vector<Coinlet*> bonuses;
         Tuxmon* tux;
         ElfSheet* elves[santa_elf_type_count];
         GridAtlas* sledge;
@@ -311,6 +281,14 @@ namespace {
         MagicalEnergyExpeditionCosmos(const char* process_path) : Cosmos(60) {
             enter_digimon_zone(process_path);
             imgdb_setup(digimon_zonedir().append("stone"));
+            
+#ifdef __windows__
+            digimon_appdata_setup("C:\\opt\\GYDMstem\\");
+            digimon_mascot_setup("C:\\opt\\GYDMstem\\stone\\mascot");
+#else
+            digimon_appdata_setup("/opt/GYDMstem/");
+            digimon_mascot_setup("/opt/GYDMstem/stone/mascot");
+#endif
         }
 
         virtual ~MagicalEnergyExpeditionCosmos() {
@@ -327,12 +305,10 @@ namespace {
             this->push_plane(new CalorieCountingPlane(this->top_count));
             this->push_plane(new RochamboPlane());
             this->push_plane(new RucksackReorganizationPlane());
-
-            this->push_plane(new StreamPlane());
         }
 
     protected:
-        void update(uint32_t count, uint32_t interval, uint32_t uptime) override {
+        void update(uint64_t count, uint32_t interval, uint64_t uptime) override {
             if (this->has_current_mission_completed()) {
                 this->transfer_to_plane(0);
             }

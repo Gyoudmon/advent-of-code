@@ -16,11 +16,10 @@ namespace WarGrey::AoC {
         SpriteULPCSheet(const std::string& pathname);
 
     protected:
-        void on_heading_changed(float theta_rad, float vx, float vy, float prev_vr) override;
-        void on_nward(float theta_rad, float vx, float vy) override;
-        void on_eward(float theta_rad, float vx, float vy) override;
-        void on_sward(float theta_rad, float vx, float vy) override;
-        void on_wward(float theta_rad, float vx, float vy) override;
+        void on_nward(double theta_rad, double vx, double vy) override;
+        void on_eward(double theta_rad, double vx, double vy) override;
+        void on_sward(double theta_rad, double vx, double vy) override;
+        void on_wward(double theta_rad, double vx, double vy) override;
 
     protected:
         const char* costume_index_to_name(size_t idx) override;

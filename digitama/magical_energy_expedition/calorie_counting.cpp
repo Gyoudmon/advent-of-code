@@ -111,7 +111,7 @@ void WarGrey::AoC::CalorieCountingPlane::reflow(float width, float height) {
     }
 }
 
-void WarGrey::AoC::CalorieCountingPlane::update(uint32_t count, uint32_t interval, uint32_t uptime) {
+void WarGrey::AoC::CalorieCountingPlane::update(uint64_t count, uint32_t interval, uint64_t uptime) {
     switch (this->status) {
         case CCStatus::CountOff: {
             if (this->current_elf_idx > 0) {
@@ -360,7 +360,7 @@ void WarGrey::AoC::CalorieCountingPlane::swap_elves(int self_idx, int target_idx
     this->elves[target_idx] = self;
 }
 
-void WarGrey::AoC::CalorieCountingPlane::on_motion_complete(IMatter* m, float x, float y, float xspd, float yspd) {
+void WarGrey::AoC::CalorieCountingPlane::on_motion_complete(IMatter* m, float x, float y, double xspd, double yspd) {
     auto elf = dynamic_cast<Elfmon*>(m);
 
     if (elf != nullptr) {
