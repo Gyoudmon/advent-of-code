@@ -9,7 +9,7 @@
 @include-abstract{abstract.scrbl}
 
 @handbook-statistics[git-size-ring-chart git-loc-time-series
-                     #:lang-delta-only? #true #:recursive? #false #:date-delta (* 3600 72)
+                     #:lang-delta-only? #true #:recursive? #false #:date-delta (* 3600 24 7)
                      #:gitstat-width 460 #:gitstat-radius 80 #:subgroups null
                      #:altcolors '(["Racket" . Green]
                                    ["Python" . Khaki])]
